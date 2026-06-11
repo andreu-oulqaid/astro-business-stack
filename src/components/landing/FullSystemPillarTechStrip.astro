@@ -1,0 +1,29 @@
+---
+import type { Locale } from '@/i18n/config';
+import { useTranslations, type TranslationKey } from '@/i18n';
+import PillarTechStrip from '@/components/landing/PillarTechStrip.astro';
+import astroLogo from '@/assets/external_logos/astro.svg';
+import tailwindLogo from '@/assets/external_logos/tailwind-svgrepo-com.svg';
+import n8nLogo from '@/assets/external_logos/N8n-logo-new.svg';
+import claudeLogo from '@/assets/external_logos/Claude_AI_logo.svg';
+import hetznerLogo from '@/assets/external_logos/hetzner.svg';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<PillarTechStrip
+  ariaLabel={t('salesFullSystem.stackStripAria' as TranslationKey)}
+  label={t('salesFullSystem.stackStripLabel' as TranslationKey)}
+  logos={[
+    { src: astroLogo.src, alt: 'Astro' },
+    { src: tailwindLogo.src, alt: 'Tailwind CSS' },
+    { src: n8nLogo.src, alt: 'n8n' },
+    { src: claudeLogo.src, alt: 'Claude' },
+    { src: hetznerLogo.src, alt: 'Hetzner', imgClass: 'logo-mark--dark-friendly' },
+  ]}
+/>

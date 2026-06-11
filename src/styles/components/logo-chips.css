@@ -1,0 +1,43 @@
+.logo-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.25rem;
+  min-width: 5rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: color-mix(in oklab, var(--background-secondary) 75%, var(--background) 25%);
+  transition: border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+}
+
+.logo-chip:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--theme-shadow-md);
+}
+
+.logo-mark {
+  height: 1.125rem;
+  width: auto;
+  max-width: 4.25rem;
+  object-fit: contain;
+  opacity: 0.78;
+  filter: grayscale(1);
+  transition: filter 180ms ease, opacity 180ms ease;
+}
+
+.logo-chip:hover .logo-mark {
+  opacity: 1;
+  filter: grayscale(0);
+}
+
+.dark .logo-mark--dark-friendly {
+  filter: invert(1) brightness(1.12) grayscale(1);
+  opacity: 0.92;
+}
+
+.dark .logo-chip:hover .logo-mark--dark-friendly {
+  filter: invert(1) brightness(1.22) grayscale(0);
+  opacity: 1;
+}

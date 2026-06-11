@@ -1,0 +1,32 @@
+---
+/**
+ * Logo strip for the web sales pillar — stacks we actually deploy (Astro, styling, CMS, verification, hosting).
+ */
+import type { Locale } from '@/i18n/config';
+import { useTranslations, type TranslationKey } from '@/i18n';
+import PillarTechStrip from '@/components/landing/PillarTechStrip.astro';
+import astroLogo from '@/assets/external_logos/astro.svg';
+import tailwindLogo from '@/assets/external_logos/tailwind-svgrepo-com.svg';
+import decapLogo from '@/assets/external_logos/decap-cms.svg';
+import pageSpeedLogo from '@/assets/external_logos/google-pagespeed-insights-icon-2021-.svg';
+import hetznerLogo from '@/assets/external_logos/hetzner.svg';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<PillarTechStrip
+  ariaLabel={t('salesWeb.stackStripAria' as TranslationKey)}
+  label={t('salesWeb.stackStripLabel' as TranslationKey)}
+  logos={[
+    { src: astroLogo.src, alt: 'Astro' },
+    { src: tailwindLogo.src, alt: 'Tailwind CSS' },
+    { src: decapLogo.src, alt: 'Decap CMS', imgClass: 'logo-mark--decap' },
+    { src: pageSpeedLogo.src, alt: 'PageSpeed Insights' },
+    { src: hetznerLogo.src, alt: 'Hetzner', imgClass: 'logo-mark--dark-friendly' },
+  ]}
+/>

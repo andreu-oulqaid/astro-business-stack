@@ -1,0 +1,71 @@
+---
+/**
+ * Home/Landing Page (default locale - English)
+ * URL: /
+ */
+import LandingLayout from '@/layouts/LandingLayout.astro';
+import { Hero } from '@/components/hero';
+import Button from '@/components/ui/form/Button/Button.astro';
+import Badge from '@/components/ui/data-display/Badge/Badge.astro';
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
+import DemoVideoSection from '@/components/landing/DemoVideoSection.astro';
+import TrustBar from '@/components/landing/TrustBar.astro';
+import LeakToFlowSection from '@/components/landing/LeakToFlowSection.astro';
+import TechEdgeSection from '@/components/landing/TechEdgeSection.astro';
+import HomeFaq from '@/components/landing/HomeFaq.astro';
+import CTA from '@/components/landing/CTA.astro';
+import LiveDeploymentsSection from '@/components/landing/LiveDeploymentsSection.astro';
+import siteConfig from '@/config/site.config';
+import { defaultLocale } from '@/i18n/config';
+import { useTranslations } from '@/i18n/index';
+import { homeFaq } from '@/i18n/copy/homeFaq';
+import { createFAQSchema } from '@/lib/schema';
+
+const locale = defaultLocale;
+const t = useTranslations(locale);
+
+const githubRepoLink = siteConfig.github.url;
+const casesLink = '#deployments';
+const faqSchema = createFAQSchema(homeFaq[locale]);
+---
+
+<LandingLayout
+  title={t('hero.title') + ' ' + t('hero.titleHighlight')}
+  description={t('hero.description')}
+  lang={locale}
+  routeId="home"
+  extraSchema={faqSchema}
+>
+  <Hero
+    layout="centered"
+    size="lg"
+    showGrid={false}
+    showLogomark={false}
+    interactiveSpotlight
+  >
+    <Badge slot="badge" pill pulse>{t('hero.badge')}</Badge>
+
+    <h1 slot="title">
+      {t('hero.title')} <span class="text-brand-500">{t('hero.titleHighlight')}</span>
+    </h1>
+
+    <p slot="description" set:html={t('hero.description')} />
+
+    <Fragment slot="actions">
+      <Button size="lg" href={githubRepoLink}>
+        <Icon name="github" size="sm" />
+        <span set:html={t('hero.cta')} />
+      </Button>
+      <Button size="lg" variant="outline" href={casesLink}>
+        {t('hero.secondaryCta')}
+      </Button>
+    </Fragment>
+  </Hero>
+  <TrustBar locale={locale} />
+  <DemoVideoSection locale={locale} />
+  <LeakToFlowSection locale={locale} />
+  <TechEdgeSection locale={locale} />
+  <LiveDeploymentsSection locale={locale} />
+  <HomeFaq locale={locale} />
+  <CTA locale={locale} size="md" layout="links" class="-mt-8 md:-mt-10" />
+</LandingLayout>

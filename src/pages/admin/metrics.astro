@@ -1,0 +1,425 @@
+---
+import { ADMIN_METRICS_ENABLED } from 'astro:env/server';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getAnalyticsEnv } from '@/lib/analyticsEnv';
+import { loadDashboardData } from '@/lib/metricsDashboard';
+import { getSupabaseAdmin } from '@/lib/supabase';
+
+export const prerender = false;
+
+/** Local dev always; production only when ADMIN_METRICS_ENABLED=true (e.g. test/staging VPS). */
+if (!import.meta.env.DEV && !ADMIN_METRICS_ENABLED) {
+  return new Response(null, { status: 404, statusText: 'Not Found' });
+}
+
+type RangeParam = '7d' | '30d';
+
+const rawRange = Astro.url.searchParams.get('range');
+const range: RangeParam = rawRange === '7d' ? '7d' : '30d';
+const allEnvironments = Astro.url.searchParams.get('env') === 'all';
+const days = range === '7d' ? 7 : 30;
+const sinceDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+
+function metricsHref(r: RangeParam, all: boolean): string {
+  const p = new URLSearchParams();
+  p.set('range', r);
+  if (all) p.set('env', 'all');
+  return `/admin/metrics?${p.toString()}`;
+}
+
+const supabase = getSupabaseAdmin();
+const analyticsEnv = getAnalyticsEnv();
+const envScopeLabel = allEnvironments ? 'all envs' : analyticsEnv;
+
+let queryError: string | null = null;
+let dashboard = null as Awaited<ReturnType<typeof loadDashboardData>> | null;
+
+if (!supabase) {
+  queryError = 'Supabase admin client is not configured. Check SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.';
+} else {
+  try {
+    dashboard = await loadDashboardData(supabase, sinceDate, { allEnvironments });
+  } catch (e) {
+    queryError = e instanceof Error ? e.message : String(e);
+  }
+}
+
+const queryLabel = range === '7d' ? 'Last 7 days' : 'Last 30 days';
+
+function formatLeadToBookingSpeed(seconds: number | null): string {
+  if (seconds == null || Number.isNaN(seconds)) return 'N/A';
+  const s = Math.round(Number(seconds));
+  return `${Math.floor(s / 60)}m ${s % 60}s`;
+}
+
+const totalLeads = dashboard?.counts.lead_captured ?? 0;
+const totalCalendar = dashboard?.counts.calendar_viewed ?? 0;
+const totalBookings = dashboard?.counts.audit_booked ?? 0;
+const conversionRate = totalLeads > 0 ? (totalBookings / totalLeads) * 100 : 0;
+const dropoffLeadToBooking = totalLeads > 0 ? ((totalLeads - totalBookings) / totalLeads) * 100 : 0;
+const dropoffLeadToCalendar = totalLeads > 0 ? ((totalLeads - totalCalendar) / totalLeads) * 100 : 0;
+const dropoffCalendarToBook = totalCalendar > 0 ? ((totalCalendar - totalBookings) / totalCalendar) * 100 : 0;
+
+const uniqueLeadUsers = dashboard?.unique_users.lead_users ?? 0;
+const uniqueBookingUsers = dashboard?.unique_users.booking_users ?? 0;
+const uniqueConversionRate = uniqueLeadUsers > 0 ? (uniqueBookingUsers / uniqueLeadUsers) * 100 : 0;
+
+const avgSpeedLabel = formatLeadToBookingSpeed(dashboard?.avg_lead_to_booking_seconds ?? null);
+
+const topSources = dashboard?.by_source ?? [];
+const topCampaigns = dashboard?.by_campaign ?? [];
+const deviceCounts = dashboard?.by_device ?? {
+  desktop: 0,
+  mobile: 0,
+  tablet: 0,
+  unknown: 0,
+};
+const totalDeviceEvents = Object.values(deviceCounts).reduce((sum, v) => sum + v, 0);
+const localeRows = dashboard?.by_locale ?? [];
+const latestEvents = dashboard?.latest ?? [];
+
+const hasData =
+  !queryError &&
+  dashboard != null &&
+  totalLeads + totalCalendar + totalBookings > 0;
+---
+
+<BaseLayout
+  title="Admin Metrics"
+  description="Internal conversion analytics dashboard."
+  lang="en"
+  noindex
+>
+  <main class="mx-auto w-full max-w-7xl px-6 py-10">
+    <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <h1 class="font-display text-3xl font-bold text-foreground">Admin Metrics</h1>
+        <p class="mt-2 text-sm text-foreground-muted">
+          Conversion BI from Supabase analytics events. Window:{' '}
+          <span class="font-semibold text-foreground">{queryLabel}</span>
+          <span class="text-foreground-subtle"> · </span>
+          <span class="font-semibold text-foreground">env: {envScopeLabel}</span>
+          {dashboard?.usedRpc ? (
+            <span class="text-foreground-subtle"> (RPC)</span>
+          ) : (
+            <span class="text-foreground-subtle"> (fallback)</span>
+          )}
+        </p>
+      </div>
+      <div class="flex flex-col items-stretch gap-2 sm:items-end">
+        <div class="inline-flex rounded-lg border border-border bg-secondary p-1 text-sm">
+          <a
+            href={metricsHref('7d', allEnvironments)}
+            class:list={[
+              'rounded-md px-3 py-1.5 transition',
+              range === '7d' ? 'bg-foreground text-background' : 'text-foreground-muted hover:text-foreground',
+            ]}
+          >
+            Last 7 days
+          </a>
+          <a
+            href={metricsHref('30d', allEnvironments)}
+            class:list={[
+              'rounded-md px-3 py-1.5 transition',
+              range === '30d' ? 'bg-foreground text-background' : 'text-foreground-muted hover:text-foreground',
+            ]}
+          >
+            Last 30 days
+          </a>
+        </div>
+        <div class="inline-flex rounded-lg border border-border bg-secondary p-1 text-sm">
+          <a
+            href={metricsHref(range, false)}
+            class:list={[
+              'rounded-md px-3 py-1.5 transition',
+              !allEnvironments ? 'bg-foreground text-background' : 'text-foreground-muted hover:text-foreground',
+            ]}
+          >
+            This deploy
+          </a>
+          <a
+            href={metricsHref(range, true)}
+            class:list={[
+              'rounded-md px-3 py-1.5 transition',
+              allEnvironments ? 'bg-foreground text-background' : 'text-foreground-muted hover:text-foreground',
+            ]}
+          >
+            All environments
+          </a>
+        </div>
+      </div>
+    </div>
+
+    {queryError ? (
+      <div class="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
+        <p class="font-semibold">Analytics unavailable</p>
+        <p class="mt-1">{queryError}</p>
+      </div>
+    ) : null}
+
+    {dashboard?.fallbackWarning ? (
+      <div class="mb-6 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
+        <p class="font-semibold">Aggregate quality</p>
+        <p class="mt-1">{dashboard.fallbackWarning}</p>
+        <p class="mt-2 text-xs text-foreground-muted">
+          Run <code class="rounded bg-secondary px-1 py-0.5">scripts/supabase-analytics-v2.sql</code> in the Supabase SQL editor (event type + RPC).
+        </p>
+      </div>
+    ) : null}
+
+    {!queryError && !hasData ? (
+      <div class="mb-6 rounded-xl border border-border bg-card p-6">
+        <h2 class="text-lg font-semibold text-foreground">No events in this range</h2>
+        <p class="mt-2 text-sm text-foreground-muted">
+          Try <a href={metricsHref('30d', allEnvironments)} class="underline">Last 30 days</a>,{' '}
+          <a href={metricsHref(range, true)} class="underline">All environments</a>, or confirm{' '}
+          <code class="rounded bg-secondary px-1 py-0.5">ANALYTICS_ENV</code> matches rows in{' '}
+          <code class="rounded bg-secondary px-1 py-0.5">metadata.env</code> (run legacy backfill if needed).
+        </p>
+      </div>
+    ) : null}
+
+    {hasData && dashboard ? (
+      <>
+        <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <div class="rounded-xl border border-border bg-card p-4">
+            <p class="text-xs uppercase tracking-wide text-foreground-subtle">Leads captured</p>
+            <p class="mt-2 text-3xl font-bold text-foreground">{totalLeads}</p>
+            <p class="mt-2 text-xs text-foreground-muted">Unique users: {uniqueLeadUsers}</p>
+          </div>
+          <div class="rounded-xl border border-border bg-card p-4">
+            <p class="text-xs uppercase tracking-wide text-foreground-subtle">Calendar viewed</p>
+            <p class="mt-2 text-3xl font-bold text-foreground">{totalCalendar}</p>
+            <p class="mt-2 text-xs text-foreground-muted">Step 3 embed shown</p>
+          </div>
+          <div class="rounded-xl border border-border bg-card p-4">
+            <p class="text-xs uppercase tracking-wide text-foreground-subtle">Audits booked</p>
+            <p class="mt-2 text-3xl font-bold text-foreground">{totalBookings}</p>
+            <p class="mt-2 text-xs text-foreground-muted">Unique users: {uniqueBookingUsers}</p>
+          </div>
+          <div class="rounded-xl border border-border bg-card p-4">
+            <p class="text-xs uppercase tracking-wide text-foreground-subtle">Lead → booking</p>
+            <p class="mt-2 text-3xl font-bold text-foreground">{conversionRate.toFixed(1)}%</p>
+            <p class="mt-2 text-xs text-foreground-muted">Unique: {uniqueConversionRate.toFixed(1)}%</p>
+          </div>
+          <div class="rounded-xl border border-border bg-card p-4">
+            <p class="text-xs uppercase tracking-wide text-foreground-subtle">Lead-to-Booking Speed</p>
+            <p class="mt-2 text-3xl font-bold text-foreground">{avgSpeedLabel}</p>
+            <p class="mt-2 text-xs text-foreground-muted">Avg of conversion_delta_seconds</p>
+          </div>
+        </section>
+
+        <section class="mt-6 grid gap-6 lg:grid-cols-2">
+          <div class="rounded-xl border border-border bg-card p-5">
+            <h2 class="text-lg font-semibold text-foreground">Funnel</h2>
+            <div class="mt-4 space-y-4">
+              <div>
+                <div class="mb-1 flex items-center justify-between text-sm">
+                  <span class="text-foreground-muted">Lead captured</span>
+                  <span class="font-medium text-foreground">{totalLeads}</span>
+                </div>
+                <div class="h-3 rounded-full bg-secondary">
+                  <div class="h-3 rounded-full bg-blue-500" style="width: 100%;"></div>
+                </div>
+              </div>
+              <div>
+                <div class="mb-1 flex items-center justify-between text-sm">
+                  <span class="text-foreground-muted">Calendar viewed</span>
+                  <span class="font-medium text-foreground">{totalCalendar}</span>
+                </div>
+                <div class="h-3 rounded-full bg-secondary">
+                  <div
+                    class="h-3 rounded-full bg-amber-500"
+                    style={`width: ${totalLeads > 0 ? Math.min(100, (totalCalendar / totalLeads) * 100).toFixed(1) : 0}%;`}
+                  >
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div class="mb-1 flex items-center justify-between text-sm">
+                  <span class="text-foreground-muted">Audit booked</span>
+                  <span class="font-medium text-foreground">{totalBookings}</span>
+                </div>
+                <div class="h-3 rounded-full bg-secondary">
+                  <div
+                    class="h-3 rounded-full bg-emerald-500"
+                    style={`width: ${totalLeads > 0 ? Math.min(100, (totalBookings / totalLeads) * 100).toFixed(1) : 0}%;`}
+                  >
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="mt-4 text-sm text-foreground-muted">
+              Drop-off lead → booking: {dropoffLeadToBooking.toFixed(1)}%
+            </p>
+          </div>
+
+          <div class="rounded-xl border border-border bg-card p-5">
+            <h2 class="text-lg font-semibold text-foreground">Funnel friction</h2>
+            <p class="mt-2 text-sm text-foreground-muted">
+              Uses <span class="text-foreground">calendar_viewed</span> events. High lead → calendar drop may indicate UX issues before the embed; high calendar → book may point to Cal.com or copy.
+            </p>
+            <ul class="mt-4 space-y-2 text-sm text-foreground">
+              <li>
+                Lead → calendar drop:{' '}
+                <span class="font-semibold">{dropoffLeadToCalendar.toFixed(1)}%</span>
+              </li>
+              <li>
+                Calendar → book drop:{' '}
+                <span class="font-semibold">{dropoffCalendarToBook.toFixed(1)}%</span>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="mt-6 grid gap-6 lg:grid-cols-2">
+          <div class="rounded-xl border border-border bg-card p-5">
+            <h2 class="text-lg font-semibold text-foreground">Device Breakdown</h2>
+            <div class="mt-4 space-y-3">
+              {Object.entries(deviceCounts).map(([device, count]) => {
+                const pct = totalDeviceEvents > 0 ? (count / totalDeviceEvents) * 100 : 0;
+                return (
+                  <div>
+                    <div class="mb-1 flex items-center justify-between text-sm">
+                      <span class="capitalize text-foreground-muted">{device}</span>
+                      <span class="font-medium text-foreground">
+                        {count} ({pct.toFixed(1)}%)
+                      </span>
+                    </div>
+                    <div class="h-2 rounded-full bg-secondary">
+                      <div class="h-2 rounded-full bg-violet-500" style={`width: ${pct.toFixed(1)}%;`}></div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div class="rounded-xl border border-border bg-card p-5">
+            <h2 class="text-lg font-semibold text-foreground">Locale friction</h2>
+            <div class="mt-4 overflow-x-auto">
+              <table class="w-full min-w-[36rem] text-sm">
+                <thead class="text-left text-foreground-subtle">
+                  <tr>
+                    <th class="pb-2 pr-3 font-medium">Locale</th>
+                    <th class="pb-2 pr-3 font-medium">Leads</th>
+                    <th class="pb-2 pr-3 font-medium">Cal views</th>
+                    <th class="pb-2 pr-3 font-medium">Books</th>
+                    <th class="pb-2 pr-3 font-medium">Lead→book</th>
+                    <th class="pb-2 pr-3 font-medium">Lead→cal Δ</th>
+                    <th class="pb-2 font-medium">Cal→book Δ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {localeRows.map((row) => (
+                    <tr class="border-t border-border/60">
+                      <td class="py-2 pr-3 uppercase text-foreground">{row.locale}</td>
+                      <td class="py-2 pr-3 text-foreground-muted">{row.leads}</td>
+                      <td class="py-2 pr-3 text-foreground-muted">{row.calendar_views}</td>
+                      <td class="py-2 pr-3 text-foreground-muted">{row.bookings}</td>
+                      <td class="py-2 pr-3 text-foreground">{row.conversion.toFixed(1)}%</td>
+                      <td class="py-2 pr-3 text-foreground">{row.lead_to_calendar_drop.toFixed(1)}%</td>
+                      <td class="py-2 text-foreground">{row.calendar_to_book_drop.toFixed(1)}%</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="mt-6 grid gap-6 lg:grid-cols-2">
+          <div class="rounded-xl border border-border bg-card p-5">
+            <h2 class="text-lg font-semibold text-foreground">Top UTM Sources</h2>
+            <div class="mt-4 overflow-x-auto">
+              <table class="w-full min-w-[28rem] text-sm">
+                <thead class="text-left text-foreground-subtle">
+                  <tr>
+                    <th class="pb-2 pr-3 font-medium">Source</th>
+                    <th class="pb-2 pr-3 font-medium">Leads</th>
+                    <th class="pb-2 pr-3 font-medium">Bookings</th>
+                    <th class="pb-2 font-medium">Conv%</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {topSources.map((row) => (
+                    <tr class="border-t border-border/60">
+                      <td class="py-2 pr-3 text-foreground">{row.utm_source}</td>
+                      <td class="py-2 pr-3 text-foreground-muted">{row.leads}</td>
+                      <td class="py-2 pr-3 text-foreground-muted">{row.bookings}</td>
+                      <td class="py-2 text-foreground">{row.conversion.toFixed(1)}%</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="rounded-xl border border-border bg-card p-5">
+            <h2 class="text-lg font-semibold text-foreground">Top UTM Campaigns</h2>
+            <div class="mt-4 overflow-x-auto">
+              <table class="w-full min-w-[28rem] text-sm">
+                <thead class="text-left text-foreground-subtle">
+                  <tr>
+                    <th class="pb-2 pr-3 font-medium">Campaign</th>
+                    <th class="pb-2 pr-3 font-medium">Leads</th>
+                    <th class="pb-2 pr-3 font-medium">Bookings</th>
+                    <th class="pb-2 font-medium">Conv%</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {topCampaigns.map((row) => (
+                    <tr class="border-t border-border/60">
+                      <td class="py-2 pr-3 text-foreground">{row.utm_campaign}</td>
+                      <td class="py-2 pr-3 text-foreground-muted">{row.leads}</td>
+                      <td class="py-2 pr-3 text-foreground-muted">{row.bookings}</td>
+                      <td class="py-2 text-foreground">{row.conversion.toFixed(1)}%</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="mt-6 rounded-xl border border-border bg-card p-5">
+          <h2 class="text-lg font-semibold text-foreground">Latest Events</h2>
+          <div class="mt-4 overflow-x-auto">
+            <table class="w-full min-w-[56rem] text-sm">
+              <thead class="text-left text-foreground-subtle">
+                <tr>
+                  <th class="pb-2 pr-3 font-medium">Timestamp</th>
+                  <th class="pb-2 pr-3 font-medium">Type</th>
+                  <th class="pb-2 pr-3 font-medium">Locale</th>
+                  <th class="pb-2 pr-3 font-medium">Device</th>
+                  <th class="pb-2 pr-3 font-medium">Source</th>
+                  <th class="pb-2 pr-3 font-medium">Campaign</th>
+                  <th class="pb-2 pr-3 font-medium">Delta</th>
+                  <th class="pb-2 font-medium">Path</th>
+                </tr>
+              </thead>
+              <tbody>
+                {latestEvents.map((row) => (
+                  <tr class="border-t border-border/60">
+                    <td class="py-2 pr-3 text-foreground-muted">{new Date(row.created_at).toLocaleString('en-US')}</td>
+                    <td class="py-2 pr-3 text-foreground">{row.event_type}</td>
+                    <td class="py-2 pr-3 text-foreground-muted">{row.locale ?? '-'}</td>
+                    <td class="py-2 pr-3 text-foreground-muted">{row.device_type ?? '-'}</td>
+                    <td class="py-2 pr-3 text-foreground-muted">{row.utm_source ?? 'direct'}</td>
+                    <td class="py-2 pr-3 text-foreground-muted">{row.utm_campaign ?? '-'}</td>
+                    <td class="py-2 pr-3 text-foreground-muted">
+                      {row.conversion_delta_seconds == null
+                        ? '-'
+                        : `${Math.floor(row.conversion_delta_seconds / 60)}m ${row.conversion_delta_seconds % 60}s`}
+                    </td>
+                    <td class="py-2 text-foreground-muted">{row.page_path ?? '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </>
+    ) : null}
+  </main>
+</BaseLayout>

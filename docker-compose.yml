@@ -1,0 +1,25 @@
+services:
+  app:
+    container_name: ${APP_CONTAINER_NAME}
+    image: ${APP_IMAGE}:latest
+    build: .
+    restart: always
+    env_file: .env
+    networks:
+      - web-public
+
+  auth-gateway:
+    container_name: ${AUTH_CONTAINER_NAME}
+    image: ${AUTH_IMAGE}:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.gateway
+    restart: always
+    env_file: .env
+    networks:
+      - web-public
+
+
+networks:
+  web-public:
+    external: true

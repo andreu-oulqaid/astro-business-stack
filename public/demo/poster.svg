@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" fill="none">
+  <rect width="1280" height="720" fill="#0a0a0a"/>
+  <rect x="1" y="1" width="1278" height="718" stroke="#262626" stroke-width="2"/>
+  <circle cx="640" cy="340" r="48" fill="none" stroke="#9f1239" stroke-width="3"/>
+  <path d="M620 320 L660 340 L620 360 Z" fill="#9f1239"/>
+  <text x="640" y="430" text-anchor="middle" fill="#737373" font-family="system-ui,sans-serif" font-size="22">Demo video placeholder</text>
+</svg>

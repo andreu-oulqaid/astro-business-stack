@@ -1,0 +1,75 @@
+---
+import type { Locale } from '@/i18n/config';
+import { useTranslations } from '@/i18n';
+import Badge from '@/components/ui/data-display/Badge/Badge.astro';
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+const videoUrl = import.meta.env.PUBLIC_DEMO_VIDEO_URL as string | undefined;
+const posterUrl = '/demo/poster.svg';
+
+const isYoutube =
+  videoUrl &&
+  (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be') || !videoUrl.includes('.mp4'));
+
+function youtubeEmbedId(url: string): string | null {
+  try {
+    if (url.includes('youtu.be/')) return url.split('youtu.be/')[1]?.split(/[?&]/)[0] ?? null;
+    if (url.includes('v=')) return new URL(url).searchParams.get('v');
+    if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return url;
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+const youtubeId = videoUrl && isYoutube ? youtubeEmbedId(videoUrl) : null;
+const hasVideo = Boolean(videoUrl && (youtubeId || videoUrl.endsWith('.mp4')));
+---
+
+<section id="demo" class="border-b border-border bg-background py-[var(--space-section-md)]" aria-labelledby="demo-video-heading">
+  <div class="mx-auto max-w-4xl px-6 text-center">
+    <Badge variant="brand" size="sm" pill class="mb-4">
+      {t('demoVideo.badge')}
+    </Badge>
+    <h2 id="demo-video-heading" class="font-display text-2xl font-bold tracking-tight text-foreground md:text-3xl">
+      {t('demoVideo.title')}
+    </h2>
+    <p class="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-foreground-muted md:text-base">
+      {t('demoVideo.description')}
+    </p>
+
+    <div class="relative mt-8 overflow-hidden rounded-xl border border-border bg-background-secondary shadow-[var(--theme-shadow-lg)] aspect-video">
+      {
+        hasVideo && youtubeId ? (
+          <iframe
+            class="absolute inset-0 h-full w-full"
+            src={`https://www.youtube-nocookie.com/embed/${youtubeId}`}
+            title={t('demoVideo.title')}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+            loading="lazy"
+          />
+        ) : hasVideo && videoUrl?.endsWith('.mp4') ? (
+          <video class="h-full w-full object-cover" controls poster={posterUrl} preload="metadata">
+            <source src={videoUrl} type="video/mp4" />
+          </video>
+        ) : (
+          <div class="flex h-full w-full flex-col items-center justify-center gap-3 bg-background-tertiary p-8">
+            <img src={posterUrl} alt="" class="absolute inset-0 h-full w-full object-cover opacity-40" loading="lazy" />
+            <div class="relative z-10 flex flex-col items-center gap-2">
+              <span class="flex h-14 w-14 items-center justify-center rounded-full border-2 border-brand-500 bg-background/80 text-brand-500" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M6 4l10 6-10 6V4z"/></svg>
+              </span>
+              <p class="text-sm font-medium text-foreground-muted">{t('demoVideo.placeholder')}</p>
+            </div>
+          </div>
+        )
+      }
+    </div>
+  </div>
+</section>

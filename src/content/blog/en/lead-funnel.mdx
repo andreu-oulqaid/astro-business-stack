@@ -1,0 +1,16 @@
+---
+title: "Lead Funnel with Notion CRM and Resend"
+description: "How contact forms flow through API routes into Notion deduplication and transactional email."
+publishedAt: 2026-06-01
+author: "Stack Team"
+tags: ["integrations", "notion", "resend", "crm"]
+featured: true
+locale: en
+draft: false
+---
+
+# Server-side lead capture
+
+The `/api/leads` route validates submissions, optionally deduplicates against a Notion clients database, writes to a leads database, and sends notification email via Resend.
+
+Integrations are optional — unset env vars disable each layer without breaking the site.

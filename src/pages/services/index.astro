@@ -1,0 +1,52 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Navbar from '@/components/landing/Navbar.astro';
+import LandingFooter from '@/components/landing/LandingFooter.astro';
+import Card from '@/components/ui/data-display/Card/Card.astro';
+import ServicesHero from '@/components/blog/ServicesHero.astro';
+import { defaultLocale } from '@/i18n/config';
+import { getLocalizedPath, useTranslations } from '@/i18n/index';
+
+const locale = defaultLocale;
+const t = useTranslations(locale);
+
+const webPath = getLocalizedPath('serviceWeb', locale);
+const automationPath = getLocalizedPath('serviceAutomation', locale);
+const fullPath = getLocalizedPath('serviceFullSystem', locale);
+const portfolioPath = getLocalizedPath('portfolio', locale);
+---
+
+<BaseLayout title={t('servicesHubPage.metaTitle')} description={t('servicesHubPage.metaDescription')} routeId="services">
+  <Navbar slot="header" locale={locale} />
+
+  <ServicesHero locale={locale} variant="hub" />
+
+  <section class="bg-background-secondary py-16 md:py-20">
+    <div class="mx-auto max-w-6xl px-6">
+      <div class="grid gap-6 md:grid-cols-2">
+        <Card variant="elevated" padding="lg" href={webPath} hover class="h-full">
+          <h2 class="font-display text-xl font-bold text-foreground">{t('servicesHubPage.cardWebTitle')}</h2>
+          <p class="mt-2 text-sm leading-relaxed text-foreground-muted">{t('servicesHubPage.cardWebBody')}</p>
+          <p class="mt-4 text-sm font-semibold text-brand-600 dark:text-brand-400">{t('servicesHubPage.explore')} →</p>
+        </Card>
+        <Card variant="elevated" padding="lg" href={automationPath} hover class="h-full">
+          <h2 class="font-display text-xl font-bold text-foreground">{t('servicesHubPage.cardAutomationTitle')}</h2>
+          <p class="mt-2 text-sm leading-relaxed text-foreground-muted">{t('servicesHubPage.cardAutomationBody')}</p>
+          <p class="mt-4 text-sm font-semibold text-brand-600 dark:text-brand-400">{t('servicesHubPage.explore')} →</p>
+        </Card>
+        <Card variant="elevated" padding="lg" href={fullPath} hover class="h-full">
+          <h2 class="font-display text-xl font-bold text-foreground">{t('servicesHubPage.cardFullTitle')}</h2>
+          <p class="mt-2 text-sm leading-relaxed text-foreground-muted">{t('servicesHubPage.cardFullBody')}</p>
+          <p class="mt-4 text-sm font-semibold text-brand-600 dark:text-brand-400">{t('servicesHubPage.explore')} →</p>
+        </Card>
+        <Card variant="elevated" padding="lg" href={portfolioPath} hover class="h-full">
+          <h2 class="font-display text-xl font-bold text-foreground">{t('servicesHubPage.cardPortfolioTitle')}</h2>
+          <p class="mt-2 text-sm leading-relaxed text-foreground-muted">{t('servicesHubPage.cardPortfolioBody')}</p>
+          <p class="mt-4 text-sm font-semibold text-brand-600 dark:text-brand-400">{t('servicesHubPage.explore')} →</p>
+        </Card>
+      </div>
+    </div>
+  </section>
+
+  <LandingFooter slot="footer" />
+</BaseLayout>

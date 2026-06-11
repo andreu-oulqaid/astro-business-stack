@@ -1,0 +1,43 @@
+---
+import type { Locale } from '@/i18n/config';
+import { useTranslations } from '@/i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+const items = [
+  {
+    title: t('selectedWorkSection.items.one.title'),
+    result: t('selectedWorkSection.items.one.result'),
+  },
+  {
+    title: t('selectedWorkSection.items.two.title'),
+    result: t('selectedWorkSection.items.two.result'),
+  },
+  {
+    title: t('selectedWorkSection.items.three.title'),
+    result: t('selectedWorkSection.items.three.result'),
+  },
+];
+---
+
+<section id="work" class="py-[var(--space-section-lg)] bg-background-secondary">
+  <div class="mx-auto max-w-6xl px-6">
+    <h2 class="font-display text-3xl md:text-4xl font-bold tracking-tight text-foreground mb-8">
+      {t('selectedWorkSection.title')}
+    </h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {items.map((item) => (
+        <article class="rounded-xl border border-border bg-background p-6">
+          <h3 class="font-display text-xl font-semibold text-foreground mb-3">{item.title}</h3>
+          <p class="text-sm md:text-base text-brand-500 font-medium">{item.result}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

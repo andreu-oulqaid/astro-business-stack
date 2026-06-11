@@ -1,0 +1,81 @@
+---
+import type { Locale } from '@/i18n/config';
+import { useTranslations } from '@/i18n/index';
+import Badge from '@/components/ui/data-display/Badge/Badge.astro';
+import SystemsTerminalDemo from '@/components/blog/SystemsTerminalDemo.astro';
+
+interface Props {
+  locale: Locale;
+  /**
+   * `hub` — services index (pillars overview + same terminal).
+   * `systemsListing` — legacy “blog” services framing (title + description from `blog.*`).
+   */
+  variant?: 'hub' | 'systemsListing';
+  /** When `variant` is `hub`, show a subtle badge above the title (recommended). */
+  showHubBadge?: boolean;
+}
+
+const { locale, variant = 'systemsListing', showHubBadge = true } = Astro.props;
+const t = useTranslations(locale);
+
+const isHub = variant === 'hub';
+const heading = isHub ? t('servicesHubPage.title') : t('blog.title');
+const description = isHub ? t('servicesHubPage.subtitle') : t('blog.description');
+---
+
+<section class="services-hero relative overflow-hidden border-b border-border bg-background-secondary dark:border-border-invert dark:bg-surface-invert">
+  <div class="services-hero__grid" aria-hidden="true"></div>
+
+  <div class="relative z-10 mx-auto max-w-6xl px-6 py-[var(--space-section-lg)]">
+    <div class="flex flex-col gap-10 lg:grid lg:grid-cols-2 lg:items-center lg:gap-12">
+      <div class="min-w-0">
+        {isHub && showHubBadge && (
+          <div class="mb-5">
+            <Badge variant="default" pill size="sm" class="text-foreground-muted">
+              {t('servicesHubPage.heroBadge')}
+            </Badge>
+          </div>
+        )}
+        <h1
+          class="font-display mb-6 text-4xl font-bold tracking-tight text-foreground md:text-5xl lg:text-6xl dark:text-on-invert"
+        >
+          {heading}
+        </h1>
+        <p class="text-xl leading-relaxed text-foreground-muted dark:text-on-invert-muted">
+          {description}
+        </p>
+      </div>
+      <div class="w-full min-w-0">
+        <SystemsTerminalDemo locale={locale} />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .services-hero__grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: radial-gradient(
+      ellipse 85% 70% at 50% 42%,
+      black 18%,
+      transparent 72%
+    );
+    -webkit-mask-image: radial-gradient(
+      ellipse 85% 70% at 50% 42%,
+      black 18%,
+      transparent 72%
+    );
+  }
+
+  :global(.dark) .services-hero__grid {
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  }
+</style>

@@ -1,0 +1,63 @@
+---
+/**
+ * Prep summary above booking CTA — web, automation, and full-system pillars.
+ */
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
+import Card from '@/components/ui/data-display/Card/Card.astro';
+import type { Locale } from '@/i18n/config';
+import { useTranslations, type TranslationKey } from '@/i18n';
+
+interface Props {
+  locale: Locale;
+  pillar: 'web' | 'automation' | 'full-system';
+}
+
+const { locale, pillar } = Astro.props;
+const t = useTranslations(locale);
+
+const prefix =
+  pillar === 'web' ? 'salesWeb' : pillar === 'automation' ? 'salesAutomation' : 'salesFullSystem';
+
+const sectionId =
+  pillar === 'web'
+    ? 'web-audit-prep'
+    : pillar === 'automation'
+      ? 'automation-audit-prep'
+      : 'full-system-audit-prep';
+const headingId = `${sectionId}-heading`;
+
+const points = [
+  t(`${prefix}.ctaPrepPoint1` as TranslationKey),
+  t(`${prefix}.ctaPrepPoint2` as TranslationKey),
+  t(`${prefix}.ctaPrepPoint3` as TranslationKey),
+];
+---
+
+<section id={sectionId} class="border-border border-t bg-background py-10 md:py-14" aria-labelledby={headingId}>
+  <div class="mx-auto max-w-6xl px-6">
+    <Card
+      variant="elevated"
+      padding="lg"
+      class="mx-auto max-w-xl border-brand-500/20 shadow-md shadow-brand-500/5 ring-1 ring-brand-500/10"
+    >
+      <h2 id={headingId} class="font-display text-lg font-semibold tracking-tight text-foreground md:text-xl">
+        {t(`${prefix}.ctaPrepTitle` as TranslationKey)}
+      </h2>
+      <p class="mt-2 text-sm leading-relaxed text-foreground-muted">
+        {t(`${prefix}.ctaPrepSubtitle` as TranslationKey)}
+      </p>
+      <ul class="mt-5 space-y-2.5 text-sm leading-snug text-foreground-secondary" role="list">
+        {
+          points.map((text) => (
+            <li class="flex gap-2.5">
+              <span class="mt-0.5 shrink-0 text-brand-600 dark:text-brand-400" aria-hidden="true">
+                <Icon name="check" size="sm" />
+              </span>
+              <span>{text}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </Card>
+  </div>
+</section>

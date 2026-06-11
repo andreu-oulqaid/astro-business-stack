@@ -1,0 +1,16 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Button from '@/components/ui/form/Button/Button.astro';
+---
+
+<BaseLayout title="Gracias" description="Tu cita ha quedado registrada." lang="es" noindex>
+  <main class="mx-auto flex min-h-[60vh] max-w-lg flex-col items-center justify-center px-6 py-20 text-center">
+    <h1 class="font-display text-3xl font-bold text-foreground md:text-4xl">Gracias</h1>
+    <p class="mt-4 text-lg text-foreground-muted">
+      Tu reserva se ha registrado correctamente. Te hemos enviado los detalles por correo.
+    </p>
+    <div class="mt-10">
+      <Button size="lg" href="/">Volver al inicio</Button>
+    </div>
+  </main>
+</BaseLayout>

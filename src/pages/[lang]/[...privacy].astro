@@ -1,0 +1,26 @@
+---
+import PrivacyPolicy from '@/components/legal/PrivacyPolicy.astro';
+import { locales, defaultLocale, isValidLocale, type Locale } from '@/i18n/config';
+import { routes } from '@/i18n/index';
+
+export function getStaticPaths() {
+  return locales
+    .filter((lang) => lang !== defaultLocale)
+    .map((lang) => ({
+      params: { lang, privacy: routes.privacy[lang] },
+    }));
+}
+
+const { lang, privacy } = Astro.params;
+
+if (!lang || !isValidLocale(lang)) {
+  return Astro.redirect('/privacy');
+}
+
+const locale = lang as Locale;
+if (privacy !== routes.privacy[locale]) {
+  return Astro.redirect(`/${locale}/${routes.privacy[locale]}`);
+}
+---
+
+<PrivacyPolicy locale={locale} />

@@ -1,0 +1,28 @@
+---
+import type { Locale } from '@/i18n/config';
+import { useTranslations } from '@/i18n';
+import Accordion from '@/components/ui/overlay/Accordion/Accordion.astro';
+import { homeFaq } from '@/i18n/copy/homeFaq';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+const items = homeFaq[locale].map((item, index) => ({
+  title: item.question,
+  content: item.answer,
+  defaultOpen: index === 0,
+}));
+---
+
+<section id="faq" class="py-[var(--space-section-lg)] bg-background">
+  <div class="mx-auto max-w-4xl px-6">
+    <h2 class="font-display text-3xl md:text-4xl font-bold tracking-tight text-foreground mb-8">
+      {t('homeFaq.title')}
+    </h2>
+    <Accordion items={items} variant="card" exclusive />
+  </div>
+</section>

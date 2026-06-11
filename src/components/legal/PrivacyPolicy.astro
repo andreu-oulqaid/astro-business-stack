@@ -1,0 +1,219 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import { type Locale } from '@/i18n/config';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+const copy = {
+  en: {
+    title: 'Privacy Policy',
+    description:
+      'How Iluro Digital collects, uses, and protects personal data when you request an audit or use this website.',
+    updated: 'Last updated: May 2026',
+    intro:
+      'Iluro Digital uses only the data needed to respond to your request, schedule your audit, improve the funnel, and keep the service secure.',
+    sections: [
+      {
+        title: 'Who is responsible',
+        body:
+          'Iluro Digital is the controller for the personal data collected through this website. You can contact us at info@ilurodigital.com for privacy questions or rights requests.',
+      },
+      {
+        title: 'Data we collect',
+        body:
+          'When you request an audit we may collect your name, email, optional phone number, preferred language, page path, referrer, campaign parameters, and basic device type. We also store cookie preferences in your browser.',
+      },
+      {
+        title: 'Why we use it',
+        body:
+          'We use this data to respond to your request, prepare and schedule your audit, avoid duplicate CRM entries, send operational emails, measure whether the booking funnel works, and protect the site from abuse.',
+      },
+      {
+        title: 'Supabase analytics',
+        body:
+          'If SUPABASE_TRACKING_ENABLED is enabled, we send pseudonymous conversion events to Supabase. The identifier is a SHA-256 hash derived from your email and a private salt. These analytics events are separated by deployment environment and are not used to enrich the Notion lead record unless you have explicitly consented to analytics.',
+      },
+      {
+        title: 'Processors and external services',
+        body:
+          'We use Supabase for pseudonymous funnel analytics, Notion for CRM records, Resend for email delivery, Cal.com for scheduling, GitHub OAuth for CMS/admin authentication, and Google Analytics or Tag Manager only when configured and consented. Fonts are served locally through the application build, not from Google Fonts at runtime.',
+      },
+      {
+        title: 'Legal bases',
+        body:
+          'Lead handling and audit scheduling are processed to take steps at your request before entering into a service relationship. Security and basic operational measurement may rely on legitimate interest. Optional marketing or third-party analytics requires consent where required by law.',
+      },
+      {
+        title: 'Retention and your rights',
+        body:
+          'We keep lead and analytics data only as long as needed for the purposes above. You can ask for access, correction, deletion, restriction, objection, or portability by emailing info@ilurodigital.com.',
+      },
+    ],
+  },
+  es: {
+    title: 'Política de Privacidad',
+    description:
+      'Cómo Iluro Digital recoge, usa y protege datos personales cuando solicitas una auditoría o usas esta web.',
+    updated: 'Última actualización: mayo de 2026',
+    intro:
+      'Iluro Digital usa solo los datos necesarios para responder a tu solicitud, programar la auditoría, mejorar el embudo y mantener el servicio seguro.',
+    sections: [
+      {
+        title: 'Responsable del tratamiento',
+        body:
+          'Iluro Digital es responsable de los datos personales recogidos a través de esta web. Puedes escribirnos a info@ilurodigital.com para consultas de privacidad o ejercicio de derechos.',
+      },
+      {
+        title: 'Datos que recogemos',
+        body:
+          'Cuando solicitas una auditoría podemos recoger tu nombre, email, teléfono opcional, idioma, ruta de página, referente, parámetros de campaña y tipo básico de dispositivo. También guardamos preferencias de cookies en tu navegador.',
+      },
+      {
+        title: 'Para qué los usamos',
+        body:
+          'Usamos estos datos para responder a tu solicitud, preparar y agendar la auditoría, evitar duplicados en CRM, enviar emails operativos, medir si el embudo de reserva funciona y proteger la web frente a abusos.',
+      },
+      {
+        title: 'Analítica de Supabase',
+        body:
+          'Si SUPABASE_TRACKING_ENABLED está activado, enviamos eventos de conversión seudónimos a Supabase. El identificador es un hash SHA-256 derivado de tu email y una sal privada. Estos eventos se separan por entorno y no se cruzan con la ficha de lead en Notion salvo consentimiento explícito de analítica.',
+      },
+      {
+        title: 'Encargados y servicios externos',
+        body:
+          'Usamos Supabase para analítica seudónima del embudo, Notion para CRM, Resend para entrega de email, Cal.com para reservas, GitHub OAuth para autenticación CMS/admin, y Google Analytics o Tag Manager solo si están configurados y consentidos. Las fuentes se sirven localmente desde la build de la aplicación, no desde Google Fonts en runtime.',
+      },
+      {
+        title: 'Bases legales',
+        body:
+          'La gestión del lead y la reserva de auditoría se tratan para aplicar medidas precontractuales a petición tuya. La seguridad y medición operativa básica pueden apoyarse en interés legítimo. El marketing opcional o analítica de terceros requiere consentimiento cuando la ley lo exige.',
+      },
+      {
+        title: 'Conservación y derechos',
+        body:
+          'Conservamos leads y analítica solo el tiempo necesario para las finalidades anteriores. Puedes solicitar acceso, rectificación, supresión, limitación, oposición o portabilidad escribiendo a info@ilurodigital.com.',
+      },
+    ],
+  },
+  ca: {
+    title: 'Política de Privacitat',
+    description:
+      'Com Iluro Digital recull, usa i protegeix dades personals quan demanes una auditoria o uses aquesta web.',
+    updated: 'Última actualització: maig de 2026',
+    intro:
+      'Iluro Digital usa només les dades necessàries per respondre la teva sol·licitud, programar l’auditoria, millorar l’embut i mantenir el servei segur.',
+    sections: [
+      {
+        title: 'Responsable',
+        body:
+          'Iluro Digital és responsable de les dades personals recollides a través d’aquesta web. Pots escriure a info@ilurodigital.com per a consultes de privacitat o exercici de drets.',
+      },
+      {
+        title: 'Dades que recollim',
+        body:
+          'Quan demanes una auditoria podem recollir nom, email, telèfon opcional, idioma, ruta de pàgina, referent, paràmetres de campanya i tipus bàsic de dispositiu. També guardem preferències de cookies al navegador.',
+      },
+      {
+        title: 'Per què les usem',
+        body:
+          'Usem aquestes dades per respondre la sol·licitud, preparar i reservar l’auditoria, evitar duplicats al CRM, enviar emails operatius, mesurar l’embut de reserva i protegir la web.',
+      },
+      {
+        title: 'Analítica de Supabase',
+        body:
+          'Si SUPABASE_TRACKING_ENABLED està activat, enviem esdeveniments de conversió seudònims a Supabase. L’identificador és un hash SHA-256 derivat del teu email i una sal privada. Aquests esdeveniments es separen per entorn i no es creuen amb el lead de Notion tret que hi hagi consentiment explícit d’analítica.',
+      },
+      {
+        title: 'Serveis externs',
+        body:
+          'Usem Supabase per a analítica seudònima, Notion per al CRM, Resend per a email, Cal.com per a reserves, GitHub OAuth per a autenticació CMS/admin, i Google Analytics o Tag Manager només si estan configurats i consentits. Les fonts se serveixen localment des de la build.',
+      },
+      {
+        title: 'Bases legals i drets',
+        body:
+          'La gestió del lead i la reserva es basen en mesures precontractuals a petició teva. La seguretat i mètrica operativa poden basar-se en interès legítim. Pots exercir els teus drets escrivint a info@ilurodigital.com.',
+      },
+    ],
+  },
+  pl: {
+    title: 'Polityka prywatności',
+    description:
+      'Jak Iluro Digital zbiera, używa i chroni dane osobowe, gdy prosisz o audyt lub korzystasz z tej strony.',
+    updated: 'Ostatnia aktualizacja: maj 2026',
+    intro:
+      'Iluro Digital używa tylko danych potrzebnych do odpowiedzi na zgłoszenie, umówienia audytu, poprawy lejka i utrzymania bezpieczeństwa usługi.',
+    sections: [
+      {
+        title: 'Administrator danych',
+        body:
+          'Iluro Digital jest administratorem danych osobowych zbieranych przez tę stronę. W sprawach prywatności i praw użytkownika napisz na info@ilurodigital.com.',
+      },
+      {
+        title: 'Jakie dane zbieramy',
+        body:
+          'Przy zgłoszeniu audytu możemy zebrać imię, email, opcjonalny telefon, język, ścieżkę strony, referrer, parametry kampanii i podstawowy typ urządzenia. Preferencje cookies są zapisywane w przeglądarce.',
+      },
+      {
+        title: 'Po co ich używamy',
+        body:
+          'Dane służą do odpowiedzi na zgłoszenie, przygotowania i umówienia audytu, unikania duplikatów w CRM, wysyłania wiadomości operacyjnych, pomiaru lejka rezerwacji i ochrony strony.',
+      },
+      {
+        title: 'Analityka Supabase',
+        body:
+          'Jeśli SUPABASE_TRACKING_ENABLED jest włączone, wysyłamy pseudonimowe zdarzenia konwersji do Supabase. Identyfikator to hash SHA-256 z emaila i prywatnej soli. Zdarzenia są oddzielone według środowiska i nie są łączone z leadem w Notion bez wyraźnej zgody analitycznej.',
+      },
+      {
+        title: 'Usługi zewnętrzne',
+        body:
+          'Używamy Supabase do pseudonimowej analityki, Notion jako CRM, Resend do emaili, Cal.com do rezerwacji, GitHub OAuth do logowania CMS/admin oraz Google Analytics lub Tag Manager tylko po konfiguracji i zgodzie. Fonty są serwowane lokalnie z buildu aplikacji.',
+      },
+      {
+        title: 'Podstawy prawne i prawa',
+        body:
+          'Obsługa leada i rezerwacji opiera się na działaniach przedumownych na Twoje żądanie. Bezpieczeństwo i pomiar operacyjny mogą opierać się na uzasadnionym interesie. Prawa możesz realizować przez info@ilurodigital.com.',
+      },
+    ],
+  },
+} as const;
+
+const page = copy[locale];
+---
+
+<PageLayout
+  title={page.title}
+  description={page.description}
+  lang={locale}
+  routeId="privacy"
+>
+  <section class="bg-background pt-28 pb-20">
+    <div class="mx-auto max-w-3xl px-6">
+      <p class="mb-4 text-sm font-semibold uppercase tracking-[0.2em] text-brand-500">
+        {page.updated}
+      </p>
+      <h1 class="font-display text-4xl font-bold tracking-tight text-foreground md:text-5xl">
+        {page.title}
+      </h1>
+      <p class="mt-6 text-lg leading-relaxed text-foreground-muted">
+        {page.intro}
+      </p>
+
+      <div class="mt-12 space-y-10">
+        {page.sections.map((section) => (
+          <section>
+            <h2 class="font-display text-2xl font-semibold text-foreground">
+              {section.title}
+            </h2>
+            <p class="mt-3 leading-relaxed text-foreground-muted">
+              {section.body}
+            </p>
+          </section>
+        ))}
+      </div>
+    </div>
+  </section>
+</PageLayout>

@@ -1,0 +1,52 @@
+---
+import type { Locale } from '@/i18n/config';
+import { useTranslations } from '@/i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+const rows = [
+  {
+    label: t('comparisonSection.rows.speed.label'),
+    traditional: t('comparisonSection.rows.speed.traditional'),
+    iluro: t('comparisonSection.rows.speed.iluro'),
+  },
+  {
+    label: t('comparisonSection.rows.communication.label'),
+    traditional: t('comparisonSection.rows.communication.traditional'),
+    iluro: t('comparisonSection.rows.communication.iluro'),
+  },
+  {
+    label: t('comparisonSection.rows.roi.label'),
+    traditional: t('comparisonSection.rows.roi.traditional'),
+    iluro: t('comparisonSection.rows.roi.iluro'),
+  },
+];
+---
+
+<section id="comparison" class="py-[var(--space-section-lg)] bg-background">
+  <div class="mx-auto max-w-6xl px-6">
+    <h2 class="font-display text-3xl md:text-4xl font-bold tracking-tight text-foreground mb-6">
+      {t('comparisonSection.title')}
+    </h2>
+
+    <div class="rounded-xl border border-border overflow-hidden">
+      <div class="grid grid-cols-1 md:grid-cols-3 bg-background-secondary border-b border-border">
+        <div class="p-4 text-sm font-semibold text-foreground-muted">Comparison</div>
+        <div class="p-4 text-sm font-semibold text-foreground-muted">{t('comparisonSection.traditional')}</div>
+        <div class="p-4 text-sm font-semibold text-foreground">{t('comparisonSection.iluro')}</div>
+      </div>
+      {rows.map((row) => (
+        <div class="grid grid-cols-1 md:grid-cols-3 border-b border-border last:border-b-0">
+          <div class="p-4 text-sm font-semibold text-foreground">{row.label}</div>
+          <div class="p-4 text-sm text-foreground-muted">{row.traditional}</div>
+          <div class="p-4 text-sm text-foreground">{row.iluro}</div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

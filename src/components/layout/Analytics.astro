@@ -1,0 +1,37 @@
+---
+/**
+ * Analytics Component
+ *
+ * Conditionally loads analytics scripts based on environment variables.
+ * Supports Google Analytics (GA4) and Google Tag Manager.
+ * External scripts are loaded by the consent banner after analytics consent.
+ *
+ * Environment variables:
+ * - PUBLIC_GA_MEASUREMENT_ID: Google Analytics 4 Measurement ID (e.g., G-XXXXXXXXXX)
+ * - PUBLIC_GTM_ID: Google Tag Manager Container ID (e.g., GTM-XXXXXXX)
+ */
+
+const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
+const gtmId = import.meta.env.PUBLIC_GTM_ID;
+---
+
+{gtmId && <meta name="gtm-id" content={gtmId} />}
+{gaId && <meta name="ga-id" content={gaId} />}
+
+{
+  (gaId || gtmId) && (
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'denied',
+        functionality_storage: 'denied',
+        personalization_storage: 'denied',
+        security_storage: 'granted'
+      });
+    </script>
+  )
+}

@@ -1,0 +1,48 @@
+---
+import type { Locale } from '@/i18n/config';
+import Badge from '@/components/ui/data-display/Badge/Badge.astro';
+import Button from '@/components/ui/form/Button/Button.astro';
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
+import { getLiveDeployments, liveDeploymentsSection } from '@/i18n/copy/liveDeployments';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const copy = liveDeploymentsSection[locale];
+const deployments = getLiveDeployments(locale);
+---
+
+<section id="deployments" class="border-y border-border bg-background-secondary py-[var(--space-section-lg)]">
+  <div class="mx-auto max-w-6xl px-6">
+    <h2 class="mb-3 font-display text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+      {copy.title}
+    </h2>
+    <p class="mb-8 max-w-2xl text-foreground-muted">{copy.description}</p>
+
+    <div class="grid gap-4 md:grid-cols-2">
+      {
+        deployments.map((deployment) => (
+          <article class="flex h-full flex-col rounded-xl border border-border bg-background p-6">
+            <div class="mb-3 flex flex-wrap gap-2">
+              {deployment.tags.map((tag) => (
+                <Badge variant="brand" size="sm">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+            <h3 class="font-display text-xl font-semibold text-foreground">{deployment.name}</h3>
+            <p class="mt-2 flex-1 text-sm leading-relaxed text-foreground-muted">{deployment.description}</p>
+            <div class="mt-4">
+              <Button variant="outline" size="sm" href={deployment.url}>
+                Visit site
+                <Icon name="external-link" size="sm" />
+              </Button>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>

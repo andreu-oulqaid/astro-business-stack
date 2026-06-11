@@ -1,0 +1,166 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Navbar from '@/components/landing/Navbar.astro';
+import LandingFooter from '@/components/landing/LandingFooter.astro';
+import BlogCard from '@/components/blog/BlogCard.astro';
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
+import { getCollection } from 'astro:content';
+import { locales, defaultLocale, isValidLocale, type Locale } from '@/i18n/config';
+import { getLocalizedPath, useTranslations } from '@/i18n/index';
+
+export function getStaticPaths() {
+  return locales.filter((lang) => lang !== defaultLocale).map((lang) => ({ params: { lang } }));
+}
+
+const { lang } = Astro.params;
+if (!lang || !isValidLocale(lang) || lang === defaultLocale) {
+  return Astro.redirect(getLocalizedPath('portfolio', defaultLocale), 301);
+}
+
+const locale = lang as Locale;
+const t = useTranslations(locale);
+
+const allPosts = await getCollection('services', ({ data }) => {
+  return import.meta.env.PROD ? data.draft !== true : true;
+});
+
+const posts = allPosts
+  .filter((post) => post.data.locale === locale)
+  .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+
+const featuredPosts = posts.filter((post) => post.data.featured);
+const nonFeaturedPosts = posts.filter((post) => !post.data.featured);
+
+const filterTags = ['integrations', 'ssr', 'cms'] as const;
+const filterTagLabels = {
+  integrations: t('blog.filter.integrations'),
+  ssr: t('blog.filter.ssr'),
+  cms: t('blog.filter.cms'),
+} as const;
+const portfolioBasePath = getLocalizedPath('portfolio', locale);
+
+const getPostUrl = (postId: string) => {
+  const slug = postId.replace(`${locale}/`, '');
+  return `${portfolioBasePath}/${slug}`;
+};
+---
+
+<BaseLayout title={t('portfolio.title')} description={t('portfolio.description')} lang={locale} routeId="portfolio">
+  <Navbar slot="header" />
+
+  <section class="border-b border-border bg-background-secondary py-16">
+    <div class="mx-auto max-w-6xl px-6 text-center">
+      <h1 class="font-display text-4xl font-bold tracking-tight text-foreground md:text-5xl">
+        {t('portfolio.title')}
+      </h1>
+      <p class="mx-auto mt-4 max-w-2xl text-lg text-foreground-muted">{t('portfolio.description')}</p>
+    </div>
+  </section>
+
+  {featuredPosts.length > 0 && (
+    <section class="bg-background py-16">
+      <div class="mx-auto max-w-6xl px-6">
+        <h2 class="mb-8 font-display text-2xl font-bold text-foreground">{t('blog.featured')}</h2>
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+          {featuredPosts.map((post) => (
+            <BlogCard
+              title={post.data.title}
+              description={post.data.description}
+              href={getPostUrl(post.id)}
+              tags={post.data.tags}
+              image={post.data.image}
+              featured={true}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section class="bg-background-secondary py-16">
+    <div class="mx-auto max-w-6xl px-6">
+      {(featuredPosts.length > 0 || nonFeaturedPosts.length > 0) && (
+        <h2 class="mb-6 font-display text-2xl font-bold text-foreground">{t('blog.allPosts')}</h2>
+      )}
+
+      <div class="mb-8 flex flex-wrap items-center gap-2">
+        <span class="text-sm font-medium text-foreground-secondary">{t('blog.filterLabel')}:</span>
+        <button type="button" data-filter-btn data-filter="all" class="service-filter-btn is-active">{t('blog.filterAll')}</button>
+        {filterTags.map((tag) => (
+          <button type="button" data-filter-btn data-filter={tag} class="service-filter-btn">{filterTagLabels[tag]}</button>
+        ))}
+      </div>
+
+      {nonFeaturedPosts.length > 0 ? (
+        <div id="portfolio-grid" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {nonFeaturedPosts.map((post) => (
+            <BlogCard
+              title={post.data.title}
+              description={post.data.description}
+              href={getPostUrl(post.id)}
+              tags={post.data.tags}
+              image={post.data.image}
+              data-tags={post.data.tags.join(',')}
+            />
+          ))}
+        </div>
+      ) : posts.length === 0 ? (
+        <div class="py-16 text-center">
+          <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-background">
+            <Icon name="file-text" size="lg" class="text-foreground-muted" />
+          </div>
+          <p class="text-lg text-foreground-muted">{t('blog.noPosts')}</p>
+        </div>
+      ) : null}
+    </div>
+  </section>
+
+  <LandingFooter slot="footer" />
+</BaseLayout>
+
+<script>
+  function initPortfolioFilters() {
+    const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-filter-btn]'));
+    const cards = Array.from(document.querySelectorAll<HTMLElement>('#portfolio-grid article'));
+    if (!buttons.length || !cards.length) return;
+
+    function applyFilter(filter: string) {
+      cards.forEach((card) => {
+        const tags = card.getAttribute('data-tags') || '';
+        const visible = filter === 'all' || tags.split(',').includes(filter);
+        card.classList.toggle('hidden', !visible);
+      });
+      buttons.forEach((btn) => btn.classList.toggle('is-active', btn.dataset.filter === filter));
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener('click', () => applyFilter(button.dataset.filter || 'all'));
+    });
+  }
+
+  initPortfolioFilters();
+  document.addEventListener('astro:page-load', initPortfolioFilters);
+</script>
+
+<style>
+  .service-filter-btn {
+    border: 1px solid var(--border);
+    background: var(--background);
+    color: var(--foreground-muted);
+    border-radius: 9999px;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1rem;
+    transition: all 150ms ease;
+  }
+  .service-filter-btn:hover {
+    border-color: color-mix(in oklab, var(--brand-500) 40%, var(--border));
+    color: var(--foreground);
+  }
+  .service-filter-btn.is-active {
+    border-color: var(--brand-500);
+    background: color-mix(in oklab, var(--brand-500) 12%, var(--background));
+    color: var(--foreground);
+  }
+</style>

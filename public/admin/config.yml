@@ -1,0 +1,67 @@
+backend:
+  name: github
+  repo: andreu-oulqaid/astro-business-stack
+  branch: develop
+  base_url: __AUTH_GATEWAY_URL__
+  auth_endpoint: api/auth
+
+i18n:
+  structure: multiple_folders
+  locales: [en, es, ca, pl]
+  default_locale: en
+  required_locales: [en, es, ca, pl]
+
+media_folder: "src/assets"
+public_folder: "/src/assets"
+
+collections:
+  - name: "blog"
+    label: "Blog / Features"
+    label_singular: "Post"
+    folder: "src/content/blog"
+    extension: "mdx"
+    format: "frontmatter"
+    create: true
+    i18n: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string", i18n: true }
+      - { label: "Description", name: "description", widget: "text", i18n: true }
+      - { label: "Published", name: "publishedAt", widget: "datetime", format: "YYYY-MM-DD", i18n: "duplicate" }
+      - { label: "Updated", name: "updatedAt", widget: "datetime", format: "YYYY-MM-DD", required: false, i18n: "duplicate" }
+      - { label: "Author", name: "author", widget: "string", default: "Stack Team", i18n: "duplicate" }
+      - { label: "Cover image", name: "image", widget: "image", required: false, i18n: "duplicate" }
+      - { label: "Image alt", name: "imageAlt", widget: "string", required: false, i18n: true }
+      - { label: "Tags", name: "tags", widget: "list", default: [], i18n: true }
+      - { label: "Featured", name: "featured", widget: "boolean", default: false, i18n: "duplicate" }
+      - { label: "Draft", name: "draft", widget: "boolean", default: true, i18n: "duplicate" }
+      - { label: "Body", name: "body", widget: "markdown", i18n: true }
+
+  - name: "faqs"
+    label: "FAQs"
+    label_singular: "FAQ"
+    folder: "src/content/faqs"
+    extension: "json"
+    format: "json"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Question", name: "question", widget: "string" }
+      - { label: "Answer", name: "answer", widget: "text" }
+      - { label: "Category", name: "category", widget: "string", required: false }
+      - { label: "Order", name: "order", widget: "number", default: 0 }
+
+  - name: "pages"
+    label: "Static Pages"
+    label_singular: "Page"
+    folder: "src/content/pages"
+    extension: "mdx"
+    format: "frontmatter"
+    create: true
+    i18n: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string", i18n: true }
+      - { label: "Description", name: "description", widget: "text", i18n: true }
+      - { label: "Updated", name: "updatedAt", widget: "datetime", format: "YYYY-MM-DD", required: false, i18n: "duplicate" }
+      - { label: "Body", name: "body", widget: "markdown", i18n: true }

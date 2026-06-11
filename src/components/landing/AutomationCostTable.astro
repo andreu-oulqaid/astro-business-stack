@@ -1,0 +1,53 @@
+---
+interface Row {
+  dimension: string;
+  human: string;
+  agent: string;
+}
+
+interface Props {
+  title: string;
+  dimensionHeader: string;
+  humanHeader: string;
+  agentHeader: string;
+  rows: Row[];
+  /** Stable id prefix for a11y (e.g. "sales-automation") */
+  idPrefix: string;
+}
+
+const { title, dimensionHeader, humanHeader, agentHeader, rows, idPrefix } = Astro.props;
+const tableId = `${idPrefix}-cost-table`;
+---
+
+<section class="border-border border-y bg-background py-14 md:py-18" aria-labelledby={`${tableId}-h`}>
+  <div class="mx-auto max-w-6xl px-6">
+    <h2 id={`${tableId}-h`} class="font-display mb-8 text-center text-2xl font-bold text-foreground md:text-3xl">
+      {title}
+    </h2>
+    <div class="overflow-x-auto rounded-xl border border-border bg-background-secondary shadow-sm">
+      <table class="w-full min-w-[520px] text-left text-sm">
+        <caption class="sr-only">{title}</caption>
+        <thead>
+          <tr class="border-b border-border bg-background">
+            <th scope="col" class="px-4 py-3 font-semibold text-foreground">{dimensionHeader}</th>
+            <th scope="col" class="px-4 py-3 font-semibold text-foreground">{humanHeader}</th>
+            <th scope="col" class="px-4 py-3 font-semibold text-foreground">{agentHeader}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            rows.map((row, i) => (
+              <tr class:list={[i % 2 === 1 && 'bg-background/60', 'border-b border-border last:border-0']}>
+                <th scope="row" class="px-4 py-3 font-medium text-foreground">
+                  {row.dimension}
+                </th>
+                <td class="px-4 py-3 text-foreground-muted">{row.human}</td>
+                <td class="px-4 py-3 text-brand-600 dark:text-brand-400">{row.agent}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

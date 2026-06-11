@@ -1,0 +1,22 @@
+---
+/**
+ * Localized web pillar: builds `/es/services/web`, `/ca/services/web`, `/pl/services/web`
+ * (one param per non-default locale). English: `src/pages/services/web.astro` → `/services/web`.
+ */
+import ServicePillarPage from '@/components/landing/service-pillars/ServicePillarPage.astro';
+import { locales, defaultLocale, isValidLocale, type Locale } from '@/i18n/config';
+import { getLocalizedPath } from '@/i18n/index';
+
+export function getStaticPaths() {
+  return locales.filter((lang) => lang !== defaultLocale).map((lang) => ({ params: { lang } }));
+}
+
+const { lang } = Astro.params;
+if (!lang || !isValidLocale(lang) || lang === defaultLocale) {
+  return Astro.redirect(getLocalizedPath('serviceWeb', defaultLocale), 301);
+}
+
+const locale = lang as Locale;
+---
+
+<ServicePillarPage locale={locale} pillar="web" />

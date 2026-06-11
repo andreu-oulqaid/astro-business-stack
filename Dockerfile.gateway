@@ -1,0 +1,20 @@
+# Dockerfile.gateway
+FROM node:18-alpine
+
+# Create working directory
+WORKDIR /app
+
+# Copy package.json & package-lock.json from gateway
+COPY gateway/package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy gateway code
+COPY gateway/ ./
+
+# Expose internal port 3000 (internal only)
+EXPOSE 3000
+
+# Run the Express app
+CMD ["node", "index.js"]

@@ -1,0 +1,18 @@
+---
+import ServicePillarPage from '@/components/landing/service-pillars/ServicePillarPage.astro';
+import { locales, defaultLocale, isValidLocale, type Locale } from '@/i18n/config';
+import { getLocalizedPath } from '@/i18n/index';
+
+export function getStaticPaths() {
+  return locales.filter((l) => l !== defaultLocale).map((l) => ({ params: { lang: l } }));
+}
+
+const { lang } = Astro.params;
+if (!lang || !isValidLocale(lang) || lang === defaultLocale) {
+  return Astro.redirect(getLocalizedPath('serviceFullSystem', defaultLocale), 301);
+}
+
+const locale = lang as Locale;
+---
+
+<ServicePillarPage locale={locale} pillar="full-system" />

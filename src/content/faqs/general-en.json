@@ -1,0 +1,7 @@
+{
+  "question": "What is Astro Business Stack?",
+  "answer": "A production-ready template for marketing sites: Astro 6 SSR, Docker, self-hosted GitHub OAuth for Decap CMS, GitHub Actions deploys to a VPS, and optional Notion, Supabase, Resend, and Cal.com integrations.",
+  "category": "general",
+  "order": 1,
+  "locale": "en"
+}

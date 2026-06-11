@@ -1,0 +1,16 @@
+---
+title: "Self-hosted Decap CMS with GitHub OAuth"
+description: "Edit markdown content in the browser; commits flow to the develop branch via a Docker auth gateway."
+publishedAt: 2026-06-03
+author: "Stack Team"
+tags: ["cms", "decap", "oauth", "docker"]
+featured: false
+locale: en
+draft: false
+---
+
+# CMS without Netlify Identity
+
+Decap loads at `/admin`. A separate `auth-gateway` container handles GitHub OAuth and returns tokens to the CMS popup — no third-party auth SaaS required.
+
+See `docs/cms-oauth.md` for OAuth App setup and callback URLs.

@@ -1,0 +1,68 @@
+---
+import { getCollection } from 'astro:content';
+import { locales, defaultLocale, type Locale } from '@/i18n/config';
+import { routes, type RouteId } from '@/i18n/routes';
+import { pillarFilesystemSegmentFromServicesSlugTail } from '@/i18n/helpers';
+
+/** Accept both localized portfolio base (casos) and Astro folder name (portfolio). */
+function stripPortfolioParam(path: string, locale: Locale): string {
+  const bases = [...new Set([routes.portfolio[locale], routes.portfolio[defaultLocale]])];
+  for (const base of bases) {
+    if (!base) continue;
+    if (path === base) return '';
+    if (path.startsWith(`${base}/`)) return path.slice(base.length + 1);
+  }
+  return path;
+}
+export async function getStaticPaths() {
+  const paths: Array<{ params: { lang: string; portfolio: string } }> = [];
+
+  for (const lang of locales) {
+    if (lang === defaultLocale) continue;
+
+    const translatedBase = routes.portfolio[lang];
+    paths.push({ params: { lang, portfolio: translatedBase } });
+
+    const posts = await getCollection('services', ({ data }) => {
+      return data.locale === lang && (import.meta.env.PROD ? data.draft !== true : true);
+    });
+
+    const pillarRouteIds: RouteId[] = ['serviceWeb', 'serviceAutomation', 'serviceFullSystem'];
+    const fsPillarTails = new Set(['web', 'automation', 'full-system']);
+    const svcBase = routes.services[lang];
+    const enPort = routes.portfolio[defaultLocale];
+
+    for (const routeId of pillarRouteIds) {
+      const full = routes[routeId][lang];
+      const tail = full.startsWith(`${svcBase}/`) ? full.slice(svcBase.length + 1) : '';
+      if (!tail || fsPillarTails.has(tail)) continue;
+      paths.push({ params: { lang, portfolio: `${translatedBase}/${tail}` } });
+      paths.push({ params: { lang, portfolio: `${enPort}/${tail}` } });
+    }
+
+    for (const post of posts) {
+      const slug = post.id.replace(`${lang}/`, '');
+      paths.push({
+        params: { lang, portfolio: `${translatedBase}/${slug}` },
+      });
+    }
+  }
+
+  return paths;
+}
+
+const { lang, portfolio } = Astro.params;
+const locale = lang as Locale;
+const extra = stripPortfolioParam(portfolio ?? '', locale);
+
+/** Localized "services" pillar slug (e.g. automatizacion) must not become /portfolio/automatizacion (404). */
+const pillarSeg = extra ? pillarFilesystemSegmentFromServicesSlugTail(extra, locale) : null;
+if (pillarSeg) {
+  return Astro.redirect(`/${lang}/services/${pillarSeg}`, 301);
+}
+
+const portfolioOut = routes.portfolio[defaultLocale];
+const target = extra ? `/${lang}/${portfolioOut}/${extra}` : `/${lang}/${portfolioOut}`;
+
+return Astro.redirect(target, 301);
+---

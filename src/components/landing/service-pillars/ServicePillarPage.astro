@@ -1,0 +1,372 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Navbar from '@/components/landing/Navbar.astro';
+import LandingFooter from '@/components/landing/LandingFooter.astro';
+import ServiceSalesShell from '@/components/landing/ServiceSalesShell.astro';
+import WebPerformanceSmackdown from '@/components/landing/WebPerformanceSmackdown.astro';
+import AutomationCostTable from '@/components/landing/AutomationCostTable.astro';
+import RevenueLoopDiagram from '@/components/landing/RevenueLoopDiagram.astro';
+import CTA from '@/components/landing/CTA.astro';
+import Card from '@/components/ui/data-display/Card/Card.astro';
+import Button from '@/components/ui/form/Button/Button.astro';
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
+import WebPillarTechStrip from '@/components/landing/WebPillarTechStrip.astro';
+import AutomationPillarTechStrip from '@/components/landing/AutomationPillarTechStrip.astro';
+import FullSystemPillarTechStrip from '@/components/landing/FullSystemPillarTechStrip.astro';
+import SalesPrepCtaCard from '@/components/landing/SalesPrepCtaCard.astro';
+import BlogCard from '@/components/blog/BlogCard.astro';
+import { getCollection } from 'astro:content';
+import { useTranslations, getLocalizedPath, type TranslationKey } from '@/i18n/index';
+import type { Locale } from '@/i18n/config';
+import type { RouteId } from '@/i18n/routes';
+import astroWordmark from '@/assets/external_logos/astro.svg';
+import tailwindWordmark from '@/assets/external_logos/tailwind-svgrepo-com.svg';
+import decapWordmark from '@/assets/external_logos/decap-cms.svg';
+import resendWordmark from '@/assets/external_logos/resend-icon-black.svg';
+import n8nWordmark from '@/assets/external_logos/N8n-logo-new.svg';
+import claudeWordmark from '@/assets/external_logos/Claude_AI_logo.svg';
+
+export type ServicePillarId = 'web' | 'automation' | 'full-system';
+
+interface Props {
+  locale: Locale;
+  pillar: ServicePillarId;
+}
+
+const { locale, pillar } = Astro.props;
+const t = useTranslations(locale);
+
+const routeIdMap: Record<ServicePillarId, RouteId> = {
+  web: 'serviceWeb',
+  automation: 'serviceAutomation',
+  'full-system': 'serviceFullSystem',
+};
+const routeId = routeIdMap[pillar];
+
+const prefix =
+  pillar === 'web' ? 'salesWeb' : pillar === 'automation' ? 'salesAutomation' : 'salesFullSystem';
+
+const metaTitle = t(`${prefix}.metaTitle` as TranslationKey);
+const metaDescription = t(`${prefix}.metaDescription` as TranslationKey);
+
+const tagFilter = pillar === 'web' ? 'web' : pillar === 'automation' ? 'automation' : 'full-system';
+
+const allPosts = await getCollection('services', ({ data }) => {
+  return import.meta.env.PROD ? data.draft !== true : true;
+});
+
+const proofPosts = allPosts
+  .filter((post) => post.data.locale === locale && post.data.tags.includes(tagFilter))
+  .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+
+const enviloPost =
+  pillar === 'web' ? proofPosts.find((p) => p.id === `${locale}/envilo`) : undefined;
+
+const proofGridPosts =
+  pillar === 'web' && enviloPost ? proofPosts.filter((p) => p.id !== enviloPost.id) : proofPosts;
+
+const portfolioBase = getLocalizedPath('portfolio', locale);
+const postHref = (postId: string) => {
+  const slug = postId.replace(`${locale}/`, '');
+  return `${portfolioBase}/${slug}`;
+};
+
+const revenueDescId = 'revenue-loop-desc';
+
+const partnerLogoCls =
+  'h-7 w-auto max-h-8 max-w-[7rem] object-contain opacity-90 dark:brightness-0 dark:invert';
+
+const heroSecondaryHref = pillar === 'web' && enviloPost ? '#sales-web-envilo' : portfolioBase;
+const heroSecondaryLabel =
+  pillar === 'web' && enviloPost ? t('salesWeb.heroCtaFeaturedCase') : t('salesCommon.heroCtaCases');
+
+const pillarHeroTitleClass =
+  'font-display text-pretty text-[1.5rem] font-normal leading-snug tracking-[-0.02em] text-foreground sm:text-[1.6875rem] sm:leading-[1.2] md:text-[2rem] md:leading-[1.17] lg:text-[2.125rem] lg:leading-[1.14] xl:text-[2.375rem] xl:leading-[1.12]';
+---
+
+<BaseLayout title={metaTitle} description={metaDescription} lang={locale} routeId={routeId}>
+  <Navbar slot="header" locale={locale} />
+
+  <ServiceSalesShell>
+    <div slot="hero" class="border-b border-border/60">
+      <div class="mx-auto max-w-6xl px-6 pb-11 pt-[clamp(4.75rem,7vw,7.5rem)] sm:pb-12 md:pb-14 md:pt-[clamp(5.75rem,8vw,8rem)] lg:pb-16">
+        <>
+          <div class:list={[`pillar-hero pillar-hero--${pillar}`, 'w-full max-w-none text-left md:max-w-[46rem] xl:max-w-[52rem] xl:pr-6']}>
+            <h1 class={pillarHeroTitleClass}>
+              <span class="text-brand-600 dark:text-brand-400">{t(`${prefix}.heroTitleAccent` as TranslationKey)}</span>
+              {' '}<span>{t(`${prefix}.heroTitleRest` as TranslationKey)}</span>
+            </h1>
+            <p class="mt-3.5 max-w-[54ch] text-[0.9375rem] leading-relaxed text-foreground-muted md:mt-4 md:text-base md:leading-[1.56] lg:leading-[1.55]">
+              {t(`${prefix}.heroSubtitle` as TranslationKey)}
+            </p>
+            {
+              pillar !== 'web' ? (
+                <p class="mt-2 max-w-[54ch] text-[0.8125rem] leading-relaxed text-foreground-secondary sm:text-sm md:leading-snug">
+                  {t(`${prefix}.riskLine` as TranslationKey)}
+                </p>
+              ) : null
+            }
+            <div class="mt-7 flex flex-col gap-2.5 sm:mt-7 sm:flex-row sm:flex-wrap sm:gap-3.5 md:gap-4">
+              <Button size="lg" href="#cta-book" class="w-full sm:w-auto sm:min-w-[11rem]">
+                {t('salesCommon.heroCtaAudit')}
+              </Button>
+              <Button variant="outline" size="lg" href={heroSecondaryHref} class="w-full sm:w-auto sm:min-w-[11rem]">
+                {heroSecondaryLabel}
+              </Button>
+            </div>
+          </div>
+          {
+            pillar === 'web' ? (
+              <WebPillarTechStrip locale={locale} />
+            ) : pillar === 'automation' ? (
+              <AutomationPillarTechStrip locale={locale} />
+            ) : (
+              <FullSystemPillarTechStrip locale={locale} />
+            )
+          }
+        </>
+      </div>
+    </div>
+
+    <div slot="contrast">
+      {pillar === 'web' && (
+        <WebPerformanceSmackdown
+          title={t('salesWeb.smackdownTitle')}
+          legacyLabel={t('salesWeb.smackdownLegacyLabel')}
+          legacyScore={78}
+          legacyCaption={t('salesWeb.smackdownLegacyCaption')}
+          ourLabel={t('salesWeb.smackdownOurLabel')}
+          ourScore={100}
+          ourCaption={t('salesWeb.smackdownOurCaption')}
+          disclaimerLead={t('salesWeb.smackdownDisclaimerLead')}
+          lighthouseLinkLabel={t('salesWeb.smackdownLighthouseLinkLabel')}
+          disclaimerTrail={t('salesWeb.smackdownDisclaimerTrail')}
+          lighthouseHref="https://developer.chrome.com/docs/lighthouse"
+        />
+      )}
+      {pillar === 'automation' && (
+        <AutomationCostTable
+          idPrefix="sales-automation"
+          title={t('salesAutomation.tableTitle')}
+          dimensionHeader={t('salesAutomation.tableDimension')}
+          humanHeader={t('salesAutomation.tableHuman')}
+          agentHeader={t('salesAutomation.tableAgent')}
+          rows={[
+            {
+              dimension: t('salesAutomation.tableRow1Dim'),
+              human: t('salesAutomation.tableRow1Human'),
+              agent: t('salesAutomation.tableRow1Agent'),
+            },
+            {
+              dimension: t('salesAutomation.tableRow2Dim'),
+              human: t('salesAutomation.tableRow2Human'),
+              agent: t('salesAutomation.tableRow2Agent'),
+            },
+            {
+              dimension: t('salesAutomation.tableRow3Dim'),
+              human: t('salesAutomation.tableRow3Human'),
+              agent: t('salesAutomation.tableRow3Agent'),
+            },
+          ]}
+        />
+      )}
+      {pillar === 'full-system' && (
+        <RevenueLoopDiagram
+          title={t('salesFullSystem.revenueTitle')}
+          descriptionId={revenueDescId}
+          description={t('salesFullSystem.revenueIntro')}
+          steps={[t('salesFullSystem.revenueStep1'), t('salesFullSystem.revenueStep2'), t('salesFullSystem.revenueStep3')]}
+          note={t('salesFullSystem.revenueNote')}
+        />
+      )}
+    </div>
+
+    <section slot="proof" class="border-b border-border/60 bg-background py-14 md:py-18">
+      <div class="mx-auto max-w-6xl px-6">
+        <h2 class="font-display mb-8 text-2xl font-bold text-foreground md:text-3xl">
+          {pillar === 'web' ? t('salesWeb.proofTitle') : pillar === 'automation' ? t('salesAutomation.proofTitle') : t('salesFullSystem.proofTitle')}
+        </h2>
+        {pillar === 'web' && proofPosts.length > 0 && (
+          <p class="mb-8 max-w-2xl text-sm leading-relaxed text-foreground-muted md:text-base">
+            {t('salesWeb.proofMicrocopy')}
+          </p>
+        )}
+        {
+          pillar === 'web' && enviloPost && (
+            <article
+              id="sales-web-envilo"
+              class="mb-10 overflow-hidden rounded-2xl border border-brand-500/35 bg-gradient-to-br from-background to-brand-500/5 p-6 shadow-lg shadow-brand-500/10 ring-1 ring-brand-500/20 md:p-8"
+            >
+              <div class="flex flex-col gap-8 md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,260px)] md:items-center md:gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
+                <div class="min-w-0">
+                  <p class="text-[11px] font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400">
+                    {t('salesWeb.enviloFeaturedEyebrow')}
+                  </p>
+                  <h3 class="font-display mt-2 text-2xl font-bold text-foreground md:text-3xl">{enviloPost.data.title}</h3>
+                  <p class="mt-3 max-w-xl text-sm leading-relaxed text-foreground-muted md:text-base">{enviloPost.data.description}</p>
+                  <a
+                    href={postHref(enviloPost.id)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-brand-600 underline-offset-4 hover:underline dark:text-brand-400"
+                  >
+                    <span>{t('salesWeb.enviloFeaturedLink')}</span>
+                    <Icon name="arrow-up-right" size="sm" class="opacity-90" />
+                  </a>
+                </div>
+                {
+                  enviloPost.data.image && (
+                    <a
+                      href={postHref(enviloPost.id)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="relative block shrink-0 overflow-hidden rounded-xl border border-border ring-2 ring-brand-500/20 transition-transform hover:scale-[1.02]"
+                    >
+                      <Image
+                        src={enviloPost.data.image}
+                        alt={enviloPost.data.imageAlt ?? enviloPost.data.title}
+                        widths={[280, 400, 640]}
+                        sizes="(max-width: 768px) 100vw, 320px"
+                        class="aspect-video w-full object-cover"
+                        loading="lazy"
+                      />
+                    </a>
+                  )
+                }
+              </div>
+            </article>
+          )
+        }
+        {(pillar === 'web' ? proofGridPosts : proofPosts).length > 0 ? (
+          <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {(pillar === 'web' ? proofGridPosts : proofPosts).map((post) => (
+              <BlogCard
+                title={post.data.title}
+                description={post.data.description}
+                href={postHref(post.id)}
+                tags={post.data.tags}
+                image={post.data.image}
+                featured={post.data.featured}
+              />
+            ))}
+          </div>
+        ) : pillar === 'web' && enviloPost ? null : (
+          <p class="text-foreground-muted">{pillar === 'web' ? t('salesWeb.proofEmpty') : pillar === 'automation' ? t('salesAutomation.proofEmpty') : t('salesFullSystem.proofEmpty')}</p>
+        )}
+      </div>
+    </section>
+
+    <section slot="mechanism" class="bg-background-secondary py-14 md:py-18">
+      <div class="mx-auto max-w-6xl px-6">
+        <h2 class="font-display mb-8 text-2xl font-bold text-foreground md:text-3xl">
+          {pillar === 'web' ? t('salesWeb.mechanismTitle') : pillar === 'automation' ? t('salesAutomation.mechanismTitle') : t('salesFullSystem.mechanismTitle')}
+        </h2>
+        <div class="grid gap-6 md:grid-cols-3">
+          <Card variant="elevated" padding="lg">
+            {
+              pillar === 'web' ? (
+                <div class="mb-4 flex flex-wrap items-center gap-5">
+                  <img src={astroWordmark.src} alt="" class={partnerLogoCls} loading="lazy" decoding="async" />
+                  <img src={tailwindWordmark.src} alt="" class={partnerLogoCls} loading="lazy" decoding="async" />
+                </div>
+              ) : pillar === 'automation' ? (
+                <div class="mb-4 flex flex-wrap items-center gap-5">
+                  <img src={n8nWordmark.src} alt="" class={partnerLogoCls} loading="lazy" decoding="async" />
+                </div>
+              ) : (
+                <div class="mb-4 flex flex-wrap items-center gap-5">
+                  <img src={astroWordmark.src} alt="" class={partnerLogoCls} loading="lazy" decoding="async" />
+                  <img src={tailwindWordmark.src} alt="" class={partnerLogoCls} loading="lazy" decoding="async" />
+                </div>
+              )
+            }
+            <h3 class="mb-2 font-display text-lg font-semibold text-foreground">
+              {pillar === 'web'
+                ? t('salesWeb.mechanismCard1Title')
+                : pillar === 'automation'
+                  ? t('salesAutomation.mechanismCard1Title')
+                  : t('salesFullSystem.mechanismCard1Title')}
+            </h3>
+            <p class="text-sm leading-relaxed text-foreground-muted">
+              {pillar === 'web'
+                ? t('salesWeb.mechanismCard1Body')
+                : pillar === 'automation'
+                  ? t('salesAutomation.mechanismCard1Body')
+                  : t('salesFullSystem.mechanismCard1Body')}
+            </p>
+          </Card>
+          <Card variant="elevated" padding="lg">
+            {
+              pillar === 'web' ? (
+                <div class="mb-4 flex flex-wrap items-center gap-5">
+                  <img src={decapWordmark.src} alt="" class={partnerLogoCls} loading="lazy" decoding="async" />
+                </div>
+              ) : pillar === 'full-system' ? (
+                <div class="mb-4 flex flex-wrap items-center gap-5">
+                  <img src={n8nWordmark.src} alt="" class={partnerLogoCls} loading="lazy" decoding="async" />
+                </div>
+              ) : null
+            }
+            <h3 class="mb-2 font-display text-lg font-semibold text-foreground">
+              {pillar === 'web'
+                ? t('salesWeb.mechanismCard2Title')
+                : pillar === 'automation'
+                  ? t('salesAutomation.mechanismCard2Title')
+                  : t('salesFullSystem.mechanismCard2Title')}
+            </h3>
+            <p class="text-sm leading-relaxed text-foreground-muted">
+              {pillar === 'web'
+                ? t('salesWeb.mechanismCard2Body')
+                : pillar === 'automation'
+                  ? t('salesAutomation.mechanismCard2Body')
+                  : t('salesFullSystem.mechanismCard2Body')}
+            </p>
+          </Card>
+          <Card variant="elevated" padding="lg">
+            {
+              pillar === 'web' ? (
+                <div class="mb-4 flex flex-wrap items-center gap-5">
+                  <img src={resendWordmark.src} alt="" class={partnerLogoCls} loading="lazy" decoding="async" />
+                </div>
+              ) : pillar === 'automation' || pillar === 'full-system' ? (
+                <div class="mb-4 flex flex-wrap items-center gap-5">
+                  <img src={claudeWordmark.src} alt="" class={partnerLogoCls} loading="lazy" decoding="async" />
+                </div>
+              ) : null
+            }
+            <h3 class="mb-2 font-display text-lg font-semibold text-foreground">
+              {pillar === 'web'
+                ? t('salesWeb.mechanismCard3Title')
+                : pillar === 'automation'
+                  ? t('salesAutomation.mechanismCard3Title')
+                  : t('salesFullSystem.mechanismCard3Title')}
+            </h3>
+            <p class="text-sm leading-relaxed text-foreground-muted">
+              {pillar === 'web'
+                ? t('salesWeb.mechanismCard3Body')
+                : pillar === 'automation'
+                  ? t('salesAutomation.mechanismCard3Body')
+                  : t('salesFullSystem.mechanismCard3Body')}
+            </p>
+          </Card>
+        </div>
+      </div>
+    </section>
+  </ServiceSalesShell>
+
+  <SalesPrepCtaCard locale={locale} pillar={pillar} />
+
+  <CTA locale={locale} variant="invert" size="lg" id="cta-book">
+    <h2
+      slot="heading"
+      class="font-display text-3xl font-bold text-balance md:text-4xl lg:text-5xl"
+      set:html={pillar === 'web' ? t('salesWeb.closeTitle') : pillar === 'automation' ? t('salesAutomation.closeTitle') : t('salesFullSystem.closeTitle')}
+    />
+    <p slot="description">
+      {pillar === 'web' ? t('salesWeb.closeDescription') : pillar === 'automation' ? t('salesAutomation.closeDescription') : t('salesFullSystem.closeDescription')}
+    </p>
+  </CTA>
+
+  <LandingFooter slot="footer" />
+</BaseLayout>

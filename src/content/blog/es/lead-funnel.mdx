@@ -1,0 +1,16 @@
+---
+title: "Embudo de leads con Notion CRM y Resend"
+description: "Cómo los formularios pasan por rutas API hacia deduplicación en Notion y email transaccional."
+publishedAt: 2026-06-01
+author: "Stack Team"
+tags: ["integraciones", "notion", "resend"]
+featured: true
+locale: es
+draft: false
+---
+
+# Captura de leads en servidor
+
+La ruta `/api/leads` valida envíos, deduplica opcionalmente contra Notion, escribe en la base de leads y notifica por Resend.
+
+Las integraciones son opcionales: sin variables de entorno, cada capa se desactiva sin romper el sitio.

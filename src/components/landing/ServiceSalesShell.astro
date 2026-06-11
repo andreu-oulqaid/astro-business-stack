@@ -1,0 +1,35 @@
+---
+/**
+ * Shared “sales anatomy” wrapper: engineering grid + stacked section slots.
+ */
+---
+
+<div class="service-sales-shell relative overflow-hidden border-b border-border bg-background dark:border-border-invert">
+  <div class="service-sales-shell__grid" aria-hidden="true"></div>
+  <div class="relative z-10">
+    <slot name="hero" />
+    <slot name="contrast" />
+    <slot name="proof" />
+    <slot name="mechanism" />
+  </div>
+</div>
+
+<style>
+  .service-sales-shell__grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: radial-gradient(ellipse 85% 70% at 50% 38%, black 18%, transparent 72%);
+    -webkit-mask-image: radial-gradient(ellipse 85% 70% at 50% 38%, black 18%, transparent 72%);
+  }
+
+  :global(.dark) .service-sales-shell__grid {
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  }
+</style>

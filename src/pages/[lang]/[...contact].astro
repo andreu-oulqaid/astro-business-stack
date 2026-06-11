@@ -1,0 +1,52 @@
+---
+import LandingLayout from '@/layouts/LandingLayout.astro';
+import { locales, isValidLocale, defaultLocale, type Locale } from '@/i18n/config';
+import { useTranslations } from '@/i18n/index';
+import { routes } from '@/i18n/routes';
+
+export function getStaticPaths() {
+  return locales
+    .filter((lang) => lang !== defaultLocale)
+    .map((lang) => ({
+      params: {
+        lang,
+        contact: routes.contact[lang],
+      },
+    }));
+}
+
+const { lang } = Astro.params;
+
+if (!lang || !isValidLocale(lang)) {
+  return Astro.redirect('/');
+}
+
+const locale = lang as Locale;
+const t = useTranslations(locale);
+---
+
+<LandingLayout
+  title={t('contact.title') || 'Contact'}
+  description={t('contact.description') || 'Add your description here'}
+  lang={locale}
+  routeId="contact"
+>
+  <!-- Hero Section -->
+  <section class="py-20 bg-secondary">
+    <div class="container">
+      <h1 class="text-4xl font-bold text-foreground">
+        {t('contact.title') || 'Contact'}
+      </h1>
+      <p class="mt-4 text-foreground-muted max-w-2xl">
+        {t('contact.description') || 'Add your content here.'}
+      </p>
+    </div>
+  </section>
+
+  <!-- Content Section -->
+  <section class="py-16">
+    <div class="container">
+      <!-- Your content -->
+    </div>
+  </section>
+</LandingLayout>

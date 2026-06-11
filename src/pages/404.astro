@@ -1,0 +1,161 @@
+---
+import LandingLayout from '@/layouts/LandingLayout.astro';
+import Button from '@/components/ui/form/Button/Button.astro';
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
+import { getLocaleFromPath } from '@/i18n/config';
+import { getLocalizedPath } from '@/i18n/index';
+
+const locale = getLocaleFromPath(Astro.url.pathname);
+const homePath = getLocalizedPath('home', locale);
+const servicesPath = getLocalizedPath('services', locale);
+const contactPath = getLocalizedPath('contact', locale);
+const privacyPath = getLocalizedPath('privacy', locale);
+
+const copy = {
+  en: {
+    title: 'Page not found',
+    description: 'The page you are looking for may have moved, or the link may be outdated.',
+    heading: "Looks like you've drifted off course",
+    home: 'Back to Home',
+    services: 'Browse Services',
+    quickLinks: 'Helpful links:',
+    contact: 'Contact',
+    privacy: 'Privacy',
+  },
+  es: {
+    title: 'Página no encontrada',
+    description: 'La página que buscas puede haberse movido o el enlace puede estar desactualizado.',
+    heading: 'Parece que el enlace se ha desviado',
+    home: 'Volver al inicio',
+    services: 'Ver servicios',
+    quickLinks: 'Enlaces útiles:',
+    contact: 'Contacto',
+    privacy: 'Privacidad',
+  },
+  ca: {
+    title: 'Pàgina no trobada',
+    description: 'La pàgina que busques pot haver-se mogut o l’enllaç pot estar desactualitzat.',
+    heading: 'Sembla que l’enllaç s’ha desviat',
+    home: 'Tornar a l’inici',
+    services: 'Veure serveis',
+    quickLinks: 'Enllaços útils:',
+    contact: 'Contacte',
+    privacy: 'Privacitat',
+  },
+  pl: {
+    title: 'Nie znaleziono strony',
+    description: 'Strona mogła zostać przeniesiona albo link jest nieaktualny.',
+    heading: 'Wygląda na to, że link zboczył z kursu',
+    home: 'Wróć na stronę główną',
+    services: 'Zobacz usługi',
+    quickLinks: 'Pomocne linki:',
+    contact: 'Kontakt',
+    privacy: 'Prywatność',
+  },
+} as const;
+
+const page = copy[locale];
+---
+
+<LandingLayout
+  title={page.title}
+  description={page.description}
+  lang={locale}
+  noindex
+  nofollow
+>
+  <section class="relative min-h-[calc(100vh-8rem)] flex items-center justify-center overflow-hidden pt-16">
+    <!-- Background Effects -->
+    <div class="absolute inset-0 bg-grid-pattern mask-[radial-gradient(ellipse_at_center,white_20%,transparent_70%)] pointer-events-none opacity-40"></div>
+    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brand-500/15 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-brand-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+    <div class="relative container px-6">
+      <div class="max-w-2xl mx-auto text-center">
+        <!-- Animated 404 -->
+        <div class="relative mb-8">
+          <div class="error-code font-display text-[10rem] md:text-[14rem] lg:text-[18rem] font-bold leading-none tracking-tighter select-none">
+            <span class="inline-block error-digit" style="animation-delay: 0s;">4</span>
+            <span class="inline-block error-digit text-transparent bg-clip-text bg-linear-to-br from-brand-400 via-brand-500 to-brand-600" style="animation-delay: 0.1s;">0</span>
+            <span class="inline-block error-digit" style="animation-delay: 0.2s;">4</span>
+          </div>
+          <!-- Glow effect behind the 0 -->
+          <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div class="w-32 h-32 md:w-48 md:h-48 bg-brand-500/20 rounded-full blur-[60px] animate-pulse"></div>
+          </div>
+        </div>
+
+        <!-- Copy -->
+        <h1 class="font-display text-2xl md:text-3xl font-bold text-foreground mb-4">
+          {page.heading}
+        </h1>
+
+        <p class="text-lg text-foreground-muted max-w-md mx-auto mb-10">
+          {page.description}
+        </p>
+
+        <!-- CTAs -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+          <Button href={homePath} size="lg">
+            <Icon name="arrow-left" size="sm" />
+            {page.home}
+          </Button>
+          <Button href={servicesPath} variant="outline" size="lg">
+            {page.services}
+          </Button>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border">
+          <span class="text-sm text-foreground-muted">{page.quickLinks}</span>
+          <a
+            href={contactPath}
+            class="text-sm font-medium text-foreground hover:text-brand-500 transition-colors"
+          >
+            {page.contact}
+          </a>
+          <span class="text-foreground-subtle">|</span>
+          <a
+            href={privacyPath}
+            class="text-sm font-medium text-foreground hover:text-brand-500 transition-colors"
+          >
+            {page.privacy}
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</LandingLayout>
+
+<style>
+  .error-code {
+    color: var(--foreground);
+    opacity: 0.15;
+  }
+
+  .error-digit {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .error-digit:nth-child(2) {
+    opacity: 1;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  /* Dark mode adjustments */
+  :global(.dark) .error-code {
+    opacity: 0.1;
+  }
+
+  :global(.dark) .error-digit:nth-child(2) {
+    opacity: 1;
+  }
+</style>

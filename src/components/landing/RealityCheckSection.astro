@@ -1,0 +1,329 @@
+---
+import type { Locale } from '@/i18n/config';
+import { useTranslations } from '@/i18n';
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+const labels = {
+  en: {
+    title: 'Ignoring these <span class="text-error">problems</span> costs you money.',
+    speedTax: 'Outdated Website Cost',
+    silenceTax: 'Non-Automation Penalty',
+    humanTax: 'Without AI',
+    webGroup: 'No / Obsolete Website',
+    speedBody: '<strong>53%</strong> of users leave after <strong>3s of loading</strong>.',
+    webInvisible: 'No website means your business is <strong>invisible</strong> when buyers compare options.',
+    noWebsite: 'No website',
+    badWebsite: 'Bad website',
+    zeroClients: '0 clients',
+    lostAfter3s: '>50% lost after 3s',
+    silenceBody: 'Lead qualification odds drop by <strong>400%</strong> after <strong>5 minutes</strong> of silence.',
+    humanBody: 'Teams lose <strong>20%</strong> of the week on repetitive manual tasks.',
+    leadDecay: 'Lead Decay',
+    responseWindow: 'Response window',
+    wastingTitle: 'You are wasting talent and money.',
+    timeWastedWeek: 'Time wasted / week',
+  },
+  es: {
+    title: 'Ignorar estos <span class="text-error">problemas</span> te cuesta dinero.',
+    speedTax: 'Coste de una web obsoleta',
+    silenceTax: 'Penalización por no automatizar',
+    humanTax: 'Sin IA',
+    webGroup: 'Sin web / web obsoleta',
+    speedBody: 'El <strong>53%</strong> de usuarios se va tras <strong>3s de carga</strong>.',
+    webInvisible: 'Sin web, tu negocio es <strong>invisible</strong> cuando el cliente compara opciones.',
+    noWebsite: 'Sin web',
+    badWebsite: 'Web obsoleta',
+    zeroClients: '0 clientes',
+    lostAfter3s: '>50% perdidos tras 3s',
+    silenceBody: 'La probabilidad de cualificar un lead cae un <strong>400%</strong> tras <strong>5 minutos</strong> de silencio.',
+    humanBody: 'Los equipos pierden un <strong>20%</strong> de la semana en tareas manuales repetitivas.',
+    leadDecay: 'Caída de leads',
+    responseWindow: 'Ventana de respuesta',
+    wastingTitle: 'Estás desperdiciando talento y dinero.',
+    timeWastedWeek: 'Tiempo perdido / semana',
+  },
+  ca: {
+    title: 'Ignorar aquests <span class="text-error">problemes</span> et costa diners.',
+    speedTax: "Cost d'un web obsolet",
+    silenceTax: 'Penalització per no automatitzar',
+    humanTax: 'Sense IA',
+    webGroup: 'Sense web / web obsoleta',
+    speedBody: 'El <strong>53%</strong> dels usuaris marxa després de <strong>3s de càrrega</strong>.',
+    webInvisible: 'Sense web, el teu negoci és <strong>invisible</strong> quan el client compara opcions.',
+    noWebsite: 'Sense web',
+    badWebsite: 'Web obsoleta',
+    zeroClients: '0 clients',
+    lostAfter3s: '>50% perduts després de 3s',
+    silenceBody: 'La probabilitat de qualificar un lead cau un <strong>400%</strong> després de <strong>5 minuts</strong> de silenci.',
+    humanBody: 'Els equips perden un <strong>20%</strong> de la setmana en tasques manuals repetitives.',
+    leadDecay: 'Caiguda de leads',
+    responseWindow: 'Finestra de resposta',
+    wastingTitle: 'Estàs malbaratant talent i diners.',
+    timeWastedWeek: 'Temps perdut / setmana',
+  },
+  pl: {
+    title: 'Ignorowanie tych <span class="text-error">problemow</span> kosztuje pieniadze.',
+    speedTax: 'Koszt przestarzalej strony',
+    silenceTax: 'Kara za brak automatyzacji',
+    humanTax: 'Bez AI',
+    webGroup: 'Brak strony / slaba strona',
+    speedBody: '<strong>53%</strong> uzytkownikow odchodzi po <strong>3s ladowania</strong>.',
+    webInvisible: 'Bez strony Twoja firma jest <strong>niewidoczna</strong>, gdy klient porownuje opcje.',
+    noWebsite: 'Brak strony',
+    badWebsite: 'Slaba strona',
+    zeroClients: '0 klientow',
+    lostAfter3s: '>50% utraty po 3s',
+    silenceBody: 'Szansa na kwalifikacje leada spada o <strong>400%</strong> po <strong>5 minutach</strong> ciszy.',
+    humanBody: 'Zespoly traca <strong>20%</strong> tygodnia na powtarzalne zadania manualne.',
+    leadDecay: 'Spadek leadow',
+    responseWindow: 'Okno odpowiedzi',
+    wastingTitle: 'Marnujesz talent i pieniadze.',
+    timeWastedWeek: 'Strata czasu / tydzien',
+  },
+} as const;
+
+const copy = labels[locale];
+---
+
+<section id="reality-check" class="border-y border-border bg-background" aria-labelledby="reality-check-heading" data-reality-check>
+  <div class="mx-auto max-w-6xl px-6 py-[var(--space-section-lg)]">
+    <h2
+      id="reality-check-heading"
+      class="font-display max-w-4xl text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl"
+    >
+      <span set:html={copy.title} />
+    </h2>
+    <div class="mt-10 grid grid-cols-1 gap-4">
+      <article class="audit-card flex h-full flex-col rounded-2xl border border-border bg-background-secondary p-6">
+        <div class="mb-5 flex items-center justify-between gap-4">
+          <p class="audit-tax-label">{copy.speedTax}</p>
+          <span class="rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground-muted">{copy.webGroup}</span>
+        </div>
+        <div class="grid gap-3 md:grid-cols-2" data-web-graphs>
+          <div class="rounded-xl border border-border bg-background p-4">
+            <div class="mb-2 flex items-center justify-between text-xs text-foreground-muted">
+              <h3 class="font-display text-xl font-semibold tracking-tight text-foreground">{copy.noWebsite}</h3>
+              <span class="font-semibold text-error">{copy.zeroClients}</span>
+            </div>
+            <p class="mb-3 text-sm leading-relaxed text-foreground-muted" set:html={copy.webInvisible} />
+            <svg viewBox="0 0 220 78" class="h-20 w-full" aria-hidden="true">
+              <path d="M10 10 L10 70 L210 70" fill="none" stroke="var(--border)" stroke-width="1.5" />
+              <path d="M16 69 L206 69" fill="none" stroke="var(--error)" stroke-width="2.5" class="flat-line" />
+            </svg>
+          </div>
+          <div class="rounded-xl border border-border bg-background p-4" data-risk-card>
+            <div class="mb-2 flex items-center justify-between text-xs text-foreground-muted">
+              <h3 class="font-display text-xl font-semibold tracking-tight text-foreground">{copy.badWebsite}</h3>
+              <span class="font-semibold text-error">{copy.lostAfter3s}</span>
+            </div>
+            <p class="mb-3 text-sm leading-relaxed text-foreground-muted" set:html={copy.speedBody} />
+            <svg viewBox="0 0 220 88" class="h-24 w-full" aria-hidden="true">
+              <path d="M10 10 L10 78 L210 78" fill="none" stroke="var(--border)" stroke-width="1.5" />
+              <path d="M16 16 L62 20 L88 28 L102 58 L132 66 L168 72 L206 76" fill="none" stroke="var(--error)" stroke-width="2.8" stroke-linecap="round" class="drop-line" />
+              <line x1="102" y1="12" x2="102" y2="76" stroke="var(--error)" stroke-width="1.8" stroke-dasharray="4 4" />
+              <text x="108" y="22" fill="var(--error)" font-size="12" font-weight="700">3s</text>
+            </svg>
+          </div>
+        </div>
+      </article>
+
+      <article class="audit-card flex h-full flex-col rounded-2xl border border-border bg-background-secondary p-6">
+        <div class="mb-5 flex items-center justify-between gap-4">
+          <p class="audit-tax-label">{copy.silenceTax}</p>
+          <span class="rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground-muted">{copy.humanTax}</span>
+        </div>
+        <div class="grid gap-3 md:grid-cols-2">
+          <div class="rounded-xl border border-border bg-background p-4">
+            <h3 class="font-display text-xl font-semibold tracking-tight text-foreground">{copy.leadDecay}</h3>
+            <p class="mt-2 text-sm leading-relaxed text-foreground-muted" set:html={copy.silenceBody} />
+            <div class="mt-5 rounded-lg border border-border bg-background-secondary p-3" data-risk-graph>
+              <div class="mb-3 flex items-center justify-between text-xs text-foreground-muted">
+                <span>{copy.responseWindow}</span>
+                <span class="font-semibold transition-colors duration-200 text-success" data-risk-counter>00:00:00</span>
+              </div>
+              <div class="relative h-12 overflow-hidden rounded-md border border-border bg-background p-2">
+                <div class="h-full w-full rounded-sm bg-[linear-gradient(to_right,var(--success),var(--warning),var(--error))] opacity-20" />
+                <div class="pointer-events-none absolute inset-y-2 left-2 w-0 rounded-sm bg-[linear-gradient(to_right,var(--success),var(--warning),var(--error))] opacity-55 transition-[width] duration-[1150ms] ease-out" data-risk-fill />
+              </div>
+            </div>
+          </div>
+
+          <div class="rounded-xl border border-border bg-background p-4">
+            <h3 class="font-display text-xl font-semibold tracking-tight text-foreground">{copy.wastingTitle}</h3>
+            <p class="mt-2 text-sm leading-relaxed text-foreground-muted" set:html={copy.humanBody} />
+            <div class="mt-4 flex items-center justify-between gap-4">
+              <div class="min-w-0">
+                <p class="text-xs uppercase tracking-[0.12em] text-foreground-muted">{copy.timeWastedWeek}</p>
+              </div>
+              <div class="flex items-center gap-4">
+                <div class="h-16 w-16 rounded-full border border-border bg-[conic-gradient(var(--warning)_72deg,var(--muted)_72deg)]" />
+                <p class="font-display text-4xl font-semibold tracking-tight text-foreground">20%</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <div class="mt-9 text-center">
+      <a
+        href="#cta"
+        class="inline-flex items-center justify-center gap-2 text-base md:text-lg italic font-medium text-foreground-muted hover:text-foreground transition-colors"
+      >
+        <Icon name="star" size="sm" class="text-brand-500" />
+        “<span set:html={t('realityCheck.cta')} />”
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .audit-tax-label {
+    display: inline-flex;
+    align-items: center;
+    max-width: min(72%, 28rem);
+    border-radius: 9999px;
+    border: 1px solid var(--border);
+    padding: 0.38rem 0.85rem;
+    font-family: var(--font-display, inherit);
+    font-size: clamp(0.85rem, 0.8rem + 0.25vw, 1.05rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: 0.01em;
+    color: var(--foreground);
+    background: color-mix(in oklab, var(--background) 86%, var(--foreground) 14%);
+    box-shadow: 0 1px 0 color-mix(in oklab, var(--foreground) 10%, transparent);
+  }
+
+  .audit-tax-label {
+    border-color: color-mix(in oklab, var(--error) 30%, var(--border));
+    background: color-mix(in oklab, var(--error) 14%, var(--background));
+  }
+
+  @media (max-width: 640px) {
+    .audit-tax-label {
+      max-width: 100%;
+      font-size: 0.88rem;
+    }
+  }
+
+  .flat-line {
+    stroke-dasharray: 220;
+    stroke-dashoffset: 220;
+    animation: reveal-line 900ms ease forwards;
+    animation-play-state: paused;
+  }
+
+  .drop-line {
+    stroke-dasharray: 260;
+    stroke-dashoffset: 260;
+    animation: reveal-line 1100ms ease forwards;
+    animation-play-state: paused;
+  }
+
+  [data-reality-check].is-lines-visible .flat-line,
+  [data-reality-check].is-lines-visible .drop-line {
+    animation-play-state: running;
+  }
+
+  @keyframes reveal-line {
+    0% {
+      stroke-dashoffset: 260;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .flat-line,
+    .drop-line {
+      animation: none;
+      stroke-dashoffset: 0;
+    }
+  }
+</style>
+
+<script>
+  const section = document.querySelector('[data-reality-check]');
+  if (!section) {
+    // no-op
+  } else {
+    const webGraphs = section.querySelector('[data-web-graphs]');
+    const riskCard = section.querySelector('[data-risk-card]');
+    const riskGraph = section.querySelector('[data-risk-graph]');
+    const counter = section.querySelector('[data-risk-counter]');
+    const fill = section.querySelector('[data-risk-fill]');
+    let hasPlayed = false;
+
+    const renderCounter = (minutes) => {
+      if (!counter) return;
+      counter.textContent = `00:0${minutes}:00`;
+      counter.classList.remove('text-success', 'text-warning', 'text-error');
+      if (minutes <= 1) counter.classList.add('text-success');
+      else if (minutes <= 3) counter.classList.add('text-warning');
+      else counter.classList.add('text-error');
+    };
+
+    const startAnimation = () => {
+      if (hasPlayed) return;
+      hasPlayed = true;
+      if (fill) fill.style.width = 'calc(100% - 1rem)';
+
+      const durationMs = 1100;
+      const maxMinutes = 5;
+      const start = performance.now();
+      const loop = (now) => {
+        const progress = Math.min((now - start) / durationMs, 1);
+        const value = Math.round(progress * maxMinutes);
+        renderCounter(value);
+        if (progress < 1) requestAnimationFrame(loop);
+      };
+      requestAnimationFrame(loop);
+    };
+
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) {
+      section.classList.add('is-lines-visible');
+      renderCounter(5);
+      if (fill) fill.style.width = 'calc(100% - 1rem)';
+    } else {
+      if (webGraphs) {
+        const linesObserver = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                section.classList.add('is-lines-visible');
+                linesObserver.disconnect();
+              }
+            });
+          },
+          { threshold: 0.55 }
+        );
+        linesObserver.observe(webGraphs);
+      }
+
+      if (riskGraph || riskCard) {
+        const riskObserver = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                startAnimation();
+                riskObserver.disconnect();
+              }
+            });
+          },
+          { threshold: 0.7, rootMargin: '0px 0px -10% 0px' }
+        );
+        riskObserver.observe(riskGraph || riskCard);
+      }
+    }
+  }
+</script>

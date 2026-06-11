@@ -1,0 +1,46 @@
+---
+import type { Locale } from '@/i18n/config';
+import { useTranslations } from '@/i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+const cards = [
+  {
+    title: t('servicesSection.cards.websites.title'),
+    description: t('servicesSection.cards.websites.description'),
+  },
+  {
+    title: t('servicesSection.cards.funnels.title'),
+    description: t('servicesSection.cards.funnels.description'),
+  },
+  {
+    title: t('servicesSection.cards.optimization.title'),
+    description: t('servicesSection.cards.optimization.description'),
+  },
+];
+---
+
+<section id="services" class="py-[var(--space-section-lg)] bg-background">
+  <div class="mx-auto max-w-6xl px-6">
+    <h2 class="font-display text-3xl md:text-4xl font-bold tracking-tight text-foreground mb-4">
+      {t('servicesSection.title')}
+    </h2>
+    <p class="text-foreground-muted text-base md:text-lg max-w-3xl mb-8">
+      {t('servicesSection.description')}
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {cards.map((card) => (
+        <article class="rounded-xl border border-border bg-background-secondary p-6">
+          <h3 class="font-display text-xl font-semibold text-foreground mb-3">{card.title}</h3>
+          <p class="text-sm md:text-base text-foreground-muted leading-relaxed">{card.description}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

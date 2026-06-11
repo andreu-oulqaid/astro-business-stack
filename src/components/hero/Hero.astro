@@ -1,0 +1,347 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+import { cn } from '@/lib/cn';
+import logomark from '@/assets/branding/logomark.svg';
+import logomarkDark from '@/assets/branding/logomark-dark.svg';
+import heroRevealBg from '@/assets/marketing/hero-reveal-bg.png';
+
+interface Props extends HTMLAttributes<'section'> {
+  /** Layout mode: centered single column or split two-column */
+  layout?: 'centered' | 'split';
+  /** Vertical padding size */
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  /** Show background grid pattern */
+  showGrid?: boolean;
+  /** Soft radial layers (theme tokens only) for depth without the grid */
+  ambientLayers?: boolean;
+  /** Show decorative gradient blob */
+  showBlob?: boolean;
+  /** Blob position (only applies when showBlob is true) */
+  blobPosition?: 'left' | 'right' | 'center';
+  /** Show Iluro logomark ornament on the right side */
+  showLogomark?: boolean;
+  /** Mouse-follow spotlight reveal on hero background (desktop); touch/reduced-motion use static low-opacity */
+  interactiveSpotlight?: boolean;
+}
+
+const {
+  layout = 'centered',
+  size = 'lg',
+  showGrid = false,
+  ambientLayers = false,
+  showBlob = false,
+  blobPosition = 'right',
+  showLogomark = false,
+  interactiveSpotlight = false,
+  class: className,
+  ...attrs
+} = Astro.props;
+
+// Check which slots are provided
+const hasBadgeSlot = Astro.slots.has('badge');
+const hasTitleSlot = Astro.slots.has('title');
+const hasDescriptionSlot = Astro.slots.has('description');
+const hasActionsSlot = Astro.slots.has('actions');
+const hasAsideSlot = Astro.slots.has('aside');
+
+// Size (padding) variants - asymmetric: more top padding for header clearance
+const sizes: Record<NonNullable<Props['size']>, string> = {
+  sm: 'pt-[var(--space-page-top-sm)] pb-[var(--space-section-sm)]',
+  md: 'pt-[var(--space-page-top)] pb-[var(--space-section-md)]',
+  lg: 'pt-[calc(var(--space-page-top)+var(--space-8))] pb-[var(--space-section-lg)]',
+  xl: 'pt-[calc(var(--space-page-top)+var(--space-16))] pb-[var(--space-section-xl)]',
+};
+
+// Blob position variants
+const blobPositions: Record<NonNullable<Props['blobPosition']>, string> = {
+  left: '-left-20 -top-20',
+  right: '-right-20 -top-20',
+  center: 'left-1/2 -translate-x-1/2 -top-20',
+};
+
+// Compute alignment based on layout
+const alignment = layout === 'centered' ? 'text-center items-center' : 'text-left items-start';
+
+// Compute classes
+const sectionClasses = cn(
+  'relative overflow-hidden bg-background',
+  sizes[size],
+  className
+);
+
+const contentClasses = cn(
+  'z-10 flex flex-col',
+  alignment
+);
+
+const gridClasses = cn(
+  'relative z-10 mx-auto grid max-w-6xl grid-cols-1 items-center gap-[var(--space-section-gap)] px-6',
+  layout === 'split' && 'lg:grid-cols-2 lg:gap-[var(--space-section-gap)]'
+);
+---
+
+<section
+  class={cn(sectionClasses, interactiveSpotlight && 'hero-spotlight-root')}
+  id={interactiveSpotlight ? 'hero-spotlight' : attrs.id}
+  data-interactive-spotlight={interactiveSpotlight ? 'true' : undefined}
+  {...attrs}
+>
+  {/* Background grid pattern */}
+  {showGrid && (
+    <div
+      class="bg-grid-pattern pointer-events-none absolute inset-0 [mask-image:linear-gradient(to_bottom,white,transparent)] opacity-40"
+      aria-hidden="true"
+    />
+  )}
+
+  {interactiveSpotlight && (
+    <div
+      class="hero-spotlight-base bg-grid-pattern pointer-events-none absolute inset-0 z-[1] [mask-image:linear-gradient(to_bottom,white,transparent)] opacity-[0.08] dark:opacity-[0.12]"
+      aria-hidden="true"
+    />
+  )}
+
+  {ambientLayers && (
+    <div class="pointer-events-none absolute inset-0 z-[2] overflow-hidden" aria-hidden="true">
+      <div
+        class="absolute left-1/2 top-0 h-[min(36rem,120vw)] w-[min(44rem,95vw)] -translate-x-1/2 rounded-[100%] bg-[radial-gradient(closest-side,color-mix(in_oklab,var(--brand-500)_20%,transparent),transparent_75%)] opacity-90 dark:opacity-100"
+      />
+      <div
+        class="absolute -bottom-8 right-[-5%] h-72 w-72 rounded-full bg-[radial-gradient(closest-side,color-mix(in_oklab,var(--foreground)_6%,transparent),transparent)] blur-2xl dark:bg-[radial-gradient(closest-side,color-mix(in_oklab,var(--foreground)_10%,transparent),transparent)]"
+      />
+      <div class="absolute left-[-8%] top-1/3 h-56 w-56 rounded-full bg-brand-500/[0.06] blur-3xl dark:bg-brand-400/[0.08]" />
+    </div>
+  )}
+
+  {interactiveSpotlight && (
+    <div
+      class="hero-spotlight-reveal pointer-events-none absolute inset-0 z-[3] bg-cover bg-center bg-no-repeat opacity-[0.42] dark:opacity-[0.38]"
+      style={{ backgroundImage: `url(${heroRevealBg.src})` }}
+      aria-hidden="true"
+    />
+  )}
+
+  {showLogomark && (
+    <div class="pointer-events-none absolute inset-y-0 right-[-32%] z-[4] hidden w-[82vw] overflow-hidden opacity-[0.08] md:block lg:right-[-20%] lg:w-[62vw] dark:opacity-[0.14]" aria-hidden="true">
+      <img
+        src={logomark.src}
+        alt=""
+        class="absolute right-0 top-[54%] h-[156%] w-auto -translate-y-1/2 translate-x-[7%] -rotate-[14deg] dark:hidden"
+        loading="eager"
+        decoding="async"
+      />
+      <img
+        src={logomarkDark.src}
+        alt=""
+        class="absolute right-0 top-[54%] hidden h-[156%] w-auto -translate-y-1/2 translate-x-[7%] -rotate-[14deg] dark:block"
+        loading="eager"
+        decoding="async"
+      />
+    </div>
+  )}
+
+  <div class={gridClasses}>
+    {/* Content Column */}
+    <div class={cn(contentClasses, 'order-1 lg:order-none')}>
+      {/* Badge Slot */}
+      {hasBadgeSlot && (
+        <div class="mb-[var(--space-heading-gap)]">
+          <slot name="badge" />
+        </div>
+      )}
+
+      {/* Title Slot */}
+      {hasTitleSlot && (
+        <div class={cn(
+          'mb-[var(--space-heading-gap)]',
+          '[&>h1]:font-display [&>h1]:text-5xl [&>h1]:leading-[1.1] [&>h1]:font-bold [&>h1]:tracking-tight [&>h1]:text-balance [&>h1]:text-foreground md:[&>h1]:text-6xl lg:[&>h1]:text-7xl',
+          '[&>h2]:font-display [&>h2]:text-4xl [&>h2]:leading-[1.1] [&>h2]:font-bold [&>h2]:tracking-tight [&>h2]:text-balance [&>h2]:text-foreground md:[&>h2]:text-5xl lg:[&>h2]:text-6xl'
+        )}>
+          <slot name="title" />
+        </div>
+      )}
+
+      {/* Description Slot */}
+      {hasDescriptionSlot && (
+        <div class={cn(
+          'mb-[var(--space-stack-lg)] max-w-xl text-lg leading-relaxed text-foreground-muted',
+          '[&>p]:text-lg [&>p]:leading-relaxed [&>p]:text-foreground-muted',
+          layout === 'centered' && 'mx-auto'
+        )}>
+          <slot name="description" />
+        </div>
+      )}
+
+      {/* Actions Slot */}
+      {hasActionsSlot && (
+        <div class={cn(
+          'flex w-full flex-col gap-4 sm:w-auto sm:flex-row',
+          layout === 'centered' && 'justify-center'
+        )}>
+          <slot name="actions" />
+        </div>
+      )}
+
+      {/* Default slot for additional content (social proof, etc.) */}
+      <slot />
+    </div>
+
+    {/* Aside Column (for split layout) */}
+    {layout === 'split' && hasAsideSlot && (
+      <div class="relative z-10 w-full order-2 lg:order-none">
+        <slot name="aside" />
+        {/* Decorative blob for split layout */}
+        {showBlob && (
+          <div
+            class={cn(
+              'bg-brand-200/20 pointer-events-none absolute h-64 w-64 rounded-full blur-3xl',
+              blobPositions[blobPosition]
+            )}
+            aria-hidden="true"
+          />
+        )}
+      </div>
+    )}
+
+    {/* Decorative blob for centered layout */}
+    {layout === 'centered' && showBlob && (
+      <div
+        class={cn(
+          'bg-brand-200/20 pointer-events-none absolute h-64 w-64 rounded-full blur-3xl',
+          blobPositions[blobPosition]
+        )}
+        aria-hidden="true"
+      />
+    )}
+  </div>
+</section>
+
+{interactiveSpotlight && (
+  <>
+    <style is:global>
+      .hero-spotlight-root {
+        --spot-x: 50%;
+        --spot-y: 50%;
+        --spotlight-opacity: 0;
+      }
+
+      .hero-spotlight-root:not(.hero-spotlight--static) .hero-spotlight-reveal {
+        -webkit-mask-image: radial-gradient(
+          circle at var(--spot-x, 50%) var(--spot-y, 50%),
+          #fff 0%,
+          rgba(255, 255, 255, 0.55) 10%,
+          transparent 16%
+        );
+        mask-image: radial-gradient(
+          circle at var(--spot-x, 50%) var(--spot-y, 50%),
+          #fff 0%,
+          rgba(255, 255, 255, 0.55) 10%,
+          transparent 16%
+        );
+        opacity: calc(var(--spotlight-opacity, 0) * 0.42);
+        transition: mask-image 0.5s ease, opacity 0.5s ease;
+      }
+
+      .dark .hero-spotlight-root:not(.hero-spotlight--static) .hero-spotlight-reveal {
+        opacity: calc(var(--spotlight-opacity, 0) * 0.38);
+      }
+
+      .hero-spotlight-root.hero-spotlight--static .hero-spotlight-reveal {
+        -webkit-mask-image: none;
+        mask-image: none;
+        opacity: 0.2;
+      }
+
+      .dark .hero-spotlight-root.hero-spotlight--static .hero-spotlight-reveal {
+        opacity: 0.18;
+      }
+    </style>
+    <script is:inline>
+      function initHeroSpotlight() {
+        document.querySelectorAll('[data-interactive-spotlight="true"]').forEach((root) => {
+          if (!(root instanceof HTMLElement)) return;
+          if (root.dataset.heroSpotlightBound === '1') return;
+          const reveal = root.querySelector('.hero-spotlight-reveal');
+          if (!reveal) return;
+
+          const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          const coarseNoHover =
+            window.matchMedia('(hover: none) and (pointer: coarse)').matches ||
+            window.matchMedia('(pointer: coarse)').matches;
+
+          if (reduced || coarseNoHover) {
+            root.classList.add('hero-spotlight--static');
+            root.dataset.heroSpotlightBound = '1';
+            return;
+          }
+
+          root.dataset.heroSpotlightBound = '1';
+
+          let ticking = false;
+          let lastEv = null;
+          let isInside = false;
+
+          const setSpotlightOpacity = (value) => {
+            root.style.setProperty('--spotlight-opacity', value);
+          };
+
+          const isRootVisible = () => {
+            const rect = root.getBoundingClientRect();
+            return rect.bottom > 0 && rect.top < window.innerHeight;
+          };
+
+          const onMouseEnter = () => {
+            isInside = true;
+            setSpotlightOpacity('1');
+          };
+
+          const onMouseLeave = () => {
+            isInside = false;
+            setSpotlightOpacity('0');
+          };
+
+          const onScroll = () => {
+            if (!isRootVisible()) {
+              setSpotlightOpacity('0');
+              return;
+            }
+
+            if (isInside) {
+              setSpotlightOpacity('1');
+            }
+          };
+
+          const onPointerMove = (e) => {
+            if (!isInside) return;
+            lastEv = e;
+            if (ticking) return;
+            ticking = true;
+            requestAnimationFrame(() => {
+              ticking = false;
+              const ev = lastEv;
+              if (!ev) return;
+              const rect = root.getBoundingClientRect();
+              const w = rect.width || 1;
+              const h = rect.height || 1;
+              const x = ((ev.clientX - rect.left) / w) * 100;
+              const y = ((ev.clientY - rect.top) / h) * 100;
+              root.style.setProperty('--spot-x', `${Math.max(0, Math.min(100, x))}%`);
+              root.style.setProperty('--spot-y', `${Math.max(0, Math.min(100, y))}%`);
+            });
+          };
+
+          root.addEventListener('mouseenter', onMouseEnter);
+          root.addEventListener('mouseleave', onMouseLeave);
+          root.addEventListener('pointermove', onPointerMove, { passive: true });
+          window.addEventListener('scroll', onScroll, { passive: true });
+        });
+      }
+
+      initHeroSpotlight();
+      if (!window['__iluroHeroSpotlightPageLoad']) {
+        window['__iluroHeroSpotlightPageLoad'] = true;
+        document.addEventListener('astro:page-load', initHeroSpotlight);
+      }
+    </script>
+  </>
+)}
