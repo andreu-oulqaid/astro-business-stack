@@ -80,4 +80,4 @@ One VPS hosts multiple client sites. Each site has:
 - Shared `web-public` network
 - Separate NPM proxy hosts
 
-See [deployment.md](deployment.md) for first-time setup.
+See [getting-started.md](getting-started.md) for first-time setup.

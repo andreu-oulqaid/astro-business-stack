@@ -1,5 +1,7 @@
 # Deployment
 
+**First time on a VPS?** Follow the full walkthrough in [getting-started.md](getting-started.md).
+
 ## Prerequisites
 
 - Hetzner (or any) VPS with Docker and Docker Compose
@@ -9,38 +11,19 @@
 
 ## GitHub secrets
 
-Configure per environment or repository:
+Configure per environment (`production` for `main`, `test` for `develop`) or at repository level:
 
 | Secret | Description |
 |--------|-------------|
 | `SSH_HOST` | VPS IP or hostname |
 | `SSH_USER` | SSH user (e.g. `deploy`) |
-| `SSH_PRIVATE_KEY` | Private key for SSH |
-| `DEPLOY_PATH` | Production clone path (e.g. `/opt/webfactory/astro-stack`) |
+| `SSH_PRIVATE_KEY` | Private key for GitHub Actions → VPS SSH |
+| `DEPLOY_PATH_PROD` | Production clone path (e.g. `/opt/webfactory/astro-business-stack`) |
 | `DEPLOY_PATH_TEST` | Test clone path (e.g. `/opt/webfactory/astro-stack-test`) |
 
 ## First-time VPS setup
 
-```bash
-# 1. Clone
-sudo mkdir -p /opt/webfactory
-sudo git clone git@github.com:andreu-oulqaid/astro-business-stack.git /opt/webfactory/astro-stack-test
-cd /opt/webfactory/astro-stack-test
-git checkout develop
-
-# 2. Environment file
-cp .env.example .env
-# Edit .env — see integrations.md for all variables
-
-# 3. Docker network
-docker network create web-public
-
-# 4. Build and run
-docker compose build
-docker compose up -d
-```
-
-Repeat for production on `main` branch at `DEPLOY_PATH`.
+See [getting-started.md](getting-started.md) for deploy user, SSH keys, clone, `.env`, DNS, NPM, and first manual `docker compose` run.
 
 ## Workflow behavior
 
@@ -60,10 +43,12 @@ Create proxy hosts (example):
 
 | Domain | Forward to |
 |--------|------------|
-| `stack.example.com` | `astro-stack-test-app:4325` |
-| `stack.example.com` path `/api/auth` | `astro-stack-test-auth:3000` |
+| `stack.example.com` | `astro-stack-app:4325` |
+| `stack.example.com` path `/api/auth` | `astro-stack-auth:3000` |
 
 Exact hostnames depend on your `.env` container names. Auth gateway must be reachable at `AUTH_GATEWAY_URL` for OAuth callbacks.
+
+See [infra/nginx-proxy-manager.example.md](../infra/nginx-proxy-manager.example.md) for detailed NPM settings.
 
 ## Production vs test
 
@@ -72,13 +57,26 @@ Use different values in `.env`:
 ```bash
 # Test
 APP_CONTAINER_NAME=astro-stack-test-app
+AUTH_CONTAINER_NAME=astro-stack-test-auth
 APP_IMAGE=astro-stack-test
+AUTH_IMAGE=astro-stack-test-auth
 AUTH_GATEWAY_URL=https://test-stack.example.com
 
 # Production
 APP_CONTAINER_NAME=astro-stack-app
+AUTH_CONTAINER_NAME=astro-stack-auth
 APP_IMAGE=astro-stack
+AUTH_IMAGE=astro-stack-auth
 AUTH_GATEWAY_URL=https://stack.example.com
+```
+
+## Image rollback
+
+Deploy workflow tags `latest` → `previous` before rebuild. To rollback:
+
+```bash
+docker tag astro-stack:previous astro-stack:latest
+docker compose up -d --force-recreate app
 ```
 
 ## Troubleshooting
