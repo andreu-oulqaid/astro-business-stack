@@ -2,6 +2,8 @@
 import type { Locale } from '@/i18n/config';
 import { useTranslations } from '@/i18n';
 import Badge from '@/components/ui/data-display/Badge/Badge.astro';
+import { PUBLIC_DEMO_CAPTCHA_ENABLED, PUBLIC_TURNSTILE_SITE_KEY } from 'astro:env/client';
+
 import LiveDemoPlayground from '@/components/landing/LiveDemoPlayground';
 import { isLiveDemoConfigured } from '@/lib/demoEnv';
 
@@ -22,25 +24,39 @@ const labels = {
   attemptsLeft: t('liveDemo.attemptsLeft'),
   captured: t('liveDemo.captured'),
   failed: t('liveDemo.failed'),
+  avgCaptureTime: t('liveDemo.avgCaptureTime'),
   recentActivity: t('liveDemo.recentActivity'),
   noActivity: t('liveDemo.noActivity'),
   rateLimited: t('liveDemo.rateLimited'),
   pipelineError: t('liveDemo.pipelineError'),
-  terminal: {
-    idle: t('liveDemo.terminal.idle'),
-    received: t('liveDemo.terminal.received'),
-    writingAnalytics: t('liveDemo.terminal.writingAnalytics'),
+  challengeRunning: t('liveDemo.challengeRunning'),
+  captchaFailed: t('liveDemo.captchaFailed'),
+  captchaRequired: t('liveDemo.captchaRequired'),
+    terminal: {
+      idle: t('liveDemo.terminal.idle'),
+      checkingQuota: t('liveDemo.terminal.checkingQuota'),
+      quotaOk: t('liveDemo.terminal.quotaOk'),
+      quotaDenied: t('liveDemo.terminal.quotaDenied'),
+      received: t('liveDemo.terminal.received'),
+      validatingInput: t('liveDemo.terminal.validatingInput'),
+      validateOk: t('liveDemo.terminal.validateOk'),
+      writingAnalytics: t('liveDemo.terminal.writingAnalytics'),
     supabaseOk: t('liveDemo.terminal.supabaseOk'),
     syncingNotion: t('liveDemo.terminal.syncingNotion'),
     notionOk: t('liveDemo.terminal.notionOk'),
     notionFailed: t('liveDemo.terminal.notionFailed'),
     sendingNotify: t('liveDemo.terminal.sendingNotify'),
     resendOk: t('liveDemo.terminal.resendOk'),
-    resendSkipped: t('liveDemo.terminal.resendSkipped'),
-    complete: t('liveDemo.terminal.complete'),
+      resendSkipped: t('liveDemo.terminal.resendSkipped'),
+      runMetadata: t('liveDemo.terminal.runMetadata'),
+      complete: t('liveDemo.terminal.complete'),
     failed: t('liveDemo.terminal.failed'),
   },
 };
+
+const captchaEnabled =
+  PUBLIC_DEMO_CAPTCHA_ENABLED === true && Boolean(PUBLIC_TURNSTILE_SITE_KEY);
+const turnstileSiteKey = captchaEnabled ? PUBLIC_TURNSTILE_SITE_KEY : undefined;
 ---
 
 <section
@@ -64,6 +80,12 @@ const labels = {
       </p>
     </div>
 
-    <LiveDemoPlayground client:visible labels={labels} locale={locale} />
+    <LiveDemoPlayground
+      client:visible
+      labels={labels}
+      locale={locale}
+      captchaEnabled={captchaEnabled}
+      turnstileSiteKey={turnstileSiteKey}
+    />
   </div>
 </section>

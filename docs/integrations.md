@@ -30,18 +30,25 @@ When configured:
 
 1. Create a Supabase project
 2. Run `scripts/supabase-analytics-base.sql` then `scripts/supabase-analytics-v2.sql` in SQL editor
-3. Configure:
+3. Run `scripts/supabase-api-rate-limit.sql` for `/api/leads`, `/api/leads/confirm`, and `/api/analytics/calendar-viewed` quotas
+4. Configure:
 
 ```bash
 SUPABASE_TRACKING_ENABLED=true
 SUPABASE_URL=https://xxx.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=eyJ...
 ANALYTICS_SALT=64-char-random-hex
+RATE_LIMIT_SALT=64-char-random-hex  # optional; defaults to ANALYTICS_SALT
+API_LEADS_MAX_PER_HOUR=10
+API_LEADS_CONFIRM_MAX_PER_HOUR=10
+API_CALENDAR_VIEWED_MAX_PER_HOUR=20
 ANALYTICS_ENV=development
 ADMIN_METRICS_ENABLED=true
 ```
 
 Dashboard at `/admin/metrics` when enabled.
+
+Production API limits **fail open** if Supabase is unset or the RPC errors — leads still flow. Only explicit quota exhaustion returns 429.
 
 ## Live demo sandbox (homepage)
 
@@ -49,9 +56,10 @@ Isolated from production analytics and CRM. Visitors run a real mini-pipeline (d
 
 1. Create a **separate** Supabase project for the demo
 2. Run `scripts/supabase-live-demo-schema.sql` then `scripts/supabase-live-demo-seed.sql`
-3. If pipeline runs fail with `permission denied`, run `scripts/supabase-live-demo-grants.sql`
-3. Create a demo Notion Leads DB per `scripts/notion-live-demo-setup.md`
-4. Configure:
+3. Run `scripts/supabase-live-demo-rate-limit.sql` for per-IP + global demo quotas
+4. If pipeline runs fail with `permission denied`, run `scripts/supabase-live-demo-grants.sql`
+5. Create a demo Notion Leads DB per `scripts/notion-live-demo-setup.md`
+6. Configure:
 
 ```bash
 PUBLIC_LIVE_DEMO_ENABLED=true
@@ -59,9 +67,25 @@ DEMO_SUPABASE_URL=https://xxx.supabase.co  # base URL only — not .../rest/v1/
 DEMO_SUPABASE_SERVICE_ROLE_KEY=eyJ...
 DEMO_NOTION_API_KEY=ntn_xxx
 DEMO_NOTION_DATABASE_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+DEMO_MAX_RUNS_PER_HOUR=5
+DEMO_GLOBAL_MAX_RUNS_PER_HOUR=60
 ```
 
 The section appears below the video walkthrough when all variables are set.
+
+### Demo rate limits & optional CAPTCHA
+
+- Quotas are stored in **demo Supabase** (`demo_rate_limit_events` + RPCs). Default: **5 runs/hour per IP**, **60/hour global**.
+- Run the rate-limit SQL migration after the demo schema. Stale rows are pruned automatically (~5% of successful runs; 48h retention).
+- Set `RATE_LIMIT_SALT` (or reuse `ANALYTICS_SALT`) so IP buckets are HMAC-hashed — never store raw IPs.
+- **Trusted proxy required:** the app reads `X-Forwarded-For` / `X-Real-IP`. Do not expose Node directly to the internet without a reverse proxy (NPM, Caddy, etc.).
+- Optional Cloudflare Turnstile (invisible, **off by default**):
+
+```bash
+PUBLIC_DEMO_CAPTCHA_ENABLED=true
+PUBLIC_TURNSTILE_SITE_KEY=0x...
+TURNSTILE_SECRET_KEY=0x...
+```
 
 ## Cal.com (booking)
 
