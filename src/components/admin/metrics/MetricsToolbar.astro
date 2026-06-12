@@ -1,0 +1,58 @@
+---
+interface Props {
+  range: '7d' | '30d';
+  allEnvironments: boolean;
+}
+
+const { range, allEnvironments } = Astro.props;
+
+function metricsHref(r: '7d' | '30d', all: boolean): string {
+  const p = new URLSearchParams();
+  p.set('range', r);
+  if (all) p.set('env', 'all');
+  return `/admin/metrics?${p.toString()}`;
+}
+---
+
+<div class="flex flex-col items-stretch gap-2 sm:items-end">
+  <div class="inline-flex rounded-lg border border-border bg-secondary p-1 text-sm">
+    <a
+      href={metricsHref('7d', allEnvironments)}
+      class:list={[
+        'rounded-md px-3 py-1.5 transition',
+        range === '7d' ? 'bg-foreground text-background' : 'text-foreground-muted hover:text-foreground',
+      ]}
+    >
+      Last 7 days
+    </a>
+    <a
+      href={metricsHref('30d', allEnvironments)}
+      class:list={[
+        'rounded-md px-3 py-1.5 transition',
+        range === '30d' ? 'bg-foreground text-background' : 'text-foreground-muted hover:text-foreground',
+      ]}
+    >
+      Last 30 days
+    </a>
+  </div>
+  <div class="inline-flex rounded-lg border border-border bg-secondary p-1 text-sm">
+    <a
+      href={metricsHref(range, false)}
+      class:list={[
+        'rounded-md px-3 py-1.5 transition',
+        !allEnvironments ? 'bg-foreground text-background' : 'text-foreground-muted hover:text-foreground',
+      ]}
+    >
+      This deploy
+    </a>
+    <a
+      href={metricsHref(range, true)}
+      class:list={[
+        'rounded-md px-3 py-1.5 transition',
+        allEnvironments ? 'bg-foreground text-background' : 'text-foreground-muted hover:text-foreground',
+      ]}
+    >
+      All environments
+    </a>
+  </div>
+</div>

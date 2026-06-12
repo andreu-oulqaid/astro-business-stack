@@ -1,0 +1,49 @@
+---
+import { enrichedUtmCampaigns, enrichedUtmSources, type MetricsAggregates } from '@/lib/metricsTypes';
+
+interface Props {
+  aggregates: MetricsAggregates;
+  variant: 'sources' | 'campaigns';
+}
+
+const { aggregates, variant } = Astro.props;
+const rows = variant === 'sources' ? enrichedUtmSources(aggregates) : enrichedUtmCampaigns(aggregates);
+const title = variant === 'sources' ? 'Top UTM Sources' : 'Top UTM Campaigns';
+const nameKey = variant === 'sources' ? 'utm_source' : 'utm_campaign';
+---
+
+<section class="rounded-xl border border-border bg-card p-5">
+  <h2 class="text-lg font-semibold text-foreground">{title}</h2>
+  <div class="mt-4 overflow-x-auto">
+    <table class="w-full min-w-md text-sm">
+      <thead class="text-left text-foreground-subtle">
+        <tr>
+          <th class="pb-2 pr-3 font-medium">{variant === 'sources' ? 'Source' : 'Campaign'}</th>
+          <th class="pb-2 pr-3 font-medium">Leads</th>
+          <th class="pb-2 pr-3 font-medium">Bookings</th>
+          <th class="pb-2 font-medium">Conv%</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          rows.length === 0 ? (
+            <tr class="border-t border-border/60">
+              <td class="py-2 text-foreground-muted" colspan="4">
+                No data
+              </td>
+            </tr>
+          ) : (
+            rows.map((row) => (
+              <tr class="border-t border-border/60">
+                <td class="py-2 pr-3 text-foreground">{row[nameKey as keyof typeof row]}</td>
+                <td class="py-2 pr-3 text-foreground-muted">{row.leads}</td>
+                <td class="py-2 pr-3 text-foreground-muted">{row.bookings}</td>
+                <td class="py-2 text-foreground">{row.conversion.toFixed(1)}%</td>
+              </tr>
+            ))
+          )
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

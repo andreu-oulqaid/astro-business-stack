@@ -1,0 +1,93 @@
+---
+import {
+  INTERACTION_PLACEMENT_LABELS,
+  INTERACTION_TARGET_LABELS,
+} from '@/lib/metricsModules';
+import { interactionSummary, type MetricsAggregates } from '@/lib/metricsTypes';
+
+interface Props {
+  aggregates: MetricsAggregates;
+}
+
+const { aggregates } = Astro.props;
+const interactions = interactionSummary(aggregates);
+---
+
+<section class="mt-6 grid gap-6 lg:grid-cols-2">
+  <div class="rounded-xl border border-border bg-card p-5">
+    <h2 class="text-lg font-semibold text-foreground">Interactions</h2>
+    <p class="mt-2 text-sm text-foreground-muted">
+      Outbound clicks and demo video plays. Unique visitors use IP-derived HMAC buckets.
+    </p>
+    <div class="mt-4 grid gap-4 sm:grid-cols-2">
+      <div class="rounded-lg border border-border/60 bg-secondary/40 p-4">
+        <p class="text-xs uppercase tracking-wide text-foreground-subtle">Total clicks</p>
+        <p class="mt-2 text-2xl font-bold text-foreground">{interactions.total}</p>
+      </div>
+      <div class="rounded-lg border border-border/60 bg-secondary/40 p-4">
+        <p class="text-xs uppercase tracking-wide text-foreground-subtle">Unique visitors</p>
+        <p class="mt-2 text-2xl font-bold text-foreground">{interactions.unique_visitors}</p>
+      </div>
+    </div>
+    <div class="mt-5">
+      <h3 class="text-sm font-semibold text-foreground">By target</h3>
+      <div class="mt-3 space-y-2">
+        {
+          Object.entries(interactions.by_target).length === 0 ? (
+            <p class="text-sm text-foreground-muted">No interaction events yet.</p>
+          ) : (
+            Object.entries(interactions.by_target)
+              .sort(([, a], [, b]) => b - a)
+              .map(([target, count]) => (
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-foreground-muted">
+                    {INTERACTION_TARGET_LABELS[target] ?? target}
+                  </span>
+                  <span class="font-medium text-foreground">{count}</span>
+                </div>
+              ))
+          )
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="rounded-xl border border-border bg-card p-5">
+    <h2 class="text-lg font-semibold text-foreground">Interaction placement</h2>
+    <p class="mt-2 text-sm text-foreground-muted">
+      Where visitors clicked GitHub, LinkedIn, or started the demo video.
+    </p>
+    <div class="mt-4 overflow-x-auto">
+      <table class="w-full min-w-80 text-sm">
+        <thead class="text-left text-foreground-subtle">
+          <tr>
+            <th class="pb-2 pr-3 font-medium">Placement</th>
+            <th class="pb-2 font-medium">Clicks</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            Object.entries(interactions.by_placement).length === 0 ? (
+              <tr class="border-t border-border/60">
+                <td class="py-2 text-foreground-muted" colspan="2">
+                  No data
+                </td>
+              </tr>
+            ) : (
+              Object.entries(interactions.by_placement)
+                .sort(([, a], [, b]) => b - a)
+                .map(([placement, count]) => (
+                  <tr class="border-t border-border/60">
+                    <td class="py-2 pr-3 text-foreground">
+                      {INTERACTION_PLACEMENT_LABELS[placement] ?? placement}
+                    </td>
+                    <td class="py-2 text-foreground-muted">{count}</td>
+                  </tr>
+                ))
+            )
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

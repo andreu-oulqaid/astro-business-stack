@@ -1,0 +1,44 @@
+---
+import { enrichedLocaleRows, type MetricsAggregates } from '@/lib/metricsTypes';
+
+interface Props {
+  aggregates: MetricsAggregates;
+}
+
+const { aggregates } = Astro.props;
+const localeRows = enrichedLocaleRows(aggregates);
+---
+
+<section class="mt-6 rounded-xl border border-border bg-card p-5">
+  <h2 class="text-lg font-semibold text-foreground">Locale friction</h2>
+  <div class="mt-4 overflow-x-auto">
+    <table class="w-full min-w-xl text-sm">
+      <thead class="text-left text-foreground-subtle">
+        <tr>
+          <th class="pb-2 pr-3 font-medium">Locale</th>
+          <th class="pb-2 pr-3 font-medium">Leads</th>
+          <th class="pb-2 pr-3 font-medium">Cal views</th>
+          <th class="pb-2 pr-3 font-medium">Books</th>
+          <th class="pb-2 pr-3 font-medium">Lead→book</th>
+          <th class="pb-2 pr-3 font-medium">Lead→cal Δ</th>
+          <th class="pb-2 font-medium">Cal→book Δ</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          localeRows.map((row) => (
+            <tr class="border-t border-border/60">
+              <td class="py-2 pr-3 uppercase text-foreground">{row.locale}</td>
+              <td class="py-2 pr-3 text-foreground-muted">{row.leads}</td>
+              <td class="py-2 pr-3 text-foreground-muted">{row.calendar_views}</td>
+              <td class="py-2 pr-3 text-foreground-muted">{row.bookings}</td>
+              <td class="py-2 pr-3 text-foreground">{row.conversion.toFixed(1)}%</td>
+              <td class="py-2 pr-3 text-foreground">{row.lead_to_calendar_drop.toFixed(1)}%</td>
+              <td class="py-2 text-foreground">{row.calendar_to_book_drop.toFixed(1)}%</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

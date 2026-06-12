@@ -1,0 +1,60 @@
+---
+import type { MetricsAggregates } from '@/lib/metricsTypes';
+
+interface Props {
+  aggregates: MetricsAggregates;
+}
+
+const { aggregates } = Astro.props;
+const latestEvents = aggregates.latest;
+---
+
+<section class="mt-6 rounded-xl border border-border bg-card p-5">
+  <h2 class="text-lg font-semibold text-foreground">Latest Events</h2>
+  <div class="mt-4 overflow-x-auto">
+    <table class="w-full min-w-4xl text-sm">
+      <thead class="text-left text-foreground-subtle">
+        <tr>
+          <th class="pb-2 pr-3 font-medium">Timestamp</th>
+          <th class="pb-2 pr-3 font-medium">Type</th>
+          <th class="pb-2 pr-3 font-medium">Locale</th>
+          <th class="pb-2 pr-3 font-medium">Device</th>
+          <th class="pb-2 pr-3 font-medium">Source</th>
+          <th class="pb-2 pr-3 font-medium">Campaign</th>
+          <th class="pb-2 pr-3 font-medium">Delta</th>
+          <th class="pb-2 font-medium">Path</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          latestEvents.length === 0 ? (
+            <tr class="border-t border-border/60">
+              <td class="py-2 text-foreground-muted" colspan="8">
+                No events
+              </td>
+            </tr>
+          ) : (
+            latestEvents.map((row) => (
+              <tr class="border-t border-border/60">
+                <td class="py-2 pr-3 text-foreground-muted">
+                  {new Date(row.created_at).toLocaleString('en-US')}
+                </td>
+                <td class="py-2 pr-3 text-foreground">{row.event_type}</td>
+                <td class="py-2 pr-3 text-foreground-muted">{row.locale ?? '-'}</td>
+                <td class="py-2 pr-3 text-foreground-muted">{row.device_type ?? '-'}</td>
+                <td class="py-2 pr-3 text-foreground-muted">{row.utm_source ?? 'direct'}</td>
+                <td class="py-2 pr-3 text-foreground-muted">{row.utm_campaign ?? '-'}</td>
+                <td class="py-2 pr-3 text-foreground-muted">
+                  {row.conversion_delta_seconds == null
+                    ? '-'
+                    : `${Math.floor(row.conversion_delta_seconds / 60)}m ${row.conversion_delta_seconds % 60}s`}
+                </td>
+                <td class="py-2 text-foreground-muted">{row.page_path ?? '-'}</td>
+              </tr>
+            ))
+          )
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

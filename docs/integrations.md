@@ -26,12 +26,17 @@ When configured:
 2. Writes new leads to leads DB
 3. Falls back to Resend-only if Notion write fails
 
-## Supabase (funnel analytics)
+## Supabase (analytics platform)
 
-1. Create a Supabase project
-2. Run `scripts/supabase-analytics-base.sql`, `scripts/supabase-analytics-v2.sql`, then `scripts/supabase-analytics-v3-interactions.sql` in SQL editor
-3. Run `scripts/supabase-api-rate-limit.sql` for `/api/leads`, `/api/leads/confirm`, `/api/analytics/calendar-viewed`, and `/api/analytics/interaction` quotas
-4. Configure:
+1. Create a Supabase project (shared across sites if desired)
+2. Run migrations in order:
+   - `scripts/supabase-analytics-base.sql`
+   - `scripts/supabase-analytics-v2.sql`
+   - `scripts/supabase-analytics-v3-interactions.sql`
+   - `scripts/supabase-analytics-v4-profiles.sql` (site registry, profile-driven dashboard)
+   - `scripts/supabase-analytics-v5-admin-hub.sql` (org-wide hub RPCs; run on shared Supabase if using iluro develop hub)
+3. Run `scripts/supabase-api-rate-limit.sql` for API quotas
+4. Configure per deployment:
 
 ```bash
 SUPABASE_TRACKING_ENABLED=true
@@ -43,12 +48,37 @@ API_LEADS_MAX_PER_HOUR=10
 API_LEADS_CONFIRM_MAX_PER_HOUR=10
 API_CALENDAR_VIEWED_MAX_PER_HOUR=20
 API_ANALYTICS_INTERACTION_MAX_PER_HOUR=30
-ANALYTICS_ENV=development
-ANALYTICS_SITE_ID=stack.example.com
-ADMIN_METRICS_ENABLED=true
+ANALYTICS_ENV=development          # tag rows: development | production | staging
+ANALYTICS_SITE_ID=stack.example.com  # optional; defaults to SITE_URL hostname
+ADMIN_METRICS_ENABLED=true         # test/staging only; prod returns 404 for /admin/metrics
 ```
 
-Dashboard at `/admin/metrics` when enabled.
+### Hybrid site profiles (collect + dashboard modules)
+
+Each repo declares defaults in [`src/config/analytics.profile.ts`](../src/config/analytics.profile.ts). On ingest and dashboard load, the app syncs the profile to Supabase (`analytics_sites`, `analytics_site_profiles`).
+
+- **`events.*.collect`** — whether this deployment writes that event type (guard on server ingest)
+- **`events.*.dashboard`** — whether aggregates include that event type
+- **`dashboard.modules`** — which UI sections `/admin/metrics` renders
+
+**This repo (marketing stack):** interactions only — no lead/calendar/booking funnel on the public site.
+
+**Client funnel sites:** copy the profile template and enable funnel modules + event types.
+
+Optional DB override (no redeploy): update `analytics_site_profiles.config` JSON in Supabase SQL editor.
+
+### Test vs production collection
+
+| Deployment | `ANALYTICS_ENV` | Collects events? | `/admin/metrics` |
+|------------|-----------------|------------------|------------------|
+| Test VPS | `development` | Yes | Yes when `ADMIN_METRICS_ENABLED=true` |
+| Prod VPS | `production` | Yes | No (404) |
+
+Use **All environments** on the test dashboard to compare test + prod traffic for the same `site_id`.
+
+Dashboard at `/admin/metrics` when enabled locally (`pnpm dev`) or when `ADMIN_METRICS_ENABLED=true`.
+
+**Org-wide hub:** iluro-prod develop (`SITE_URL=https://test-iluro.ilurodigital.com`) hosts the multi-site command center with `?site=all` and env filters. This repo keeps its per-deployment dashboard unchanged. See [iluro-prod docs/integrations.md](../../iluro-prod/docs/integrations.md).
 
 Production API limits **fail open** if Supabase is unset or the RPC errors — leads still flow. Only explicit quota exhaustion returns 429 (interaction ingest silently drops at 204 instead).
 
@@ -56,7 +86,7 @@ Production API limits **fail open** if Supabase is unset or the RPC errors — l
 
 First-party click/play events via `POST /api/analytics/interaction`:
 
-- **Event type:** `interaction` with metadata `{ env, site_id, category, action, target, placement }`
+- **Event type:** `interaction` with metadata `{ category, action, target, placement }` plus columns `site_id`, `env`
 - **Visitor identity:** IP HMAC via `RATE_LIMIT_SALT` (stored in `user_hash`; distinct from email HMAC on funnel events)
 - **Rate limit:** `analytics_interaction` route, default **30 events/hour per IP** (`API_ANALYTICS_INTERACTION_MAX_PER_HOUR`)
 - **Client:** `navigator.sendBeacon` with JSON blob; video play deduped once per tab session
