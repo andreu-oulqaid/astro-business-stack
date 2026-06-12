@@ -1,7 +1,9 @@
 import type { APIRoute } from 'astro';
 import { z } from 'astro/zod';
 
+import { checkAndConsumeApiQuota } from '@/lib/apiRateLimit';
 import { trackCalendarViewed } from '@/lib/analyticsEvents';
+import { getClientIp } from '@/lib/clientIp';
 import { detectDevice } from '@/lib/analyticsUtils';
 
 export const prerender = false;
@@ -49,14 +51,22 @@ export const POST: APIRoute = async ({ request }) => {
     return jsonResponse({ ok: false, error: 'invalid' }, 400);
   }
 
+  const raw = json as Record<string, unknown>;
+  if (raw.company != null && String(raw.company).length > 0) {
+    return jsonResponse({ ok: true });
+  }
+
   const parsed = bodySchema.safeParse(json);
   if (!parsed.success) {
     return jsonResponse({ ok: false, error: 'invalid' }, 400);
   }
 
-  const raw = json as Record<string, unknown>;
-  if (raw.company != null && String(raw.company).length > 0) {
-    return jsonResponse({ ok: true });
+  const quota = await checkAndConsumeApiQuota('calendar_viewed', getClientIp(request));
+  if (!quota.allowed) {
+    return jsonResponse(
+      { ok: false, error: 'rate_limited', retryAfterSec: quota.retryAfterSec },
+      429,
+    );
   }
 
   const ua = request.headers.get('user-agent');

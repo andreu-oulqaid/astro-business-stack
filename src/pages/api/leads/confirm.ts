@@ -1,7 +1,9 @@
 import type { APIRoute } from 'astro';
 import { z } from 'astro/zod';
 
+import { checkAndConsumeApiQuota } from '@/lib/apiRateLimit';
 import { trackAuditBooked } from '@/lib/analyticsEvents';
+import { getClientIp } from '@/lib/clientIp';
 import { detectDevice } from '@/lib/analyticsUtils';
 import { sendLeadEmail } from '@/lib/leadEmail';
 import {
@@ -128,6 +130,14 @@ export const POST: APIRoute = async ({ request }) => {
   const parsed = confirmSchema.safeParse(json);
   if (!parsed.success) {
     return jsonResponse({ ok: false, error: 'invalid' }, 400);
+  }
+
+  const quota = await checkAndConsumeApiQuota('leads_confirm', getClientIp(request));
+  if (!quota.allowed) {
+    return jsonResponse(
+      { ok: false, error: 'rate_limited', retryAfterSec: quota.retryAfterSec },
+      429,
+    );
   }
 
   const ua = request.headers.get('user-agent');

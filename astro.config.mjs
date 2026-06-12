@@ -98,6 +98,54 @@ export default defineConfig({
         optional: true,
         default: '',
       }),
+      DEMO_MAX_RUNS_PER_HOUR: envField.number({
+        context: 'server',
+        access: 'secret',
+        default: 5,
+      }),
+      DEMO_GLOBAL_MAX_RUNS_PER_HOUR: envField.number({
+        context: 'server',
+        access: 'secret',
+        default: 60,
+      }),
+      RATE_LIMIT_SALT: envField.string({
+        context: 'server',
+        access: 'secret',
+        optional: true,
+        default: '',
+      }),
+      PUBLIC_DEMO_CAPTCHA_ENABLED: envField.boolean({
+        context: 'client',
+        access: 'public',
+        default: false,
+      }),
+      PUBLIC_TURNSTILE_SITE_KEY: envField.string({
+        context: 'client',
+        access: 'public',
+        optional: true,
+        default: '',
+      }),
+      TURNSTILE_SECRET_KEY: envField.string({
+        context: 'server',
+        access: 'secret',
+        optional: true,
+        default: '',
+      }),
+      API_LEADS_MAX_PER_HOUR: envField.number({
+        context: 'server',
+        access: 'secret',
+        default: 10,
+      }),
+      API_LEADS_CONFIRM_MAX_PER_HOUR: envField.number({
+        context: 'server',
+        access: 'secret',
+        default: 10,
+      }),
+      API_CALENDAR_VIEWED_MAX_PER_HOUR: envField.number({
+        context: 'server',
+        access: 'secret',
+        default: 20,
+      }),
     },
   },
 
