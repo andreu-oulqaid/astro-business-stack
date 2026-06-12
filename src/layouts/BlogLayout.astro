@@ -21,8 +21,8 @@ interface Props {
   tags?: string[];
   slug?: string;
   locale?: Locale;
-  /** Breadcrumb + “back” hub (case studies live under portfolio) */
-  hubRouteId?: 'portfolio' | 'services';
+  /** Breadcrumb + “back” hub */
+  hubRouteId?: 'portfolio' | 'services' | 'docs';
 }
 
 const {
@@ -52,7 +52,12 @@ const ogImage = resolveOgImageString(image);
 
 const hubUrl = getLocalizedPath(hubRouteId, locale);
 const homeUrl = getLocalizedPath('home', locale);
-const hubCrumbLabel = hubRouteId === 'portfolio' ? t('portfolio.breadcrumb') : t('nav.features');
+const hubCrumbLabel =
+  hubRouteId === 'portfolio'
+    ? t('portfolio.breadcrumb')
+    : hubRouteId === 'docs'
+      ? t('docs.breadcrumb')
+      : t('nav.features');
 
 const breadcrumbs = [
   { label: t('nav.home'), href: homeUrl },
@@ -119,7 +124,11 @@ const fullUrl = new URL(Astro.url.pathname, Astro.site).toString();
             >
               <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            {hubRouteId === 'portfolio' ? t('portfolio.backToIndex') : t('blog.backToBlog')}
+            {hubRouteId === 'portfolio'
+              ? t('portfolio.backToIndex')
+              : hubRouteId === 'docs'
+                ? t('docs.backToIndex')
+                : t('blog.backToBlog')}
           </a>
 
           <!-- Share buttons -->

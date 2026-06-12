@@ -1,0 +1,33 @@
+---
+title: "Pipeline treści: OAuth, Decap i Git"
+description: "Self-hosted OAuth GitHub, edycja w Decap CMS i commit do repozytorium."
+publishedAt: 2026-06-10
+author: "Stack Team"
+tags: ["deploy", "oauth", "decap", "cms"]
+category: deploy
+order: 1
+locale: pl
+draft: false
+---
+
+Przewodnik po **krokach 1–3** [pipeline na stronie głównej](/pl#process).
+
+<h2 id="oauth">Login OAuth</h2>
+
+Decap wymaga tokenu GitHub. Stack używa **self-hosted gateway** (`gateway/`) na VPS.
+
+Przepływ: `/admin` → gateway → GitHub OAuth → callback → token do Decap.
+
+Zmienne: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `AUTH_GATEWAY_URL`.
+
+<h2 id="decap">Edycja w Decap CMS</h2>
+
+Kolekcje w `src/content/`. `config.yml` z `base_url` podstawianym przy deployu.
+
+<h2 id="git-commit">Commit do GitHub</h2>
+
+Zapis na gałąź `develop` (test) lub `main` (produkcja). Treść w git — review przez PR.
+
+---
+
+[Następny: Deploy produkcyjny](/pl/dokumentacja/production-deploy)

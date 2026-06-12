@@ -1,8 +1,7 @@
 ---
 import type { HTMLAttributes } from 'astro/types';
 import { cn } from '@/lib/cn';
-import logomark from '@/assets/branding/logomark.svg';
-import logomarkDark from '@/assets/branding/logomark-dark.svg';
+import siteConfig from '@/config/site.config';
 import heroRevealBg from '@/assets/marketing/hero-reveal-bg.png';
 
 interface Props extends HTMLAttributes<'section'> {
@@ -124,16 +123,9 @@ const gridClasses = cn(
   {showLogomark && (
     <div class="pointer-events-none absolute inset-y-0 right-[-32%] z-[4] hidden w-[82vw] overflow-hidden opacity-[0.08] md:block lg:right-[-20%] lg:w-[62vw] dark:opacity-[0.14]" aria-hidden="true">
       <img
-        src={logomark.src}
+        src={siteConfig.branding.favicon.svg}
         alt=""
-        class="absolute right-0 top-[54%] h-[156%] w-auto -translate-y-1/2 translate-x-[7%] -rotate-[14deg] dark:hidden"
-        loading="eager"
-        decoding="async"
-      />
-      <img
-        src={logomarkDark.src}
-        alt=""
-        class="absolute right-0 top-[54%] hidden h-[156%] w-auto -translate-y-1/2 translate-x-[7%] -rotate-[14deg] dark:block"
+        class="absolute right-0 top-[54%] h-[156%] w-auto -translate-y-1/2 translate-x-[7%] -rotate-[14deg]"
         loading="eager"
         decoding="async"
       />

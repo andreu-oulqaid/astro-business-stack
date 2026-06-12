@@ -3,6 +3,7 @@
  * Navbar Component (i18n-aware)
  * Dynamic navigation with translations and language switcher
  */
+import BrandMark from '@/components/ui/brand/BrandMark.astro';
 import Button from '@/components/ui/form/Button/Button.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import ThemeToggle from '@/components/layout/ThemeToggle.astro';
@@ -28,41 +29,40 @@ const isLandingPage = currentPath === homePath || currentPath === `${homePath}/`
 
 const featuresLink = isLandingPage ? '#tech-edge' : `${homePath}#tech-edge`;
 const deploymentsLink = isLandingPage ? '#deployments' : `${homePath}#deployments`;
-const aboutPath = getLocalizedPath('about', locale);
-const contactPath = getLocalizedPath('contact', locale);
 const faqLink = isLandingPage ? '#faq' : `${homePath}#faq`;
 const githubLink = siteConfig.github.url;
+const linkedinLink = siteConfig.linkedin.url;
 ---
 
 <nav class="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
   <div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
     <!-- Logo -->
     <a href={homePath} class="flex items-center gap-2.5">
-      <span class="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background-secondary text-brand-500">
-        <Icon name="code" size="sm" />
-      </span>
+      <BrandMark />
       <span class="font-display text-lg font-bold tracking-tight text-foreground">{t('site.name')}</span>
     </a>
 
     <!-- Desktop Menu -->
-    <div class="hidden items-center gap-8 md:flex">
+    <div class="hidden flex-1 items-center justify-end gap-8 md:flex">
       <a href={featuresLink} class="text-sm font-medium text-foreground-muted hover:text-foreground transition-colors">
         {t('nav.features')}
       </a>
       <a href={deploymentsLink} class="text-sm font-medium text-foreground-muted hover:text-foreground transition-colors">
         {t('nav.portfolio')}
       </a>
-      <a href={aboutPath} class="text-sm font-medium text-foreground-muted hover:text-foreground transition-colors">
-        {t('nav.about')}
-      </a>
-      <a href={contactPath} class="text-sm font-medium text-foreground-muted hover:text-foreground transition-colors">
-        {t('nav.contact')}
-      </a>
       <a href={faqLink} class="text-sm font-medium text-foreground-muted hover:text-foreground transition-colors">
         {t('nav.faq')}
       </a>
+      <a
+        href={linkedinLink}
+        class="text-sm font-medium text-foreground-muted hover:text-foreground transition-colors"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {t('nav.contact')}
+      </a>
 
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 border-l border-border pl-6">
         <LanguageSwitcher />
         <ThemeToggle />
         <Button size="sm" href={githubLink}>
@@ -104,14 +104,16 @@ const githubLink = siteConfig.github.url;
     <a href={deploymentsLink} class="text-base font-medium text-foreground-secondary hover:text-foreground transition-colors">
       {t('nav.portfolio')}
     </a>
-    <a href={aboutPath} class="text-base font-medium text-foreground-secondary hover:text-foreground transition-colors">
-      {t('nav.about')}
-    </a>
-    <a href={contactPath} class="text-base font-medium text-foreground-secondary hover:text-foreground transition-colors">
-      {t('nav.contact')}
-    </a>
     <a href={faqLink} class="text-base font-medium text-foreground-secondary hover:text-foreground transition-colors">
       {t('nav.faq')}
+    </a>
+    <a
+      href={linkedinLink}
+      class="text-base font-medium text-foreground-secondary hover:text-foreground transition-colors"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {t('nav.contact')}
     </a>
 
     <div class="flex items-center gap-3 pt-2 border-t border-border">

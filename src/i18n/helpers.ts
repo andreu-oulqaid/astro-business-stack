@@ -104,6 +104,7 @@ function buildPathLookup(): Map<string, { routeId: RouteId; locale: Locale }> {
   // routes.ts uses translated slugs (e.g. /es/servicios/web). Alias canonical paths.
   const aliasRouteIds: RouteId[] = [
     'portfolio',
+    'docs',
     'serviceWeb',
     'serviceAutomation',
     'serviceFullSystem',

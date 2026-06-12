@@ -1,0 +1,31 @@
+---
+title: "Deploy en producción: Actions, Docker y sitio en vivo"
+description: "Deploy SSH con GitHub Actions, rebuild Docker en VPS y TLS con Astro SSR."
+publishedAt: 2026-06-10
+author: "Stack Team"
+tags: ["deploy", "docker", "github-actions"]
+category: deploy
+order: 2
+locale: es
+draft: false
+---
+
+Guía de los **pasos 4–6** del [pipeline en la homepage](/es#process).
+
+<h2 id="github-actions">GitHub Actions</h2>
+
+En push a `main` o `develop`: SSH al VPS, pull, sustitución de `AUTH_GATEWAY_URL`, build y `compose up -d --force-recreate`.
+
+Secrets: `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`, `DEPLOY_PATH_PROD`, `DEPLOY_PATH_TEST`.
+
+<h2 id="docker">Docker en VPS</h2>
+
+Contenedores `app` (Astro SSR :4325) y `auth-gateway` (OAuth :3000) en la red `web-public`.
+
+<h2 id="live-site">Sitio en vivo</h2>
+
+Nginx Proxy Manager termina TLS y enruta al contenedor Astro. OAuth en `/api/auth` al gateway.
+
+---
+
+[Anterior: Pipeline de contenido](/es/documentacion/content-pipeline)

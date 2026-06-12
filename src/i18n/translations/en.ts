@@ -55,6 +55,10 @@ export const en = {
 
   trustBar: {
     label: 'Built with',
+    velocityTitle: 'Velocity — UI baseline by Southwell Media',
+    attributionPrefix: 'UI baseline from ',
+    attributionLink: 'Velocity',
+    attributionSuffix: ' by Southwell Media',
     item1: 'Astro 6 SSR + Node adapter',
     item2: 'Docker multi-stage builds',
     item3: 'GitHub Actions SSH deploy',
@@ -65,9 +69,40 @@ export const en = {
   demoVideo: {
     badge: 'Walkthrough',
     title: 'See the stack in action',
-    description:
-      'A short demo of the deploy pipeline, CMS auth flow, and integration layer. Record your walkthrough and set PUBLIC_DEMO_VIDEO_URL when ready.',
+    description: 'Short walkthrough of deploy, CMS auth, and integrations.',
     placeholder: 'Demo video coming soon',
+    posterAlt: 'Self-hosted web stack walkthrough — production-ready and automated',
+    playLabel: 'Play walkthrough video',
+  },
+
+  liveDemo: {
+    badge: 'Try it yourself',
+    title: 'Live integration sandbox',
+    description:
+      'Simulate a lead form pipeline through demo Supabase and Notion — same integration pattern as production.',
+    runButton: 'Run pipeline',
+    running: 'Running pipeline…',
+    attemptsLeft: '{remaining} of {max} runs / hour',
+    captured: 'Leads captured',
+    failed: 'Failed',
+    recentActivity: 'Recent activity',
+    noActivity: 'No runs yet.',
+    rateLimited: 'Too many runs. Try again in an hour.',
+    pipelineError: 'Pipeline failed. Check demo configuration.',
+    terminal: {
+      idle: 'Run the pipeline to see output.',
+      received: 'Lead received: {lead}',
+      writingAnalytics: '◐ Writing analytics event…',
+      supabaseOk: 'Supabase: lead_captured',
+      syncingNotion: '◐ Syncing to Notion CRM…',
+      notionOk: 'Notion: row created',
+      notionFailed: 'Notion: failed',
+      sendingNotify: '◐ Sending notification…',
+      resendOk: 'Resend: simulated — no email sent',
+      resendSkipped: 'Resend: skipped',
+      complete: 'Pipeline complete ({ms}ms)',
+      failed: 'Pipeline failed',
+    },
   },
 
   realityCheck: {
@@ -91,26 +126,47 @@ export const en = {
   },
 
   leakToFlow: {
-    title: 'How the <span class="text-brand-500"><strong>platform</strong></span> works.',
+    title: 'The <span class="text-brand-500"><strong>deploy pipeline</strong></span> — from CMS to VPS.',
     steps: {
       step1: {
-        title: '<strong>Push</strong> to GitHub.',
-        body: 'main → production, develop → test. GitHub Actions SSHs into the VPS and rebuilds containers.',
+        title: '<strong>Login</strong> via OAuth.',
+        body: 'Editor opens /admin. Self-hosted auth gateway redirects to GitHub and returns a CMS token.',
       },
       step2: {
-        title: 'Containers on <strong>web-public</strong>.',
-        body: 'Astro app (SSR) + OAuth gateway share an external Docker network. Nginx Proxy Manager routes TLS.',
+        title: 'Edit in <strong>Decap CMS</strong>.',
+        body: 'Content changes in the visual editor. No third-party auth SaaS.',
       },
       step3: {
-        title: '<strong>Edit content</strong> via Decap.',
-        body: 'GitHub OAuth gateway issues CMS tokens. Content commits flow back to the repo branch.',
+        title: '<strong>Commit</strong> to GitHub.',
+        body: 'Decap saves to the repo branch — develop for test, main for production.',
+      },
+      step4: {
+        title: '<strong>GitHub Actions</strong> deploy.',
+        body: 'Workflow SSHs into the VPS, pulls latest code, and triggers a rebuild.',
+      },
+      step5: {
+        title: '<strong>Docker</strong> rebuild on VPS.',
+        body: 'Multi-stage build, compose up on the shared web-public network.',
+      },
+      step6: {
+        title: '<strong>Live site</strong> updated.',
+        body: 'Nginx Proxy Manager routes TLS. Astro SSR serves the new build.',
       },
     },
     badges: {
-      web: 'App: Astro SSR',
-      automation: 'Auth: OAuth gateway',
+      auth: 'Auth: self-hosted OAuth',
+      web: 'CI: GitHub Actions',
+      automation: 'Runtime: Docker + Astro SSR',
     },
-    cta: 'See <strong>deployment</strong> guide',
+    readDocs: 'Read docs',
+    cta: 'Read <strong>deploy guides</strong>',
+  },
+
+  docs: {
+    title: 'Deploy guides',
+    description: 'How content authoring and production deploy work on this stack — step by step.',
+    breadcrumb: 'Docs',
+    backToIndex: 'Back to docs',
   },
 
   techEdge: {
@@ -136,14 +192,15 @@ export const en = {
     },
     automation: {
       title: 'CI/CD + Docker',
-      body: 'Multi-stage Dockerfile with BuildKit cache. Rolling image tags for quick rollback on the VPS.',
-      cta: 'CMS workflow article',
+      body: 'GitHub Actions SSH deploy, multi-stage Docker builds, and rolling image tags for VPS rollback.',
+      cta: 'Production deploy guide',
     },
     bridge: {
       title: 'Business Integrations',
-      body: 'Lead capture with Notion CRM, Resend email, Supabase analytics, and Cal.com booking per locale.',
+      body: 'Optional Notion CRM, Resend email, Supabase analytics, and Cal.com — wired through typed API routes.',
       cta: 'Lead funnel article',
     },
+    readGuide: 'Read guide',
   },
 
   servicesSection: {
@@ -312,11 +369,12 @@ export const en = {
 
   // CTA Section
   cta: {
-    title: 'Explore the',
-    titleHighlight: 'repository',
+    title: 'Ready to deploy the stack',
+    titleHighlight: 'stack',
     description:
-      'Clone the stack, read the deployment docs, and adapt it to your own VPS or client projects.',
+      'Clone the repository, follow the docs, and adapt the pattern to your own VPS or client projects.',
     docs: 'Read documentation',
+    reachOut: 'Reach out to me',
     command: 'View on GitHub',
     guaranteeBadge: 'MIT License',
     privacyNotePrefix:
@@ -353,6 +411,7 @@ export const en = {
     links: {
       documentation: 'Docs',
       github: 'GitHub',
+      linkedin: 'LinkedIn',
       twitter: 'GitHub',
       license: 'License',
       privacy: 'Privacy',
@@ -468,6 +527,7 @@ export const en = {
     filterLabel: 'Filter by',
     filterAll: 'All',
     filter: {
+      capabilities: 'Capabilities',
       integrations: 'Integrations',
       ssr: 'SSR & i18n',
       cms: 'CMS & deploy',

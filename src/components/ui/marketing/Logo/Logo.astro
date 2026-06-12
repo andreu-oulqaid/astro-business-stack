@@ -2,16 +2,11 @@
 /**
  * Logo Component
  *
- * To customize: Replace the SVG files in src/assets/branding/
- * - logomark.svg       → Icon for light backgrounds
- * - logomark-dark.svg  → Icon for dark backgrounds
- * - logo-full.svg      → Full logo for light backgrounds
- * - logo-full-dark.svg → Full logo for dark backgrounds
+ * Logomark: public/favicon.svg (generate PNG/ICO variants from the same source).
+ * Full logo: src/assets/branding/logo-full*.svg
  */
 import siteConfig from '@/config/site.config';
 
-import logomark from '@/assets/branding/logomark.svg';
-import logomarkDark from '@/assets/branding/logomark-dark.svg';
 import logoFull from '@/assets/branding/logo-full.svg';
 import logoFullDark from '@/assets/branding/logo-full-dark.svg';
 
@@ -33,8 +28,9 @@ const {
   class: className,
 } = Astro.props;
 
-const lightLogo = variant === 'full' ? logoFull : logomark;
-const darkLogo = variant === 'full' ? logoFullDark : logomarkDark;
+const faviconSrc = siteConfig.branding.favicon.svg;
+const lightLogo = variant === 'full' ? logoFull : null;
+const darkLogo = variant === 'full' ? logoFullDark : null;
 
 const sizeClasses: Record<string, string> = {
   sm: 'h-5 w-5',
@@ -48,25 +44,29 @@ const sizeClass = sizeClasses[size] || sizeClasses.md;
 ---
 
 <span class:list={['inline-block', className]}>
-  {forceDark ? (
-    <img
-      src={darkLogo.src}
-      alt={siteConfig.branding.logo.alt}
-      class:list={[sizeClass]}
-    />
-  ) : (
-    <Fragment>
+  {
+    variant === 'logomark' ? (
       <img
-        src={lightLogo.src}
+        src={faviconSrc}
         alt={siteConfig.branding.logo.alt}
-        class:list={[sizeClass, 'block dark:hidden']}
+        class:list={[sizeClass, 'rounded-sm']}
       />
-      <img
-        src={darkLogo.src}
-        alt=""
-        class:list={[sizeClass, 'hidden dark:block']}
-        aria-hidden="true"
-      />
-    </Fragment>
-  )}
+    ) : forceDark ? (
+      <img src={darkLogo!.src} alt={siteConfig.branding.logo.alt} class:list={[sizeClass]} />
+    ) : (
+      <Fragment>
+        <img
+          src={lightLogo!.src}
+          alt={siteConfig.branding.logo.alt}
+          class:list={[sizeClass, 'block dark:hidden']}
+        />
+        <img
+          src={darkLogo!.src}
+          alt=""
+          class:list={[sizeClass, 'hidden dark:block']}
+          aria-hidden="true"
+        />
+      </Fragment>
+    )
+  }
 </span>

@@ -1,0 +1,76 @@
+---
+title: "Production deploy: Actions, Docker, and go-live"
+description: "GitHub Actions SSH deploy, Docker rebuild on the VPS, and TLS routing to the live Astro SSR site."
+publishedAt: 2026-06-10
+author: "Stack Team"
+tags: ["deploy", "docker", "github-actions", "ci-cd"]
+category: deploy
+order: 2
+locale: en
+draft: false
+---
+
+This guide covers **steps 4–6** of the [homepage deploy pipeline](/#process): CI/CD, containers, and the live site.
+
+<h2 id="github-actions">GitHub Actions deploy</h2>
+
+On push to `main` (production) or `develop` (test), the workflow:
+
+1. SSHs into the VPS using repository secrets
+2. `git fetch` + `reset --hard` to the branch tip
+3. Verifies `.env` exists
+4. Substitutes `AUTH_GATEWAY_URL` into `public/admin/config.yml`
+5. Tags Docker images (`latest` → `previous`) for rollback
+6. Runs `docker compose build app auth-gateway`
+7. Runs `docker compose up -d --force-recreate`
+
+**Required GitHub secrets** (per environment):
+
+| Secret | Purpose |
+|--------|---------|
+| `SSH_HOST` | VPS hostname or IP |
+| `SSH_USER` | Deploy user |
+| `SSH_PRIVATE_KEY` | Key for Actions → VPS |
+| `DEPLOY_PATH_PROD` | Production clone path |
+| `DEPLOY_PATH_TEST` | Staging clone path |
+
+BuildKit cache mounts speed up repeated `pnpm` and Astro builds.
+
+<h2 id="docker">Docker rebuild on VPS</h2>
+
+Two containers share the external `web-public` Docker network:
+
+| Service | Role |
+|---------|------|
+| `app` | Astro SSR on port 4325 — pages, API routes, integrations |
+| `auth-gateway` | GitHub OAuth for Decap on port 3000 |
+
+Multi-stage Dockerfiles keep runtime images small. Container names and image tags come from `.env` so production and test can run on the same VPS without collisions.
+
+**Rollback** after a bad deploy:
+
+```bash
+docker tag astro-stack:previous astro-stack:latest
+docker compose up -d --force-recreate app
+```
+
+<h2 id="live-site">Live site updated</h2>
+
+Nginx Proxy Manager terminates TLS and routes traffic:
+
+| Route | Target |
+|-------|--------|
+| `stack.example.com` | `astro-stack-app:4325` |
+| `/api/auth` | `astro-stack-auth:3000` |
+
+After `compose up`, the new Astro build serves SSR pages, API routes (`/api/leads`, `/api/demo/*`), and static assets. No separate CDN required — the VPS + NPM stack is the delivery path.
+
+**Common issues:**
+
+- OAuth redirect mismatch — callback must match `AUTH_GATEWAY_URL/api/auth/callback`
+- Container unreachable — verify both services joined `web-public`
+- Missing `.env` — deploy fails intentionally; copy from `.env.example`
+
+---
+
+[Previous: Content pipeline](/docs/content-pipeline) · [Back to pipeline](/#process)

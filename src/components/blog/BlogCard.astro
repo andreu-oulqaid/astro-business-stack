@@ -12,6 +12,7 @@ interface Props {
   featured?: boolean;
   image?: ImageMetadata;
   'data-tags'?: string;
+  'data-category'?: string;
 }
 
 const {
@@ -22,6 +23,7 @@ const {
   featured = false,
   image,
   'data-tags': dataTags = '',
+  'data-category': dataCategory = 'capabilities',
 } = Astro.props;
 const locale = getLocaleFromPath(Astro.url.pathname);
 const t = useTranslations(locale);
@@ -29,6 +31,7 @@ const t = useTranslations(locale);
 
 <article
   data-tags={dataTags}
+  data-category={dataCategory}
   class:list={[
     'group relative rounded-xl border bg-background p-6 transition-all duration-200 ease-out',
     featured

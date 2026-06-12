@@ -1,0 +1,29 @@
+---
+title: "Deploy en producció: Actions, Docker i lloc en viu"
+description: "Deploy SSH amb GitHub Actions, rebuild Docker al VPS i TLS amb Astro SSR."
+publishedAt: 2026-06-10
+author: "Stack Team"
+tags: ["deploy", "docker", "github-actions"]
+category: deploy
+order: 2
+locale: ca
+draft: false
+---
+
+Guia dels **passos 4–6** del [pipeline a la homepage](/ca#process).
+
+<h2 id="github-actions">GitHub Actions</h2>
+
+Push a `main`/`develop` → SSH, pull, build, `compose up`. Secrets SSH i `DEPLOY_PATH_*`.
+
+<h2 id="docker">Docker al VPS</h2>
+
+`app` (Astro :4325) i `auth-gateway` (:3000) a la xarxa `web-public`.
+
+<h2 id="live-site">Lloc en viu</h2>
+
+Nginx Proxy Manager gestiona TLS i enruta al contenidor Astro.
+
+---
+
+[Anterior: Pipeline de contingut](/ca/documentacio/content-pipeline)

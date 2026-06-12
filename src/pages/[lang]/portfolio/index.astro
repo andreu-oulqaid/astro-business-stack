@@ -25,14 +25,18 @@ const allPosts = await getCollection('services', ({ data }) => {
 });
 
 const posts = allPosts
-  .filter((post) => post.data.locale === locale)
+  .filter(
+    (post) =>
+      post.data.locale === locale && (post.data.category ?? 'capabilities') === 'capabilities',
+  )
   .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
 
 const featuredPosts = posts.filter((post) => post.data.featured);
 const nonFeaturedPosts = posts.filter((post) => !post.data.featured);
 
-const filterTags = ['integrations', 'ssr', 'cms'] as const;
+const filterTags = ['capabilities', 'integrations', 'ssr', 'cms'] as const;
 const filterTagLabels = {
+  capabilities: t('blog.filter.capabilities'),
   integrations: t('blog.filter.integrations'),
   ssr: t('blog.filter.ssr'),
   cms: t('blog.filter.cms'),
@@ -70,6 +74,7 @@ const getPostUrl = (postId: string) => {
               tags={post.data.tags}
               image={post.data.image}
               featured={true}
+              data-category={post.data.category ?? 'capabilities'}
             />
           ))}
         </div>
@@ -101,6 +106,7 @@ const getPostUrl = (postId: string) => {
               tags={post.data.tags}
               image={post.data.image}
               data-tags={post.data.tags.join(',')}
+              data-category={post.data.category ?? 'capabilities'}
             />
           ))}
         </div>
@@ -127,7 +133,11 @@ const getPostUrl = (postId: string) => {
     function applyFilter(filter: string) {
       cards.forEach((card) => {
         const tags = card.getAttribute('data-tags') || '';
-        const visible = filter === 'all' || tags.split(',').includes(filter);
+        const category = card.getAttribute('data-category') || 'capabilities';
+        const visible =
+          filter === 'all' ||
+          (filter === 'capabilities' && category === 'capabilities') ||
+          (filter !== 'capabilities' && tags.split(',').includes(filter));
         card.classList.toggle('hidden', !visible);
       });
       buttons.forEach((btn) => btn.classList.toggle('is-active', btn.dataset.filter === filter));

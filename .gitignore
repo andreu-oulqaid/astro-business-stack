@@ -49,9 +49,17 @@ test-results/
 # Pagefind
 public/pagefind/
 
+# Video 
+public/demo/LinkedIn-stack.mp4
+
 # Claude Code
 .claude/
 
+# Cursor
+.cursor/
+
+# VS Code
+.vscode/
 
 # npm lockfile (pnpm only)
 package-lock.json

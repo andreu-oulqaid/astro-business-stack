@@ -22,22 +22,50 @@
   width: auto;
   max-width: 4.25rem;
   object-fit: contain;
-  opacity: 0.78;
-  filter: grayscale(1);
-  transition: filter 180ms ease, opacity 180ms ease;
+  opacity: 0.92;
+  filter: none;
+  transition: opacity 180ms ease, transform 180ms ease, filter 180ms ease;
 }
 
 .logo-chip:hover .logo-mark {
   opacity: 1;
-  filter: grayscale(0);
+  transform: scale(1.06);
 }
 
+/* Black/dark SVGs — invert in dark mode only so they stay visible on dark backgrounds */
+.dark .logo-mark--on-dark,
+.dark .logo-mark--mono,
 .dark .logo-mark--dark-friendly {
-  filter: invert(1) brightness(1.12) grayscale(1);
+  filter: invert(1) brightness(1.08);
   opacity: 0.92;
 }
 
+.dark .logo-chip:hover .logo-mark--on-dark,
+.dark .logo-chip:hover .logo-mark--mono,
 .dark .logo-chip:hover .logo-mark--dark-friendly {
-  filter: invert(1) brightness(1.22) grayscale(0);
+  filter: invert(1) brightness(1.18);
   opacity: 1;
+  transform: scale(1.06);
+}
+
+/* Decap CMS — slightly taller mark */
+.logo-mark--decap {
+  height: 1.2rem;
+  max-width: 4rem;
+}
+
+.logo-chip:hover .logo-mark--decap {
+  opacity: 1;
+  transform: scale(1.06);
+}
+
+/* Velocity logomark — full color, compact in chips */
+.logo-mark--velocity {
+  height: 1.25rem;
+  max-width: 1.125rem;
+  opacity: 1;
+}
+
+.logo-chip:hover .logo-mark--velocity {
+  transform: scale(1.08);
 }

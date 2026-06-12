@@ -1,11 +1,13 @@
 ---
 /** Shared logo strip styling for sales pillars (labels passed in from callers). */
+import type { LogoKey } from '@/config/logoMarks';
+import LogoChip from '@/components/ui/data-display/LogoChip/LogoChip.astro';
 
 interface LogoItem {
   src: string;
   alt: string;
+  logoKey?: LogoKey;
   wrapperClass?: string;
-  imgClass?: string;
 }
 
 interface Props {
@@ -23,16 +25,9 @@ const { ariaLabel, label, logos } = Astro.props;
   </p>
   <ul class="m-0 flex list-none flex-wrap gap-3 p-0 sm:gap-4" role="list">
     {
-      logos.map(({ src, alt, wrapperClass, imgClass }) => (
-        <li class:list={['logo-chip', wrapperClass]}>
-          <img
-            src={src}
-            alt={alt}
-            class:list={['logo-mark', imgClass]}
-            loading="lazy"
-            width="96"
-            height="24"
-          />
+      logos.map(({ src, alt, logoKey, wrapperClass }) => (
+        <li class:list={[wrapperClass]}>
+          <LogoChip src={src} alt={alt} logoKey={logoKey} width={96} height={24} />
         </li>
       ))
     }
@@ -50,66 +45,4 @@ const { ariaLabel, label, logos } = Astro.props;
       gap: 1rem;
     }
   }
-
-  .logo-chip {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 2.5rem;
-    min-width: 5.5rem;
-    padding: 0 0.875rem;
-    border: 1px solid var(--border);
-    border-radius: 0.5rem;
-    background: color-mix(in oklab, var(--background) 85%, var(--background-secondary) 15%);
-    transition:
-      border-color 180ms ease,
-      transform 180ms ease,
-      box-shadow 180ms ease;
-  }
-
-  .logo-chip:hover {
-    border-color: var(--border-strong);
-    transform: translateY(-1px);
-    box-shadow: var(--theme-shadow-md);
-  }
-
-  .logo-mark {
-    height: 1.25rem;
-    width: auto;
-    max-width: 5rem;
-    object-fit: contain;
-    opacity: 0.82;
-    filter: grayscale(1);
-    transition:
-      filter 180ms ease,
-      opacity 180ms ease;
-  }
-
-  .logo-chip :global(.logo-mark--decap) {
-    height: 1.35rem;
-    max-width: 4.5rem;
-    filter: grayscale(1) brightness(0.85);
-  }
-
-  :global(.dark) .logo-chip :global(.logo-mark--decap) {
-    filter: grayscale(1) brightness(1.15);
-    opacity: 0.9;
-  }
-
-  .logo-chip:hover .logo-mark,
-  :global(.dark) .logo-chip:hover .logo-mark--decap {
-    opacity: 1;
-    filter: grayscale(0);
-  }
-
-  .logo-chip :global(.logo-mark--dark-friendly) {
-    filter: invert(1) brightness(1.12) grayscale(1);
-    opacity: 0.92;
-  }
-
-  :global(.dark) .logo-chip:hover .logo-mark--dark-friendly {
-    filter: invert(1) brightness(1.22) grayscale(0);
-    opacity: 1;
-  }
-
 </style>

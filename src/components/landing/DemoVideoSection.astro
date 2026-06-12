@@ -10,7 +10,8 @@ const { locale } = Astro.props;
 const t = useTranslations(locale);
 
 const videoUrl = import.meta.env.PUBLIC_DEMO_VIDEO_URL as string | undefined;
-const posterUrl = '/demo/poster.svg';
+const posterUrl = '/demo/tumbnail.png';
+const posterAlt = t('demoVideo.posterAlt');
 
 const isYoutube =
   videoUrl &&
@@ -43,7 +44,9 @@ const hasVideo = Boolean(videoUrl && (youtubeId || videoUrl.endsWith('.mp4')));
       {t('demoVideo.description')}
     </p>
 
-    <div class="relative mt-8 overflow-hidden rounded-xl border border-border bg-background-secondary shadow-[var(--theme-shadow-lg)] aspect-video">
+    <div
+      class="demo-video-frame group relative mt-8 aspect-video overflow-hidden rounded-xl border border-border bg-black shadow-[var(--theme-shadow-lg)]"
+    >
       {
         hasVideo && youtubeId ? (
           <iframe
@@ -55,17 +58,60 @@ const hasVideo = Boolean(videoUrl && (youtubeId || videoUrl.endsWith('.mp4')));
             loading="lazy"
           />
         ) : hasVideo && videoUrl?.endsWith('.mp4') ? (
-          <video class="h-full w-full object-cover" controls poster={posterUrl} preload="metadata">
-            <source src={videoUrl} type="video/mp4" />
-          </video>
-        ) : (
-          <div class="flex h-full w-full flex-col items-center justify-center gap-3 bg-background-tertiary p-8">
-            <img src={posterUrl} alt="" class="absolute inset-0 h-full w-full object-cover opacity-40" loading="lazy" />
-            <div class="relative z-10 flex flex-col items-center gap-2">
-              <span class="flex h-14 w-14 items-center justify-center rounded-full border-2 border-brand-500 bg-background/80 text-brand-500" aria-hidden="true">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M6 4l10 6-10 6V4z"/></svg>
+          <div class="demo-video-player relative h-full w-full" data-demo-video>
+            <video
+              class="demo-video h-full w-full object-cover"
+              playsinline
+              preload="metadata"
+              poster={posterUrl}
+              aria-label={t('demoVideo.title')}
+            >
+              <source src={videoUrl} type="video/mp4" />
+            </video>
+            <button
+              type="button"
+              class="demo-video-poster absolute inset-0 z-10 flex cursor-pointer items-center justify-center border-0 bg-transparent p-0"
+              data-demo-video-poster
+              aria-label={t('demoVideo.playLabel')}
+            >
+              <img
+                src={posterUrl}
+                alt={posterAlt}
+                class="demo-video-poster-img absolute inset-0 h-full w-full object-cover"
+                loading="eager"
+                decoding="async"
+              />
+              <span class="absolute inset-0 bg-gradient-to-t from-black/45 via-black/5 to-black/15" aria-hidden="true" />
+              <span
+                class="demo-video-play-btn relative flex h-16 w-16 items-center justify-center rounded-full border border-white/25 bg-black/45 text-white shadow-lg backdrop-blur-sm"
+                aria-hidden="true"
+              >
+                <svg width="22" height="22" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M6 4l10 6-10 6V4z" />
+                </svg>
               </span>
-              <p class="text-sm font-medium text-foreground-muted">{t('demoVideo.placeholder')}</p>
+            </button>
+          </div>
+        ) : (
+          <div class="relative flex h-full w-full items-center justify-center">
+            <img
+              src={posterUrl}
+              alt={posterAlt}
+              class="demo-video-poster-img absolute inset-0 h-full w-full object-cover"
+              loading="lazy"
+              decoding="async"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-black/20" aria-hidden="true" />
+            <div class="relative z-10 flex flex-col items-center gap-3 px-6">
+              <span
+                class="demo-video-play-btn flex h-16 w-16 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white shadow-lg backdrop-blur-sm"
+                aria-hidden="true"
+              >
+                <svg width="22" height="22" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M6 4l10 6-10 6V4z" />
+                </svg>
+              </span>
+              <p class="text-sm font-medium text-white/90">{t('demoVideo.placeholder')}</p>
             </div>
           </div>
         )
@@ -73,3 +119,105 @@ const hasVideo = Boolean(videoUrl && (youtubeId || videoUrl.endsWith('.mp4')));
     </div>
   </div>
 </section>
+
+<script>
+  function initDemoVideoPlayers() {
+    document.querySelectorAll<HTMLElement>('[data-demo-video]').forEach((root) => {
+      if (root.dataset.demoVideoInit === 'true') return;
+      root.dataset.demoVideoInit = 'true';
+
+      const video = root.querySelector<HTMLVideoElement>('video');
+      const poster = root.querySelector<HTMLButtonElement>('[data-demo-video-poster]');
+      if (!video || !poster) return;
+
+      const showPoster = () => {
+        poster.hidden = false;
+        video.removeAttribute('controls');
+      };
+
+      const hidePoster = () => {
+        poster.hidden = true;
+        video.setAttribute('controls', '');
+      };
+
+      poster.addEventListener('click', () => {
+        hidePoster();
+        void video.play();
+      });
+
+      video.addEventListener('ended', () => {
+        video.currentTime = 0;
+        showPoster();
+      });
+    });
+  }
+
+  initDemoVideoPlayers();
+  document.addEventListener('astro:page-load', initDemoVideoPlayers);
+</script>
+
+<style>
+  .demo-video-frame {
+    transition:
+      transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 280ms ease;
+  }
+
+  .demo-video-frame:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in oklab, var(--brand-500) 22%, var(--border));
+    box-shadow:
+      0 20px 40px -24px color-mix(in oklab, var(--foreground) 28%, transparent),
+      var(--theme-shadow-lg);
+  }
+
+  .demo-video-poster-img {
+    transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .demo-video-frame:hover .demo-video-poster-img {
+    transform: scale(1.03);
+  }
+
+  .demo-video-play-btn {
+    transition:
+      transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 200ms ease,
+      border-color 200ms ease;
+  }
+
+  .demo-video-frame:hover .demo-video-play-btn {
+    transform: scale(1.08);
+    background-color: color-mix(in oklab, var(--brand-500) 55%, black);
+    border-color: color-mix(in oklab, var(--brand-500) 40%, white);
+  }
+
+  .demo-video-poster:focus-visible {
+    outline: none;
+  }
+
+  .demo-video-poster:focus-visible .demo-video-play-btn {
+    outline: 2px solid var(--brand-500);
+    outline-offset: 3px;
+  }
+
+  .demo-video-poster[hidden] {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .demo-video-frame,
+    .demo-video-frame:hover {
+      transform: none;
+    }
+
+    .demo-video-poster-img,
+    .demo-video-frame:hover .demo-video-poster-img,
+    .demo-video-play-btn,
+    .demo-video-frame:hover .demo-video-play-btn {
+      transform: none;
+      transition: none;
+    }
+  }
+</style>

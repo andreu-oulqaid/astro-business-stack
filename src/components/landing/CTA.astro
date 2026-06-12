@@ -93,8 +93,8 @@ const displayHeading = t('cta.title');
 const displayHighlight = t('cta.titleHighlight');
 const displayDescription = t('cta.description');
 const calLink = getCalLink(locale);
-const docsLink = `${siteConfig.github.url}#readme`;
 const repoLink = siteConfig.github.url;
+const linkedinLink = siteConfig.linkedin.url;
 const privacyPath = getLocalizedPath('privacy', locale);
 const funnelLabels = {
   step1Title: t('cta.funnel.step1Title'),
@@ -180,9 +180,9 @@ const hasBookingFootnoteSlot = Astro.slots.has('booking-footnote');
             <Icon name="github" size="sm" />
             <span set:html={t('cta.command')} />
           </Button>
-          <Button size="lg" variant="outline" href={docsLink}>
-            {t('cta.docs')}
-            <Icon name="arrow-right" size="sm" />
+          <Button size="lg" variant="outline" href={linkedinLink} target="_blank">
+            {t('cta.reachOut')}
+            <Icon name="external-link" size="sm" />
           </Button>
         </div>
       ) : (

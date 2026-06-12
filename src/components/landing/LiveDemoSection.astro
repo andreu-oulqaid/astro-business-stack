@@ -1,0 +1,69 @@
+---
+import type { Locale } from '@/i18n/config';
+import { useTranslations } from '@/i18n';
+import Badge from '@/components/ui/data-display/Badge/Badge.astro';
+import LiveDemoPlayground from '@/components/landing/LiveDemoPlayground';
+import { isLiveDemoConfigured } from '@/lib/demoEnv';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+if (!isLiveDemoConfigured()) {
+  return null;
+}
+
+const labels = {
+  runButton: t('liveDemo.runButton'),
+  running: t('liveDemo.running'),
+  attemptsLeft: t('liveDemo.attemptsLeft'),
+  captured: t('liveDemo.captured'),
+  failed: t('liveDemo.failed'),
+  recentActivity: t('liveDemo.recentActivity'),
+  noActivity: t('liveDemo.noActivity'),
+  rateLimited: t('liveDemo.rateLimited'),
+  pipelineError: t('liveDemo.pipelineError'),
+  terminal: {
+    idle: t('liveDemo.terminal.idle'),
+    received: t('liveDemo.terminal.received'),
+    writingAnalytics: t('liveDemo.terminal.writingAnalytics'),
+    supabaseOk: t('liveDemo.terminal.supabaseOk'),
+    syncingNotion: t('liveDemo.terminal.syncingNotion'),
+    notionOk: t('liveDemo.terminal.notionOk'),
+    notionFailed: t('liveDemo.terminal.notionFailed'),
+    sendingNotify: t('liveDemo.terminal.sendingNotify'),
+    resendOk: t('liveDemo.terminal.resendOk'),
+    resendSkipped: t('liveDemo.terminal.resendSkipped'),
+    complete: t('liveDemo.terminal.complete'),
+    failed: t('liveDemo.terminal.failed'),
+  },
+};
+---
+
+<section
+  id="live-demo"
+  class="border-b border-border bg-background-secondary py-[var(--space-section-md)]"
+  aria-labelledby="live-demo-heading"
+>
+  <div class="mx-auto max-w-6xl px-6">
+    <div class="mb-8 text-center">
+      <Badge variant="brand" size="sm" pill class="mb-4">
+        {t('liveDemo.badge')}
+      </Badge>
+      <h2
+        id="live-demo-heading"
+        class="font-display text-2xl font-bold tracking-tight text-foreground md:text-3xl"
+      >
+        {t('liveDemo.title')}
+      </h2>
+      <p class="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-foreground-muted md:text-base">
+        {t('liveDemo.description')}
+      </p>
+    </div>
+
+    <LiveDemoPlayground client:visible labels={labels} locale={locale} />
+  </div>
+</section>

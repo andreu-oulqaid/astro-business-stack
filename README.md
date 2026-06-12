@@ -60,20 +60,16 @@ Sites built with this stack pattern (external repos):
 
 ## Documentation
 
+- [Getting started (VPS)](docs/getting-started.md)
 - [Architecture](docs/architecture.md)
 - [Deployment](docs/deployment.md)
 - [CMS & OAuth](docs/cms-oauth.md)
 - [Integrations](docs/integrations.md)
 - [Local development](docs/local-development.md)
 
-## VPS deployment checklist
+## VPS deployment
 
-1. Clone repo on VPS (`/opt/webfactory/astro-stack` or your path)
-2. Copy `.env.example` → `.env` and fill secrets
-3. Create GitHub OAuth App with callback `https://your-domain/api/auth/callback`
-4. Configure Nginx Proxy Manager hosts for app + auth paths
-5. Set GitHub Environment secrets: `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`, `DEPLOY_PATH`, `DEPLOY_PATH_TEST`
-6. Push `develop` → test, `main` → production
+See [docs/getting-started.md](docs/getting-started.md) for the full checklist: deploy user, SSH keys, DNS, `.env`, NPM, and GitHub Actions secrets (`DEPLOY_PATH_PROD`, `DEPLOY_PATH_TEST`). Push `develop` → test, `main` → production.
 
 ## Upstream
 

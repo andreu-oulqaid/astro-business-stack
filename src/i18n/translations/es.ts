@@ -57,11 +57,54 @@ export const es: TranslationKeys = {
 
   trustBar: {
     label: 'Construido con',
+    velocityTitle: 'Velocity — base UI de Southwell Media',
+    attributionPrefix: 'Base UI de ',
+    attributionLink: 'Velocity',
+    attributionSuffix: ' por Southwell Media',
     item1: 'Astro 6 SSR + adaptador Node',
     item2: 'Builds Docker multi-etapa',
     item3: 'Deploy SSH con GitHub Actions',
     item4: 'OAuth Decap autoalojado',
     item5: 'Integraciones de producción opcionales',
+  },
+
+  demoVideo: {
+    badge: 'Recorrido',
+    title: 'El stack en acción',
+    description: 'Recorrido breve de deploy, auth CMS e integraciones.',
+    placeholder: 'Vídeo demo próximamente',
+    posterAlt: 'Recorrido del stack web autoalojado — listo para producción y automatizado',
+    playLabel: 'Reproducir vídeo del recorrido',
+  },
+
+  liveDemo: {
+    badge: 'Pruébalo tú',
+    title: 'Sandbox de integraciones en vivo',
+    description:
+      'Simula un pipeline de formulario lead con Supabase y Notion de demo — mismo patrón que en producción.',
+    runButton: 'Ejecutar pipeline',
+    running: 'Ejecutando pipeline…',
+    attemptsLeft: '{remaining} de {max} ejecuciones / hora',
+    captured: 'Leads capturados',
+    failed: 'Fallidos',
+    recentActivity: 'Actividad reciente',
+    noActivity: 'Aún no hay ejecuciones.',
+    rateLimited: 'Demasiadas ejecuciones. Inténtalo de nuevo en una hora.',
+    pipelineError: 'El pipeline falló. Revisa la configuración de demo.',
+    terminal: {
+      idle: 'Ejecuta el pipeline para ver la salida.',
+      received: 'Lead recibido: {lead}',
+      writingAnalytics: '◐ Escribiendo evento de analytics…',
+      supabaseOk: 'Supabase: lead_captured',
+      syncingNotion: '◐ Sincronizando con Notion CRM…',
+      notionOk: 'Notion: fila creada',
+      notionFailed: 'Notion: error',
+      sendingNotify: '◐ Enviando notificación…',
+      resendOk: 'Resend: simulado — sin email',
+      resendSkipped: 'Resend: omitido',
+      complete: 'Pipeline completado ({ms}ms)',
+      failed: 'Pipeline fallido',
+    },
   },
 
   realityCheck: {
@@ -85,52 +128,76 @@ export const es: TranslationKeys = {
   },
 
   leakToFlow: {
-    title: 'Esta es la <span class="text-brand-500"><strong>Solución</strong></span>.',
+    title: 'El <span class="text-brand-500"><strong>pipeline de deploy</strong></span> — del CMS al VPS.',
     steps: {
       step1: {
-        title: 'Auditoría <strong>Gratis</strong>.',
-        body: 'Identificamos fugas de dinero en tu proceso actual. Mapa de soluciones, no promesas.',
+        title: '<strong>Login</strong> con OAuth.',
+        body: 'El editor abre /admin. Gateway OAuth autoalojado redirige a GitHub y devuelve un token CMS.',
       },
       step2: {
-        title: 'Despliegue Inmediato.',
-        body: 'Web en <strong>< 7 días</strong>. Automatización en <strong>< 10 días</strong>. El dinero ama la velocidad.',
+        title: 'Editar en <strong>Decap CMS</strong>.',
+        body: 'Cambios de contenido en el editor visual. Sin SaaS de auth de terceros.',
       },
       step3: {
-        title: 'Escalado Automático.',
-        body: 'Tu equipo se puede dedicar a las tareas importantes. El cliente te puede ver.',
+        title: '<strong>Commit</strong> a GitHub.',
+        body: 'Decap guarda en la rama del repo — develop para test, main para producción.',
+      },
+      step4: {
+        title: 'Deploy con <strong>GitHub Actions</strong>.',
+        body: 'El workflow hace SSH al VPS, pull del código y dispara el rebuild.',
+      },
+      step5: {
+        title: 'Rebuild <strong>Docker</strong> en VPS.',
+        body: 'Build multi-etapa y compose up en la red web-public.',
+      },
+      step6: {
+        title: 'Sitio <strong>en vivo</strong> actualizado.',
+        body: 'Nginx Proxy Manager gestiona TLS. Astro SSR sirve el nuevo build.',
       },
     },
     badges: {
-      web: 'Web: < 7 días',
-      automation: 'Automatización: < 10 días',
+      auth: 'Auth: OAuth autoalojado',
+      web: 'CI: GitHub Actions',
+      automation: 'Runtime: Docker + Astro SSR',
     },
-    cta: 'Reservar Auditoría <strong>Gratis</strong>',
+    readDocs: 'Leer docs',
+    cta: 'Ver <strong>guías de deploy</strong>',
+  },
+
+  docs: {
+    title: 'Guías de deploy',
+    description: 'Cómo funcionan el pipeline de contenido y el deploy en producción — paso a paso.',
+    breadcrumb: 'Docs',
+    backToIndex: 'Volver a docs',
   },
 
   techEdge: {
-    title: 'Nuestra ventaja competitiva.',
+    title: 'Capacidades del stack',
+    metrics: {
+      ssr: 'Renderizado',
+      ssrValue: 'Astro SSR',
+      locales: 'Idiomas',
+      localesValue: '4',
+      containers: 'Deploy',
+      containersValue: '2 contenedores',
+    },
     web: {
-      title: 'Webs de Alto Rendimiento',
-      body: 'Webs que cargan en milisegundos. Sin fugas de clientes y con excelente SEO.',
-      metrics: {
-        title: 'Cualificación de Google (Lighthouse)',
-        competitor: 'Competidor local Wordpress',
-        us: 'Nosotros',
-        mobileNote:
-          '<strong>Aproximadamente el 80% de los clientes vienen desde móvil</strong>, donde estos resultados son aún más críticos para no perder clientes.',
-      },
-      cta: 'Leer más sobre nuestra arquitectura web',
+      title: 'Astro SSR + design system',
+      body: 'Páginas SSR, routing i18n, content collections tipadas y librería de componentes.',
+      metrics: { title: '', competitor: '', us: '', mobileNote: '' },
+      cta: 'Artículo multi-locale SSR',
     },
     automation: {
-      title: 'Automatización + IA',
-      body: 'Despliegue en días. Sistemas fiables con herramientas top del mercado para <strong>ahorrarte cientos de horas</strong>.',
-      cta: 'Ver proyectos de automatización',
+      title: 'CI/CD + Docker',
+      body: 'Deploy SSH con GitHub Actions, builds Docker multi-etapa y rollback por tags en el VPS.',
+      cta: 'Guía de deploy en producción',
     },
     bridge: {
-      title: 'Sistema completo Web + Automatización',
-      body: 'Unimos web, automatización e IA en un solo sistema. Menos fricción operativa, más capacidad de crecimiento.',
-      cta: 'Ver proyectos full system',
+      title: 'Integraciones de negocio',
+      body: 'Notion CRM, Resend, Supabase analytics y Cal.com — vía rutas API tipadas.',
+      cta: 'Artículo lead funnel',
     },
+    readGuide: 'Leer guía',
   },
 
   servicesSection: {
@@ -299,13 +366,14 @@ export const es: TranslationKeys = {
 
   // CTA Section
   cta: {
-    title: '¿Seguirás dejando que tu sistema pierda dinero?',
-    titleHighlight: 'El riesgo es nuestro.',
+    title: 'Listo para desplegar el stack',
+    titleHighlight: 'stack',
     description:
-      'Obtén un mapa de soluciones en una llamada de 15 min. Si no cumplimos los objetivos de conversión pactados, <strong>no pagas ni un céntimo</strong>. Así de simple.',
-    docs: 'Ver Casos de Éxito',
-    command: 'Quiero mi Auditoría <strong>Gratis</strong>',
-    guaranteeBadge: 'Garantía de Devolución 100%',
+      'Clona el repositorio, sigue la documentación y adapta el patrón a tu propio VPS o proyectos de clientes.',
+    docs: 'Leer documentación',
+    reachOut: 'Escríbeme',
+    command: 'Ver en GitHub',
+    guaranteeBadge: 'Licencia MIT',
     privacyNotePrefix:
       'Al continuar, aceptas nuestra',
     privacyNoteLink: 'Política de Privacidad',
@@ -340,6 +408,7 @@ export const es: TranslationKeys = {
     links: {
       documentation: 'Docs',
       github: 'GitHub',
+      linkedin: 'LinkedIn',
       twitter: 'GitHub',
       license: 'Licencia',
       privacy: 'Privacidad',
@@ -453,6 +522,10 @@ export const es: TranslationKeys = {
     filterLabel: 'Filtrar por',
     filterAll: 'Todos',
     filter: {
+      capabilities: 'Capacidades',
+      integrations: 'Integraciones',
+      ssr: 'SSR e i18n',
+      cms: 'CMS',
       web: 'Web',
       automation: 'Automatización',
       'full-system': 'Sistema completo',

@@ -80,18 +80,19 @@ export async function createLeadInNotion(
   notion: Client,
   databaseId: string,
   lead: LeadInput,
-  extras?: { auditBookedDate?: string },
+  extras?: { auditBookedDate?: string; source?: string },
   dbName: NotionDbName = 'Leads',
 ): Promise<{ ok: true; pageId: string } | { ok: false }> {
+  const source = extras?.source ?? 'website-cta';
   try {
     const res = await notion.pages.create({
       parent: { database_id: databaseId },
       properties: {
-        Company: { title: [{ text: { content: lead.name } }] },
+        ID: { title: [{ text: { content: lead.name } }] },
         Name: { rich_text: [{ text: { content: lead.name } }] },
         Email: { email: lead.email },
         ...(lead.phone ? { Phone: { phone_number: lead.phone } } : {}),
-        Source: { rich_text: [{ text: { content: 'website-cta' } }] },
+        Source: { rich_text: [{ text: { content: source } }] },
         ...(lead.locale ? { Locale: { select: { name: lead.locale } } } : {}),
         Status: { status: { name: 'New Response' } },
         ...(extras?.auditBookedDate

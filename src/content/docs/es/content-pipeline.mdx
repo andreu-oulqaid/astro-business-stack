@@ -1,0 +1,36 @@
+---
+title: "Pipeline de contenido: OAuth, Decap y Git"
+description: "Login OAuth autoalojado, edición en Decap CMS y commit al repositorio."
+publishedAt: 2026-06-10
+author: "Stack Team"
+tags: ["deploy", "oauth", "decap", "cms"]
+category: deploy
+order: 1
+locale: es
+draft: false
+---
+
+Guía de los **pasos 1–3** del [pipeline en la homepage](/es#process).
+
+<h2 id="oauth">Login OAuth</h2>
+
+Decap necesita un token de GitHub. Este stack usa un **gateway Express autoalojado** (`gateway/`) en tu VPS — sin SaaS de auth de terceros.
+
+1. El editor abre `/admin`
+2. Redirección a `AUTH_GATEWAY_URL/api/auth`
+3. OAuth de GitHub → callback `/api/auth/callback`
+4. El gateway devuelve el token a Decap
+
+Variables en el VPS: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `AUTH_GATEWAY_URL`.
+
+<h2 id="decap">Editar en Decap CMS</h2>
+
+Colecciones en `src/content/` (blog, faqs, pages). `config.yml` usa `base_url: __AUTH_GATEWAY_URL__` sustituido en el deploy.
+
+<h2 id="git-commit">Commit a GitHub</h2>
+
+Decap guarda en la rama configurada: `develop` (test) o `main` (producción). El contenido vive en git — revisión con PRs normales.
+
+---
+
+[Siguiente: Deploy en producción](/es/documentacion/production-deploy)

@@ -66,22 +66,26 @@ const deployments: Record<Locale, LiveDeployment[]> = {
   ],
 };
 
-export const liveDeploymentsSection: Record<Locale, { title: string; description: string }> = {
+export const liveDeploymentsSection: Record<Locale, { title: string; description: string; visitSite: string }> = {
   en: {
     title: 'Live deployments',
     description: 'Production sites running on the same VPS platform this stack powers.',
+    visitSite: 'Visit site',
   },
   es: {
     title: 'Despliegues en producción',
     description: 'Sitios reales en el mismo VPS que impulsa este stack.',
+    visitSite: 'Visitar sitio',
   },
   ca: {
     title: 'Desplegaments en producció',
     description: 'Llocs reals al mateix VPS que impulsa aquest stack.',
+    visitSite: 'Visitar lloc',
   },
   pl: {
     title: 'Wdrożenia produkcyjne',
     description: 'Prawdziwe strony na tym samym VPS, który napędza ten stack.',
+    visitSite: 'Odwiedź stronę',
   },
 };
 

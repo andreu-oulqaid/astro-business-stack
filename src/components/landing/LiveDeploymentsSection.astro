@@ -24,7 +24,7 @@ const deployments = getLiveDeployments(locale);
     <div class="grid gap-4 md:grid-cols-2">
       {
         deployments.map((deployment) => (
-          <article class="flex h-full flex-col rounded-xl border border-border bg-background p-6">
+          <article class="flex h-full flex-col rounded-xl border border-border bg-background p-6 transition-shadow duration-200 hover:shadow-md">
             <div class="mb-3 flex flex-wrap gap-2">
               {deployment.tags.map((tag) => (
                 <Badge variant="brand" size="sm">
@@ -35,8 +35,8 @@ const deployments = getLiveDeployments(locale);
             <h3 class="font-display text-xl font-semibold text-foreground">{deployment.name}</h3>
             <p class="mt-2 flex-1 text-sm leading-relaxed text-foreground-muted">{deployment.description}</p>
             <div class="mt-4">
-              <Button variant="outline" size="sm" href={deployment.url}>
-                Visit site
+              <Button variant="outline" size="sm" href={deployment.url} target="_blank">
+                {copy.visitSite}
                 <Icon name="external-link" size="sm" />
               </Button>
             </div>
