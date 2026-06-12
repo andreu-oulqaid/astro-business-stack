@@ -29,8 +29,8 @@ When configured:
 ## Supabase (funnel analytics)
 
 1. Create a Supabase project
-2. Run `scripts/supabase-analytics-base.sql` then `scripts/supabase-analytics-v2.sql` in SQL editor
-3. Run `scripts/supabase-api-rate-limit.sql` for `/api/leads`, `/api/leads/confirm`, and `/api/analytics/calendar-viewed` quotas
+2. Run `scripts/supabase-analytics-base.sql`, `scripts/supabase-analytics-v2.sql`, then `scripts/supabase-analytics-v3-interactions.sql` in SQL editor
+3. Run `scripts/supabase-api-rate-limit.sql` for `/api/leads`, `/api/leads/confirm`, `/api/analytics/calendar-viewed`, and `/api/analytics/interaction` quotas
 4. Configure:
 
 ```bash
@@ -42,13 +42,35 @@ RATE_LIMIT_SALT=64-char-random-hex  # optional; defaults to ANALYTICS_SALT
 API_LEADS_MAX_PER_HOUR=10
 API_LEADS_CONFIRM_MAX_PER_HOUR=10
 API_CALENDAR_VIEWED_MAX_PER_HOUR=20
+API_ANALYTICS_INTERACTION_MAX_PER_HOUR=30
 ANALYTICS_ENV=development
+ANALYTICS_SITE_ID=stack.example.com
 ADMIN_METRICS_ENABLED=true
 ```
 
 Dashboard at `/admin/metrics` when enabled.
 
-Production API limits **fail open** if Supabase is unset or the RPC errors — leads still flow. Only explicit quota exhaustion returns 429.
+Production API limits **fail open** if Supabase is unset or the RPC errors — leads still flow. Only explicit quota exhaustion returns 429 (interaction ingest silently drops at 204 instead).
+
+### Interaction analytics (GitHub, LinkedIn, demo video)
+
+First-party click/play events via `POST /api/analytics/interaction`:
+
+- **Event type:** `interaction` with metadata `{ env, site_id, category, action, target, placement }`
+- **Visitor identity:** IP HMAC via `RATE_LIMIT_SALT` (stored in `user_hash`; distinct from email HMAC on funnel events)
+- **Rate limit:** `analytics_interaction` route, default **30 events/hour per IP** (`API_ANALYTICS_INTERACTION_MAX_PER_HOUR`)
+- **Client:** `navigator.sendBeacon` with JSON blob; video play deduped once per tab session
+- **Multi-site:** set `ANALYTICS_SITE_ID` per deployment when sharing one Supabase project
+
+Allowed values (server-validated):
+
+| Field | Values |
+|-------|--------|
+| `target` | `github`, `linkedin`, `demo_video` |
+| `placement` | `navbar`, `footer`, `cta`, `hero` |
+| `action` | `click`, `play` |
+
+Tracked automatically on navbar/footer/CTA outbound links and MP4 demo poster click. Not a replacement for GA — complementary portfolio metrics.
 
 ## Live demo sandbox (homepage)
 

@@ -121,6 +121,8 @@ const hasVideo = Boolean(videoUrl && (youtubeId || videoUrl.endsWith('.mp4')));
 </section>
 
 <script>
+  import { trackInteraction } from '@/lib/trackInteraction';
+
   function initDemoVideoPlayers() {
     document.querySelectorAll<HTMLElement>('[data-demo-video]').forEach((root) => {
       if (root.dataset.demoVideoInit === 'true') return;
@@ -141,6 +143,12 @@ const hasVideo = Boolean(videoUrl && (youtubeId || videoUrl.endsWith('.mp4')));
       };
 
       poster.addEventListener('click', () => {
+        trackInteraction({
+          target: 'demo_video',
+          placement: 'hero',
+          action: 'play',
+          category: 'media',
+        });
         hidePoster();
         void video.play();
       });

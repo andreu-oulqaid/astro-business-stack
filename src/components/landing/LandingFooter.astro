@@ -67,6 +67,9 @@ const socialLinks = [
             target="_blank"
             rel="noopener noreferrer"
             aria-label={social.label}
+            data-analytics-target={social.platform}
+            data-analytics-placement="footer"
+            data-analytics-action="click"
           >
             <Icon name={social.platform} size="md" />
           </a>

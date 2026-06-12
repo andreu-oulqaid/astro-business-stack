@@ -53,6 +53,14 @@ Locales: `en` (default, no prefix), `es`, `ca`, `pl`.
 - Route slugs: `src/i18n/routes.ts`
 - Localized pages: `src/pages/[lang]/`
 
+### Auto locale redirect
+
+On first visit, unprefixed English URLs (`/`, `/about`, `/portfolio/...`) redirect to the best matching locale using the browser `Accept-Language` header. Unsupported languages fall back to English.
+
+After you pick a language in the navbar switcher, a `preferred_locale` cookie (1 year) overrides auto-detection. To re-test detection, clear that cookie in devtools and reload.
+
+Implementation: [`src/middleware.ts`](../src/middleware.ts) + [`src/lib/localeDetect.ts`](../src/lib/localeDetect.ts).
+
 ## API routes (SSR)
 
 All under `src/pages/api/` — require `output: 'server'` and Node adapter. Test with curl or the contact form on `/contact`.

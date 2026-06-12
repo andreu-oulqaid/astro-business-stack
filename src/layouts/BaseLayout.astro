@@ -5,6 +5,7 @@ import JsonLd from '@/components/seo/JsonLd.astro';
 import Hreflang from '@/components/i18n/Hreflang.astro';
 import Analytics from '@/components/layout/Analytics.astro';
 import ConsentBanner from '@/components/ui/overlay/ConsentBanner';
+import TrackInteraction from '@/components/TrackInteraction.astro';
 import { createWebsiteSchema, createOrganizationSchema } from '@/lib/schema';
 import type { Thing, WithContext } from 'schema-dts';
 import siteConfig from '@/config/site.config';
@@ -157,5 +158,6 @@ if (extraSchema) {
     <slot name="footer" />
 
     <ConsentBanner ui={consentUi} alwaysOnLabel={consentAlwaysOnLabel} />
+    <TrackInteraction />
   </body>
 </html>

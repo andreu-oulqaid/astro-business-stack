@@ -58,6 +58,9 @@ const linkedinLink = siteConfig.linkedin.url;
         class="text-sm font-medium text-foreground-muted hover:text-foreground transition-colors"
         target="_blank"
         rel="noopener noreferrer"
+        data-analytics-target="linkedin"
+        data-analytics-placement="navbar"
+        data-analytics-action="click"
       >
         {t('nav.contact')}
       </a>
@@ -65,7 +68,13 @@ const linkedinLink = siteConfig.linkedin.url;
       <div class="flex items-center gap-2 border-l border-border pl-6">
         <LanguageSwitcher />
         <ThemeToggle />
-        <Button size="sm" href={githubLink}>
+        <Button
+          size="sm"
+          href={githubLink}
+          data-analytics-target="github"
+          data-analytics-placement="navbar"
+          data-analytics-action="click"
+        >
           <Icon name="github" size="sm" />
           <span set:html={t('nav.getStarted')} />
         </Button>
@@ -73,7 +82,14 @@ const linkedinLink = siteConfig.linkedin.url;
     </div>
 
     <div class="flex items-center gap-2 md:hidden">
-      <Button size="sm" href={githubLink} class="h-9 px-3 text-xs">
+      <Button
+        size="sm"
+        href={githubLink}
+        class="h-9 px-3 text-xs"
+        data-analytics-target="github"
+        data-analytics-placement="navbar"
+        data-analytics-action="click"
+      >
         <Icon name="github" size="sm" />
         <span set:html={t('nav.getStarted')} />
       </Button>
@@ -112,6 +128,9 @@ const linkedinLink = siteConfig.linkedin.url;
       class="text-base font-medium text-foreground-secondary hover:text-foreground transition-colors"
       target="_blank"
       rel="noopener noreferrer"
+      data-analytics-target="linkedin"
+      data-analytics-placement="navbar"
+      data-analytics-action="click"
     >
       {t('nav.contact')}
     </a>
@@ -120,7 +139,13 @@ const linkedinLink = siteConfig.linkedin.url;
       <LanguageSwitcher />
       <ThemeToggle />
     </div>
-    <Button fullWidth href={githubLink}>
+    <Button
+      fullWidth
+      href={githubLink}
+      data-analytics-target="github"
+      data-analytics-placement="navbar"
+      data-analytics-action="click"
+    >
       <Icon name="github" size="sm" />
       <span set:html={t('nav.getStarted')} />
     </Button>

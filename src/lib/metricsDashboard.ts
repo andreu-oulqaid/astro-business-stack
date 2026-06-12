@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 import { getAnalyticsEnv } from './analyticsEnv';
+import { getAnalyticsSiteId } from './analyticsSite';
 
 export type DeviceType = 'mobile' | 'desktop' | 'tablet' | 'unknown';
 
@@ -15,8 +16,16 @@ export type DashboardRow = {
   page_path: string | null;
 };
 
+export type InteractionSummary = {
+  total: number;
+  unique_visitors: number;
+  by_target: Record<string, number>;
+  by_placement: Record<string, number>;
+};
+
 export type DashboardData = {
   envFilter: string;
+  siteFilter: string;
   usedRpc: boolean;
   fallbackWarning: string | null;
   counts: {
@@ -26,6 +35,7 @@ export type DashboardData = {
   };
   unique_users: { lead_users: number; booking_users: number };
   avg_lead_to_booking_seconds: number | null;
+  interactions: InteractionSummary;
   by_source: Array<{ utm_source: string; leads: number; bookings: number; conversion: number; volume: number }>;
   by_campaign: Array<{ utm_campaign: string; leads: number; bookings: number; conversion: number; volume: number }>;
   by_device: Record<DeviceType, number>;
@@ -45,6 +55,12 @@ type RpcPayload = {
   counts?: { lead_captured?: number; calendar_viewed?: number; audit_booked?: number };
   unique_users?: { lead_users?: number; booking_users?: number };
   avg_lead_to_booking_seconds?: number | null;
+  interactions?: {
+    total?: number;
+    unique_visitors?: number;
+    by_target?: Record<string, number>;
+    by_placement?: Record<string, number>;
+  };
   by_source?: Array<{ utm_source: string; leads: number; bookings: number }>;
   by_campaign?: Array<{ utm_campaign: string; leads: number; bookings: number }>;
   by_device?: Record<string, number>;
@@ -56,7 +72,16 @@ function emptyDeviceRecord(): Record<DeviceType, number> {
   return { desktop: 0, mobile: 0, tablet: 0, unknown: 0 };
 }
 
-function enrichFromRpc(raw: RpcPayload, envFilter: string): DashboardData {
+function normalizeInteractionSummary(raw: RpcPayload['interactions']): InteractionSummary {
+  return {
+    total: raw?.total ?? 0,
+    unique_visitors: raw?.unique_visitors ?? 0,
+    by_target: raw?.by_target ?? {},
+    by_placement: raw?.by_placement ?? {},
+  };
+}
+
+function enrichFromRpc(raw: RpcPayload, envFilter: string, siteFilter: string): DashboardData {
   const counts = {
     lead_captured: raw.counts?.lead_captured ?? 0,
     calendar_viewed: raw.counts?.calendar_viewed ?? 0,
@@ -110,12 +135,14 @@ function enrichFromRpc(raw: RpcPayload, envFilter: string): DashboardData {
 
   return {
     envFilter,
+    siteFilter,
     usedRpc: true,
     fallbackWarning: null,
     counts,
     unique_users,
     avg_lead_to_booking_seconds:
       raw.avg_lead_to_booking_seconds == null ? null : Number(raw.avg_lead_to_booking_seconds),
+    interactions: normalizeInteractionSummary(raw.interactions),
     by_source,
     by_campaign,
     by_device,
@@ -147,6 +174,7 @@ async function loadFallback(
   supabase: SupabaseClient,
   sinceIso: string,
   env: string,
+  siteId: string,
 ): Promise<DashboardData> {
   const [lead_captured, calendar_viewed, audit_booked] = await Promise.all([
     countFiltered(supabase, sinceIso, env, 'lead_captured'),
@@ -157,7 +185,7 @@ async function loadFallback(
   let q = supabase
     .from('analytics_events')
     .select(
-      'event_type,user_hash,locale,page_path,device_type,referrer,utm_source,utm_campaign,conversion_delta_seconds,created_at',
+      'event_type,user_hash,locale,page_path,device_type,referrer,utm_source,utm_campaign,conversion_delta_seconds,created_at,metadata',
     )
     .gte('created_at', sinceIso)
     .order('created_at', { ascending: false })
@@ -178,7 +206,29 @@ async function loadFallback(
     utm_campaign: string | null;
     conversion_delta_seconds: number | null;
     created_at: string;
+    metadata: { site_id?: string; target?: string; placement?: string } | null;
   }>;
+
+  const interactionEvents = events.filter((e) => {
+    if (e.event_type !== 'interaction') return false;
+    if (siteId && e.metadata?.site_id !== siteId) return false;
+    return true;
+  });
+  const interactionUsers = new Set(interactionEvents.map((e) => e.user_hash));
+  const by_target: Record<string, number> = {};
+  const by_placement: Record<string, number> = {};
+  for (const e of interactionEvents) {
+    const target = e.metadata?.target ?? 'unknown';
+    const placement = e.metadata?.placement ?? 'unknown';
+    by_target[target] = (by_target[target] ?? 0) + 1;
+    by_placement[placement] = (by_placement[placement] ?? 0) + 1;
+  }
+  const interactions: InteractionSummary = {
+    total: interactionEvents.length,
+    unique_visitors: interactionUsers.size,
+    by_target,
+    by_placement,
+  };
 
   const leadUsers = new Set(events.filter((e) => e.event_type === 'lead_captured').map((e) => e.user_hash));
   const bookingUsers = new Set(events.filter((e) => e.event_type === 'audit_booked').map((e) => e.user_hash));
@@ -268,14 +318,16 @@ async function loadFallback(
 
   return {
     envFilter: env,
+    siteFilter: siteId,
     usedRpc: false,
     fallbackWarning:
       events.length >= 50_000
-        ? 'Fallback mode hit the 50k row cap; run scripts/supabase-analytics-v2.sql for accurate aggregates.'
-        : 'Using fallback aggregates (RPC missing or failed). Run scripts/supabase-analytics-v2.sql in Supabase for exact counts.',
+        ? 'Fallback mode hit the 50k row cap; run scripts/supabase-analytics-v3-interactions.sql for accurate aggregates.'
+        : 'Using fallback aggregates (RPC missing or failed). Run scripts/supabase-analytics-v3-interactions.sql in Supabase for exact counts.',
     counts: { lead_captured, calendar_viewed, audit_booked },
     unique_users: { lead_users: leadUsers.size, booking_users: bookingUsers.size },
     avg_lead_to_booking_seconds,
+    interactions,
     by_source,
     by_campaign,
     by_device,
@@ -287,6 +339,8 @@ async function loadFallback(
 export type LoadDashboardOptions = {
   /** When true, RPC uses blank p_env and fallback skips metadata.env (all rows in window). */
   allEnvironments?: boolean;
+  /** When true, interaction aggregates include all sites (p_site_id blank). Funnel counts unchanged. */
+  allSites?: boolean;
 };
 
 export async function loadDashboardData(
@@ -295,22 +349,32 @@ export async function loadDashboardData(
   options?: LoadDashboardOptions,
 ): Promise<DashboardData> {
   const deploymentEnv = getAnalyticsEnv();
+  const deploymentSiteId = getAnalyticsSiteId();
   const allEnvironments = options?.allEnvironments === true;
+  const allSites = options?.allSites === true;
   const envFilter = allEnvironments ? 'all' : deploymentEnv;
+  const siteFilter = allSites ? 'all' : deploymentSiteId;
   const rpcEnv = allEnvironments ? '' : deploymentEnv;
+  const rpcSiteId = allSites ? '' : deploymentSiteId;
   const fallbackEnv = allEnvironments ? '' : deploymentEnv;
 
   const { data: rpcData, error: rpcError } = await supabase.rpc('analytics_dashboard_summary', {
     p_since: sinceIso,
     p_env: rpcEnv,
+    p_site_id: rpcSiteId,
   });
 
   if (!rpcError && rpcData && typeof rpcData === 'object') {
-    return enrichFromRpc(rpcData as RpcPayload, envFilter);
+    return enrichFromRpc(rpcData as RpcPayload, envFilter, siteFilter);
   }
 
   try {
-    const fallback = await loadFallback(supabase, sinceIso, fallbackEnv);
+    const fallback = await loadFallback(
+      supabase,
+      sinceIso,
+      fallbackEnv,
+      allSites ? '' : deploymentSiteId,
+    );
     return {
       ...fallback,
       fallbackWarning:

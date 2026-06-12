@@ -146,6 +146,17 @@ export default defineConfig({
         access: 'secret',
         default: 20,
       }),
+      API_ANALYTICS_INTERACTION_MAX_PER_HOUR: envField.number({
+        context: 'server',
+        access: 'secret',
+        default: 30,
+      }),
+      ANALYTICS_SITE_ID: envField.string({
+        context: 'server',
+        access: 'secret',
+        optional: true,
+        default: '',
+      }),
     },
   },
 
