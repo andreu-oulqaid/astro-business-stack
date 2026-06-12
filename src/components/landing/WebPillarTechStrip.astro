@@ -23,10 +23,10 @@ const t = useTranslations(locale);
   ariaLabel={t('salesWeb.stackStripAria' as TranslationKey)}
   label={t('salesWeb.stackStripLabel' as TranslationKey)}
   logos={[
-    { src: astroLogo.src, alt: 'Astro' },
-    { src: tailwindLogo.src, alt: 'Tailwind CSS' },
-    { src: decapLogo.src, alt: 'Decap CMS', imgClass: 'logo-mark--decap' },
-    { src: pageSpeedLogo.src, alt: 'PageSpeed Insights' },
-    { src: hetznerLogo.src, alt: 'Hetzner', imgClass: 'logo-mark--dark-friendly' },
+    { src: astroLogo.src, alt: 'Astro', logoKey: 'astro' },
+    { src: tailwindLogo.src, alt: 'Tailwind CSS', logoKey: 'tailwind' },
+    { src: decapLogo.src, alt: 'Decap CMS', logoKey: 'decap' },
+    { src: pageSpeedLogo.src, alt: 'PageSpeed Insights', logoKey: 'pageSpeed' },
+    { src: hetznerLogo.src, alt: 'Hetzner', logoKey: 'hetzner' },
   ]}
 />

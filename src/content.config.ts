@@ -17,6 +17,26 @@ const services = defineCollection({
       tags: z.array(z.string()).default([]),
       draft: z.boolean().default(false),
       featured: z.boolean().default(false),
+      category: z.enum(['capabilities', 'deploy']).default('capabilities'),
+      locale: z.enum(['en', 'es', 'ca', 'pl']).default('en'),
+    }),
+});
+
+const docs = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/docs' }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string().max(100),
+      description: z.string().max(200),
+      publishedAt: z.coerce.date(),
+      updatedAt: z.coerce.date().optional(),
+      author: z.string().default('Stack Team'),
+      image: image().optional(),
+      imageAlt: z.string().optional(),
+      tags: z.array(z.string()).default([]),
+      draft: z.boolean().default(false),
+      category: z.literal('deploy').default('deploy'),
+      order: z.number().default(0),
       locale: z.enum(['en', 'es', 'ca', 'pl']).default('en'),
     }),
 });
@@ -64,6 +84,7 @@ const faqs = defineCollection({
 
 export const collections = {
   services,
+  docs,
   pages,
   authors,
   faqs,

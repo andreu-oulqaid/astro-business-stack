@@ -1,9 +1,10 @@
 ---
 title: "Lead Funnel with Notion CRM and Resend"
-description: "How contact forms flow through API routes into Notion deduplication and transactional email."
+description: "How contact forms flow through API routes into Notion deduplication, Supabase analytics, and Resend email."
 publishedAt: 2026-06-01
 author: "Stack Team"
 tags: ["integrations", "notion", "resend", "crm"]
+category: capabilities
 featured: true
 locale: en
 draft: false
@@ -11,6 +12,44 @@ draft: false
 
 # Server-side lead capture
 
-The `/api/leads` route validates submissions, optionally deduplicates against a Notion clients database, writes to a leads database, and sends notification email via Resend.
+The `/api/leads` route validates submissions server-side. Integrations are **optional** — unset env vars disable each layer without breaking the site.
 
-Integrations are optional — unset env vars disable each layer without breaking the site.
+## Request flow
+
+```
+Browser form → POST /api/leads → Zod validation → Notion (optional) → Resend (optional) → Supabase event (optional)
+```
+
+Honeypot and rate limiting run before any external call.
+
+## Notion CRM
+
+When `NOTION_API_KEY` and `NOTION_DATABASE_ID` are set:
+
+1. Optional dedup against a clients database (`NOTION_CLIENTS_DATABASE_ID`)
+2. New row in the leads database with mapped properties
+3. Graceful fallback if Notion write fails (Resend-only path)
+
+## Resend notifications
+
+```bash
+RESEND_API_KEY=re_xxx
+RESEND_FROM=Stack Demo <onboarding@resend.dev>
+LEAD_NOTIFICATION_EMAIL=you@example.com
+```
+
+Transactional email notifies your team on each qualified lead.
+
+## Supabase analytics
+
+Enable funnel tracking with `SUPABASE_TRACKING_ENABLED` and the SQL scripts in `scripts/`. Hashed visitor IDs — no raw PII in analytics tables.
+
+Admin dashboard at `/admin/metrics` when `ADMIN_METRICS_ENABLED=true`.
+
+## Live demo sandbox
+
+The homepage `#live-demo` section runs an isolated pipeline against **demo** Supabase and Notion projects — separate from production credentials. See `docs/integrations.md` for env setup.
+
+---
+
+Related: [Production deploy guide](/docs/production-deploy)

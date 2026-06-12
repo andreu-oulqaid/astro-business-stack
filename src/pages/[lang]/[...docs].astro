@@ -1,0 +1,177 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import BlogLayout from '@/layouts/BlogLayout.astro';
+import Navbar from '@/components/landing/Navbar.astro';
+import LandingFooter from '@/components/landing/LandingFooter.astro';
+import BlogCard from '@/components/blog/BlogCard.astro';
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
+import { getCollection, render } from 'astro:content';
+import { locales, defaultLocale, isValidLocale, type Locale } from '@/i18n/config';
+import { routes } from '@/i18n/routes';
+import { getLocalizedPath, useTranslations } from '@/i18n/index';
+
+type HubProps = { page: 'hub' };
+type ArticleProps = {
+  page: 'article';
+  post: Awaited<ReturnType<typeof getCollection<'docs'>>>[number];
+};
+
+type DocsProps = HubProps | ArticleProps;
+
+function stripDocsParam(path: string, locale: Locale): { isHub: boolean; slug: string } {
+  const bases = [...new Set([routes.docs[locale], routes.docs[defaultLocale], 'docs'])];
+  for (const base of bases) {
+    if (!base) continue;
+    if (path === base) return { isHub: true, slug: '' };
+    if (path.startsWith(`${base}/`)) return { isHub: false, slug: path.slice(base.length + 1) };
+  }
+  return { isHub: false, slug: '' };
+}
+
+export async function getStaticPaths() {
+  const paths: { params: { lang: string; docs: string }; props: DocsProps }[] = [];
+
+  for (const lang of locales) {
+    if (lang === defaultLocale) continue;
+
+    const translatedBase = routes.docs[lang];
+    paths.push({ params: { lang, docs: translatedBase }, props: { page: 'hub' } });
+    paths.push({ params: { lang, docs: 'docs' }, props: { page: 'hub' } });
+
+    const localePosts = await getCollection('docs', ({ data }) => {
+      return data.locale === lang && (import.meta.env.PROD ? data.draft !== true : true);
+    });
+
+    for (const post of localePosts) {
+      const slug = post.id.replace(`${lang}/`, '');
+      paths.push({
+        params: { lang, docs: `${translatedBase}/${slug}` },
+        props: { page: 'article', post },
+      });
+      paths.push({
+        params: { lang, docs: `docs/${slug}` },
+        props: { page: 'article', post },
+      });
+    }
+  }
+
+  return paths;
+}
+
+const { lang, docs } = Astro.params;
+const props = Astro.props as DocsProps;
+
+if (!lang || !isValidLocale(lang) || lang === defaultLocale) {
+  return Astro.redirect(getLocalizedPath('docs', defaultLocale), 301);
+}
+
+const locale = lang as Locale;
+const docsBase = getLocalizedPath('docs', locale);
+const parsed = stripDocsParam(docs ?? '', locale);
+
+if (docs === 'docs' || docs?.startsWith('docs/')) {
+  const target = parsed.isHub ? docsBase : `${docsBase}/${parsed.slug}`;
+  return Astro.redirect(target, 301);
+}
+
+if (props.page === 'hub' && !parsed.isHub) {
+  return Astro.redirect(docsBase, 302);
+}
+
+if (props.page === 'article' && !parsed.slug) {
+  return Astro.redirect(docsBase, 302);
+}
+
+const t = useTranslations(locale);
+const homeUrl = getLocalizedPath('home', locale);
+
+let guides: Awaited<ReturnType<typeof getCollection<'docs'>>> = [];
+let Content: Awaited<ReturnType<typeof render>>['Content'] | null = null;
+let articlePost: ArticleProps['post'] | null = null;
+
+if (props.page === 'hub') {
+  guides = (await getCollection('docs', ({ data }) => {
+    return (
+      data.locale === locale &&
+      data.category === 'deploy' &&
+      (import.meta.env.PROD ? data.draft !== true : true)
+    );
+  })).sort(
+    (a, b) => a.data.order - b.data.order || b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf(),
+  );
+} else {
+  articlePost = props.post;
+  const rendered = await render(props.post);
+  Content = rendered.Content;
+}
+
+const getGuideUrl = (postId: string) => {
+  const slug = postId.replace(`${locale}/`, '');
+  return `${docsBase}/${slug}`;
+};
+---
+
+{
+  props.page === 'hub' ? (
+    <BaseLayout title={t('docs.title')} description={t('docs.description')} routeId="docs" lang={locale}>
+      <Navbar slot="header" locale={locale} />
+
+      <section class="border-b border-border bg-background-secondary py-16">
+        <div class="mx-auto max-w-6xl px-6 text-center">
+          <h1 class="font-display text-4xl font-bold tracking-tight text-foreground md:text-5xl">
+            {t('docs.title')}
+          </h1>
+          <p class="mx-auto mt-4 max-w-2xl text-lg text-foreground-muted">{t('docs.description')}</p>
+          <a
+            href={`${homeUrl}#process`}
+            class="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-brand-600 hover:text-brand-500 dark:text-brand-400"
+          >
+            <Icon name="arrow-left" size="sm" />
+            Homepage pipeline
+          </a>
+        </div>
+      </section>
+
+      <section class="bg-background py-16">
+        <div class="mx-auto max-w-6xl px-6">
+          {guides.length > 0 ? (
+            <div class="grid gap-6 md:grid-cols-2">
+              {guides.map((guide) => (
+                <BlogCard
+                  title={guide.data.title}
+                  description={guide.data.description}
+                  href={getGuideUrl(guide.id)}
+                  tags={guide.data.tags}
+                  image={guide.data.image}
+                />
+              ))}
+            </div>
+          ) : (
+            <p class="text-center text-foreground-muted">{t('blog.noPosts')}</p>
+          )}
+        </div>
+      </section>
+
+      <LandingFooter slot="footer" locale={locale} />
+    </BaseLayout>
+  ) : (
+    articlePost &&
+    Content && (
+      <BlogLayout
+        title={articlePost.data.title}
+        description={articlePost.data.description}
+        publishedAt={articlePost.data.publishedAt}
+        updatedAt={articlePost.data.updatedAt}
+        author={articlePost.data.author}
+        image={articlePost.data.image}
+        imageAlt={articlePost.data.imageAlt}
+        tags={articlePost.data.tags}
+        slug={articlePost.id}
+        locale={locale}
+        hubRouteId="docs"
+      >
+        <Content />
+      </BlogLayout>
+    )
+  )
+}

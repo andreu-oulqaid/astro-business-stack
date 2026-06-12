@@ -1,0 +1,69 @@
+---
+import type { LogoKey, LogoMarkModifier } from '@/config/logoMarks';
+import { getLogoMarkClass, logoMarkClassFromModifier } from '@/config/logoMarks';
+import { getLogoThemeSources } from '@/config/logoAssets';
+
+interface Props {
+  src: string;
+  alt: string;
+  logoKey?: LogoKey;
+  modifier?: LogoMarkModifier;
+  darkSrc?: string;
+  class?: string;
+  width?: number;
+  height?: number;
+  loading?: 'lazy' | 'eager';
+}
+
+const {
+  src,
+  alt,
+  logoKey,
+  modifier,
+  darkSrc: darkSrcProp,
+  class: className,
+  width = 68,
+  height = 18,
+  loading = 'lazy',
+} = Astro.props;
+
+const theme = logoKey ? getLogoThemeSources(logoKey, src) : { src };
+const lightSrc = theme.src;
+const darkSrc = darkSrcProp ?? theme.darkSrc;
+const markClass = logoKey ? getLogoMarkClass(logoKey) : logoMarkClassFromModifier(modifier);
+const imgClass = ['logo-mark', markClass];
+---
+
+<span class:list={['logo-chip', className]}>
+  {
+    darkSrc ? (
+      <>
+        <img
+          src={lightSrc}
+          alt={alt}
+          class:list={[...imgClass, 'dark:hidden']}
+          loading={loading}
+          width={width}
+          height={height}
+        />
+        <img
+          src={darkSrc}
+          alt={alt}
+          class:list={[...imgClass, 'hidden dark:block']}
+          loading={loading}
+          width={width}
+          height={height}
+        />
+      </>
+    ) : (
+      <img
+        src={lightSrc}
+        alt={alt}
+        class:list={imgClass}
+        loading={loading}
+        width={width}
+        height={height}
+      />
+    )
+  }
+</span>

@@ -1,111 +1,263 @@
 ---
 import type { Locale } from '@/i18n/config';
-import { useTranslations } from '@/i18n';
+import type { LogoKey } from '@/config/logoMarks';
+import { getLocalizedPath, useTranslations } from '@/i18n';
 import Badge from '@/components/ui/data-display/Badge/Badge.astro';
+import LogoChip from '@/components/ui/data-display/LogoChip/LogoChip.astro';
 import Button from '@/components/ui/form/Button/Button.astro';
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
+import astroLogo from '@/assets/external_logos/astro.svg';
+import decapLogo from '@/assets/external_logos/decap-cms.svg';
+import dockerLogo from '@/assets/external_logos/Docker-Logos-1/docker-logos/SVG/docker-mark-black.svg';
+import githubActionsLogo from '@/assets/external_logos/githubactions-svgrepo-com.svg';
 
 interface Props {
   locale: Locale;
 }
 
+type PipelineStep = {
+  num: string;
+  title: string;
+  body: string;
+  badges: string[];
+  docSlug: string;
+  docAnchor: string;
+} & (
+  | { kind: 'icon'; iconName: string; logoAlt: string }
+  | { kind: 'img'; logo: string; logoAlt: string; logoKey: LogoKey }
+);
+
 const { locale } = Astro.props;
 const t = useTranslations(locale);
+const docsBase = getLocalizedPath('docs', locale);
 
-const steps = [
+const steps: PipelineStep[] = [
   {
     num: '1',
+    kind: 'icon',
+    iconName: 'shield',
     title: t('leakToFlow.steps.step1.title'),
     body: t('leakToFlow.steps.step1.body'),
-    badges: [] as string[],
+    logoAlt: 'OAuth',
+    badges: [t('leakToFlow.badges.auth')],
+    docSlug: 'content-pipeline',
+    docAnchor: 'oauth',
   },
   {
     num: '2',
+    kind: 'img',
     title: t('leakToFlow.steps.step2.title'),
     body: t('leakToFlow.steps.step2.body'),
-    badges: [t('leakToFlow.badges.web'), t('leakToFlow.badges.automation')],
+    logo: decapLogo.src,
+    logoAlt: 'Decap CMS',
+    logoKey: 'decap',
+    badges: [],
+    docSlug: 'content-pipeline',
+    docAnchor: 'decap',
   },
   {
     num: '3',
+    kind: 'icon',
+    iconName: 'github',
     title: t('leakToFlow.steps.step3.title'),
     body: t('leakToFlow.steps.step3.body'),
-    badges: [] as string[],
+    logoAlt: 'GitHub',
+    badges: [],
+    docSlug: 'content-pipeline',
+    docAnchor: 'git-commit',
+  },
+  {
+    num: '4',
+    kind: 'img',
+    title: t('leakToFlow.steps.step4.title'),
+    body: t('leakToFlow.steps.step4.body'),
+    logo: githubActionsLogo.src,
+    logoAlt: 'GitHub Actions',
+    logoKey: 'githubActions',
+    badges: [t('leakToFlow.badges.web')],
+    docSlug: 'production-deploy',
+    docAnchor: 'github-actions',
+  },
+  {
+    num: '5',
+    kind: 'img',
+    title: t('leakToFlow.steps.step5.title'),
+    body: t('leakToFlow.steps.step5.body'),
+    logo: dockerLogo.src,
+    logoAlt: 'Docker',
+    logoKey: 'docker',
+    badges: [t('leakToFlow.badges.automation')],
+    docSlug: 'production-deploy',
+    docAnchor: 'docker',
+  },
+  {
+    num: '6',
+    kind: 'img',
+    title: t('leakToFlow.steps.step6.title'),
+    body: t('leakToFlow.steps.step6.body'),
+    logo: astroLogo.src,
+    logoAlt: 'Astro',
+    logoKey: 'astro',
+    badges: [],
+    docSlug: 'production-deploy',
+    docAnchor: 'live-site',
   },
 ];
+
+const desktopRows = [steps.slice(0, 3), steps.slice(3, 6)];
+
+function stepDocHref(step: PipelineStep): string {
+  return `${docsBase}/${step.docSlug}#${step.docAnchor}`;
+}
 ---
 
-<section id="process" data-leak-flow-section class="relative border-y border-border bg-background py-[var(--space-section-lg)]" aria-labelledby="leak-to-flow-heading">
+<section
+  id="process"
+  data-leak-flow-section
+  class="relative border-y border-border bg-background py-10 md:py-[var(--space-section-lg)]"
+  aria-labelledby="leak-to-flow-heading"
+>
   <div class="mx-auto max-w-6xl px-6">
     <h2
       id="leak-to-flow-heading"
-      class="font-display text-3xl md:text-4xl font-bold tracking-tight text-foreground mb-12 text-balance"
+      class="font-display text-3xl md:text-4xl font-bold tracking-tight text-foreground mb-8 md:mb-12 text-balance"
       set:html={t('leakToFlow.title')}
     >
     </h2>
 
-    <!-- Desktop: horizontal steps + connector -->
-    <div class="relative hidden lg:block">
-      <div class="pointer-events-none absolute left-[10%] right-[10%] top-[22px] z-0 h-px bg-border" aria-hidden="true"></div>
-      <div class="relative z-10 grid grid-cols-3 gap-8">
-        {
-          steps.map((step) => (
-            <article class="group leak-step relative flex flex-col items-center text-center">
-              <div
-                class="relative mb-6 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-border bg-background text-sm font-semibold tabular-nums tracking-tight text-foreground shadow-sm ring-1 ring-foreground/[0.04] transition-shadow duration-200 group-hover:border-brand-500 group-hover:shadow-lg dark:ring-foreground/[0.08]"
-              >
-                {step.num}
-              </div>
-              <h3 class="font-display relative text-xl font-semibold text-foreground" set:html={step.title} />
-              <p class="relative mt-3 max-w-[34ch] text-sm leading-relaxed text-foreground-muted md:text-base" set:html={step.body} />
-              {step.badges.length > 0 && (
-                <div class="relative mt-4 flex flex-wrap justify-center gap-2">
-                  {step.badges.map((label) => (
-                    <Badge variant="brand" pill size="sm" class="font-semibold">
-                      {label}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </article>
-          ))
-        }
-      </div>
+    <!-- Desktop: two rows × three steps -->
+    <div class="hidden lg:flex lg:flex-col lg:gap-8">
+      {
+        desktopRows.map((rowSteps, rowIndex) => (
+          <div class="pipeline-row relative" style="--pipeline-connector-y: calc(4.75rem + 0.75rem + 0.65em);">
+            <div
+              class="relative z-10 grid grid-cols-[minmax(0,1fr)_2rem_minmax(0,1fr)_2rem_minmax(0,1fr)] items-start"
+            >
+              {rowSteps.flatMap((step, colIndex) => {
+                const stepIndex = rowIndex * 3 + colIndex;
+                const stepCard = (
+                  <a
+                    href={stepDocHref(step)}
+                    class="link-card link-card--subtle group leak-step pipeline-step-card relative flex min-w-0 flex-col items-center pb-8 text-center"
+                    style={`--step-index: ${stepIndex}`}
+                    aria-label={`${t('leakToFlow.readDocs')}: ${step.title.replace(/<[^>]+>/g, '')}`}
+                  >
+                    <span class="pipeline-step-bg-num" aria-hidden="true">
+                      {step.num}
+                    </span>
+                    <div class="pipeline-step-top relative z-[1] mb-3 w-full">
+                      <div class="pipeline-step-header flex w-full items-center justify-center pt-1">
+                        {step.kind === 'icon' ? (
+                          <span class="logo-chip">
+                            <Icon name={step.iconName} size="lg" class="text-foreground" />
+                          </span>
+                        ) : (
+                          <LogoChip src={step.logo} alt={step.logoAlt} logoKey={step.logoKey} width={56} height={20} />
+                        )}
+                      </div>
+                    </div>
+                    <h3
+                      class="pipeline-step-title font-display relative z-[1] text-base font-semibold leading-snug text-foreground"
+                      set:html={step.title}
+                    />
+                    <p
+                      class="relative z-[1] mt-2 text-xs leading-relaxed text-foreground-muted"
+                      set:html={step.body}
+                    />
+                    {step.badges.length > 0 && (
+                      <div class="relative z-[1] mt-3 flex flex-wrap justify-center gap-1.5">
+                        {step.badges.map((label) => (
+                          <Badge variant="brand" pill size="sm" class="font-semibold text-[10px]">
+                            {label}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                      <span class="link-card-affordance" aria-hidden="true">
+                        <span class="link-card-affordance-text">{t('leakToFlow.readDocs')}</span>
+                        <Icon name="external-link" size="xs" />
+                      </span>
+                  </a>
+                );
+
+                if (colIndex < rowSteps.length - 1) {
+                  return [
+                    stepCard,
+                    <div class="pipeline-row-arrow" aria-hidden="true">
+                      <Icon name="chevron-right" size="sm" class="text-brand-500 opacity-80" />
+                    </div>,
+                  ];
+                }
+
+                return [stepCard];
+              })}
+            </div>
+          </div>
+        ))
+      }
     </div>
 
-    <!-- Mobile: vertical stack; thread is w-px flex-1 centered under w-10 circles -->
+    <!-- Mobile: vertical timeline -->
     <div class="space-y-0 lg:hidden">
       {
         steps.map((step, index) => (
-          <article class="group leak-step flex gap-4">
-            <div class="relative flex w-10 shrink-0 flex-col items-center">
+          <article
+            class="group leak-step pipeline-step-card flex gap-3 sm:gap-4"
+            style={`--step-index: ${index}`}
+          >
+            <div class="relative flex w-9 shrink-0 flex-col items-center sm:w-10">
               <div
-                class="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-border bg-background text-xs font-semibold tabular-nums tracking-tight text-foreground shadow-sm ring-1 ring-foreground/[0.04] transition-shadow duration-200 group-hover:border-brand-500 group-hover:shadow-lg dark:ring-foreground/[0.08]"
+                class="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-border bg-background text-[10px] font-semibold tabular-nums tracking-tight text-foreground shadow-sm ring-1 ring-foreground/[0.04] transition-shadow duration-200 group-hover:border-brand-500 group-hover:shadow-lg dark:ring-foreground/[0.08] sm:h-10 sm:w-10 sm:text-xs"
               >
                 {step.num}
               </div>
               {index < steps.length - 1 && (
-                <div class="mt-2 min-h-10 w-px flex-1 bg-border" aria-hidden="true" />
+                <div class="mt-1.5 min-h-6 w-px flex-1 bg-border sm:mt-2 sm:min-h-8" aria-hidden="true" />
               )}
             </div>
-            <div class="min-w-0 pb-12 pt-0.5">
-              <h3 class="font-display text-lg font-semibold text-foreground" set:html={step.title} />
-              <p class="mt-2 max-w-[44ch] text-sm leading-relaxed text-foreground-muted" set:html={step.body} />
+            <a
+              href={stepDocHref(step)}
+              class="link-card link-card--subtle relative min-w-0 flex-1 rounded-lg pb-8 pt-0 sm:pb-10"
+              aria-label={`${t('leakToFlow.readDocs')}: ${step.title.replace(/<[^>]+>/g, '')}`}
+            >
+              <div class="mb-2 flex items-center gap-2">
+                {step.kind === 'icon' ? (
+                  <span class="logo-chip">
+                    <Icon name={step.iconName} size="md" class="text-foreground" />
+                  </span>
+                ) : (
+                  <LogoChip src={step.logo} alt={step.logoAlt} logoKey={step.logoKey} width={48} height={16} />
+                )}
+              </div>
+              <h3
+                class="font-display text-base font-semibold leading-snug text-foreground sm:text-lg"
+                set:html={step.title}
+              />
+              <p
+                class="mt-1.5 max-w-[44ch] text-xs leading-relaxed text-foreground-muted sm:mt-2 sm:text-sm"
+                set:html={step.body}
+              />
               {step.badges.length > 0 && (
-                <div class="mt-3 flex flex-wrap gap-2">
+                <div class="mt-2 flex flex-wrap gap-1.5 sm:mt-3">
                   {step.badges.map((label) => (
-                    <Badge variant="brand" pill size="sm" class="font-semibold">
+                    <Badge variant="brand" pill size="sm" class="font-semibold text-[10px]">
                       {label}
                     </Badge>
                   ))}
                 </div>
               )}
-            </div>
+                      <span class="link-card-affordance" aria-hidden="true">
+                        <span class="link-card-affordance-text">{t('leakToFlow.readDocs')}</span>
+                        <Icon name="external-link" size="xs" />
+                      </span>
+            </a>
           </article>
         ))
       }
     </div>
 
-    <div class="mt-4 lg:mt-10 text-center">
-      <Button size="lg" href="#cta">
+    <div class="mt-4 text-center lg:mt-10">
+      <Button size="lg" href={docsBase}>
         <span set:html={t('leakToFlow.cta')} />
       </Button>
     </div>
@@ -117,40 +269,28 @@ const steps = [
     const section = document.querySelector<HTMLElement>('[data-leak-flow-section]');
     if (!section) return;
 
-    // Re-initialize on client-side navigations.
-    section.classList.remove('is-visible');
+    const steps = section.querySelectorAll<HTMLElement>('.leak-step');
+    steps.forEach((el) => el.classList.remove('is-step-visible'));
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduceMotion) {
-      section.classList.add('is-visible');
+      steps.forEach((el) => el.classList.add('is-step-visible'));
       return;
     }
-
-    const reveal = () => {
-      if (section.classList.contains('is-visible')) return;
-      // Give the browser one frame so the first animated state is paint-visible.
-      requestAnimationFrame(() => section.classList.add('is-visible'));
-    };
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            reveal();
-            observer.disconnect();
+            entry.target.classList.add('is-step-visible');
+            observer.unobserve(entry.target);
           }
         });
       },
-      { threshold: 0.1, rootMargin: '0px 0px -8% 0px' }
+      { threshold: 0.2, rootMargin: '0px 0px -8% 0px' },
     );
 
-    observer.observe(section);
-
-    // Safety fallback in case observer is throttled or blocked.
-    setTimeout(() => {
-      reveal();
-      observer.disconnect();
-    }, 1800);
+    steps.forEach((el) => observer.observe(el));
   }
 
   initLeakToFlowReveal();
@@ -158,21 +298,70 @@ const steps = [
 </script>
 
 <style>
+  .pipeline-step-top {
+    position: relative;
+    min-height: 4.75rem;
+  }
+
+  .pipeline-step-bg-num {
+    position: absolute;
+    top: 0.15rem;
+    left: 0.35rem;
+    font-family: var(--font-display, inherit);
+    font-size: clamp(3.25rem, 4.5vw, 4.25rem);
+    font-weight: 800;
+    line-height: 0.9;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.04em;
+    color: var(--brand-500);
+    opacity: 0.14;
+    pointer-events: none;
+    user-select: none;
+    z-index: 0;
+    transition: opacity 320ms ease, transform 320ms ease;
+  }
+
+  :global(.dark) .pipeline-step-bg-num {
+    opacity: 0.2;
+  }
+
+  .pipeline-step-header {
+    position: relative;
+    z-index: 1;
+    margin-top: 1.5rem;
+  }
+
+  .pipeline-row-arrow {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: var(--pipeline-connector-y, 5.5rem);
+    pointer-events: none;
+  }
+
+  .pipeline-step-card {
+    padding: 0.75rem 0.5rem 0;
+  }
+
+  .link-card:hover .pipeline-step-bg-num,
+  .link-card:focus-visible .pipeline-step-bg-num {
+    opacity: 0.24;
+    transform: scale(1.03) translateX(-2px);
+  }
+
+  :global(.dark) .link-card:hover .pipeline-step-bg-num,
+  :global(.dark) .link-card:focus-visible .pipeline-step-bg-num {
+    opacity: 0.3;
+  }
+
   .leak-step {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(16px);
   }
 
-  .is-visible .leak-step {
-    animation: leak-step-in 520ms ease forwards;
-  }
-
-  .is-visible .leak-step:nth-child(2) {
-    animation-delay: 90ms;
-  }
-
-  .is-visible .leak-step:nth-child(3) {
-    animation-delay: 180ms;
+  .leak-step.is-step-visible {
+    animation: leak-step-in 560ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: calc(var(--step-index, 0) * 60ms);
   }
 
   @keyframes leak-step-in {

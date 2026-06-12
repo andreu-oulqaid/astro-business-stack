@@ -28,6 +28,12 @@ export interface SiteConfig {
     };
     favicon: {
       svg: string;
+      /** Generate from public/favicon.svg via RealFaviconGenerator */
+      png96: string;
+      ico: string;
+      appleTouch: string;
+      manifest192: string;
+      manifest512: string;
     };
     colors: {
       themeColor: string;
@@ -38,6 +44,9 @@ export interface SiteConfig {
     repo: string;
     url: string;
     profile: string;
+  };
+  linkedin: {
+    url: string;
   };
 }
 
@@ -54,7 +63,7 @@ const siteConfig: SiteConfig = {
   ogImage: '/og-default.png',
   author: 'Andreu Oulqaid',
   email: 'hello@example.com',
-  socialLinks: ['https://github.com/andreu-oulqaid'],
+  socialLinks: ['https://github.com/andreu-oulqaid', 'https://www.linkedin.com/in/andreuog'],
   twitter: {
     site: '@example',
     creator: '@example',
@@ -69,6 +78,11 @@ const siteConfig: SiteConfig = {
     },
     favicon: {
       svg: '/favicon.svg',
+      png96: '/favicon-96x96.png',
+      ico: '/favicon.ico',
+      appleTouch: '/apple-touch-icon.png',
+      manifest192: '/web-app-manifest-192x192.png',
+      manifest512: '/web-app-manifest-512x512.png',
     },
     colors: {
       themeColor: '#9f1239',
@@ -79,6 +93,9 @@ const siteConfig: SiteConfig = {
     repo: 'andreu-oulqaid/astro-business-stack',
     url: 'https://github.com/andreu-oulqaid/astro-business-stack',
     profile: 'https://github.com/andreu-oulqaid',
+  },
+  linkedin: {
+    url: 'https://www.linkedin.com/in/andreuog',
   },
 };
 

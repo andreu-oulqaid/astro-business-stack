@@ -1,7 +1,8 @@
 ---
 import type { Locale } from '@/i18n/config';
-import { useTranslations, getLocalizedPath } from '@/i18n';
-import Badge from '@/components/ui/data-display/Badge/Badge.astro';
+import type { LogoKey } from '@/config/logoMarks';
+import { getLocalizedPath, useTranslations } from '@/i18n';
+import LogoChip from '@/components/ui/data-display/LogoChip/LogoChip.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import astroLogo from '@/assets/external_logos/astro.svg';
 import tailwindLogo from '@/assets/external_logos/tailwind-svgrepo-com.svg';
@@ -18,119 +19,154 @@ interface Props {
 const { locale } = Astro.props;
 const t = useTranslations(locale);
 const portfolioBase = getLocalizedPath('portfolio', locale);
+const docsBase = getLocalizedPath('docs', locale);
 
-const metrics = [
-  { label: t('techEdge.metrics.ssr'), value: t('techEdge.metrics.ssrValue') },
-  { label: t('techEdge.metrics.locales'), value: t('techEdge.metrics.localesValue') },
-  { label: t('techEdge.metrics.containers'), value: t('techEdge.metrics.containersValue') },
+const cards = [
+  {
+    title: t('techEdge.web.title'),
+    body: t('techEdge.web.body'),
+    cta: t('techEdge.web.cta'),
+    href: `${portfolioBase}/multi-locale-ssr`,
+    logos: [
+      { src: astroLogo.src, alt: 'Astro', logoKey: 'astro' as LogoKey },
+      { src: tailwindLogo.src, alt: 'Tailwind CSS', logoKey: 'tailwind' as LogoKey },
+    ],
+    metrics: [
+      { label: t('techEdge.metrics.ssr'), value: t('techEdge.metrics.ssrValue') },
+      { label: t('techEdge.metrics.locales'), value: t('techEdge.metrics.localesValue') },
+    ],
+  },
+  {
+    title: t('techEdge.automation.title'),
+    body: t('techEdge.automation.body'),
+    cta: t('techEdge.automation.cta'),
+    href: `${docsBase}/production-deploy`,
+    logos: [
+      { src: dockerLogo.src, alt: 'Docker', logoKey: 'docker' as LogoKey },
+      { src: githubActionsLogo.src, alt: 'GitHub Actions', logoKey: 'githubActions' as LogoKey },
+    ],
+    metrics: [{ label: t('techEdge.metrics.containers'), value: t('techEdge.metrics.containersValue') }],
+  },
+  {
+    title: t('techEdge.bridge.title'),
+    body: t('techEdge.bridge.body'),
+    cta: t('techEdge.bridge.cta'),
+    href: `${portfolioBase}/lead-funnel`,
+    logos: [
+      { src: notionLogo.src, alt: 'Notion', logoKey: 'notion' as LogoKey },
+      { src: supabaseLogo.src, alt: 'Supabase', logoKey: 'supabase' as LogoKey },
+      { src: resendLogo.src, alt: 'Resend', logoKey: 'resend' as LogoKey },
+    ],
+    metrics: [],
+  },
 ];
 ---
 
-<section id="tech-edge" class="border-y border-border bg-background py-[var(--space-section-lg)]">
+<section id="tech-edge" data-tech-edge-section class="border-y border-border bg-background py-[var(--space-section-lg)]">
   <div class="mx-auto max-w-6xl px-6">
     <h2 class="mb-8 max-w-4xl text-balance font-display text-3xl font-bold tracking-tight text-foreground md:text-4xl">
       {t('techEdge.title')}
     </h2>
 
-    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-stretch">
-      <article class="flex h-full flex-col rounded-xl border border-border bg-background-secondary p-6">
-        <h3 class="font-display text-xl font-semibold text-foreground">{t('techEdge.web.title')}</h3>
-        <p
-          class="mt-3 max-w-[42ch] text-sm leading-relaxed text-foreground-muted md:text-base"
-          set:html={t('techEdge.web.body')}
-        />
-
-        <div class="mt-4 flex flex-wrap gap-2">
-          {metrics.map((m) => (
-            <Badge variant="default" size="sm">
-              {m.label}: <span class="font-semibold text-foreground">{m.value}</span>
-            </Badge>
-          ))}
-        </div>
-
-        <div class="mt-5 flex flex-wrap items-center gap-2" aria-label="Web technology logos">
-          <span class="logo-chip">
-            <img src={astroLogo.src} alt="Astro" class="logo-mark" loading="lazy" />
-          </span>
-          <span class="logo-chip">
-            <img src={tailwindLogo.src} alt="Tailwind CSS" class="logo-mark" loading="lazy" />
-          </span>
-        </div>
-
-        <a
-          href={`${portfolioBase}/multi-locale-ssr`}
-          class="tech-link mt-5 inline-flex min-h-11 items-center gap-1.5 text-sm lg:mt-auto"
-        >
-          {t('techEdge.web.cta')}
-          <Icon name="arrow-right" size="sm" />
-        </a>
-      </article>
-
-      <div class="flex h-full flex-col gap-4">
-        <article class="flex flex-1 flex-col rounded-xl border border-border bg-background-secondary p-6">
-          <h3 class="font-display text-xl font-semibold text-foreground">{t('techEdge.automation.title')}</h3>
-          <p
-            class="mt-3 max-w-[42ch] text-sm leading-relaxed text-foreground-muted md:text-base"
-            set:html={t('techEdge.automation.body')}
-          />
-
-          <div class="mt-5 flex flex-wrap items-center gap-2" aria-label="Deploy technology logos">
-            <span class="logo-chip">
-              <img src={dockerLogo.src} alt="Docker" class="logo-mark logo-mark--dark-friendly" loading="lazy" />
-            </span>
-            <span class="logo-chip">
-              <img src={githubActionsLogo.src} alt="GitHub Actions" class="logo-mark" loading="lazy" />
-            </span>
-          </div>
-
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:items-stretch">
+      {
+        cards.map((card, index) => (
           <a
-            href={`${portfolioBase}/cms-workflow`}
-            class="tech-link mt-5 inline-flex min-h-11 items-center gap-1.5 text-sm lg:mt-auto"
+            href={card.href}
+            class="link-card link-card--bordered tech-edge-card flex h-full flex-col bg-background-secondary p-6 pb-8"
+            style={`--card-index: ${index}`}
+            aria-label={`${card.title}: ${card.cta}`}
           >
-            {t('techEdge.automation.cta')}
-            <Icon name="arrow-right" size="sm" />
+            <h3 class="font-display text-xl font-semibold text-foreground">{card.title}</h3>
+            <p class="mt-3 text-sm leading-relaxed text-foreground-muted md:text-base" set:html={card.body} />
+
+            {card.metrics.length > 0 && (
+              <div class="mt-4 flex flex-wrap gap-2">
+                {card.metrics.map((m) => (
+                  <span class="inline-flex items-center rounded-full border border-border bg-background px-2.5 py-0.5 text-xs font-medium text-foreground-muted">
+                    {m.label}: <span class="ml-1 font-semibold text-foreground">{m.value}</span>
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div class="mt-5 flex flex-wrap items-center gap-2" aria-hidden="true">
+              {card.logos.map((logo) => (
+                <LogoChip src={logo.src} alt={logo.alt} logoKey={logo.logoKey} />
+              ))}
+            </div>
+
+            <span class="link-card-action mt-5 lg:mt-auto">
+              {card.cta}
+              <Icon name="external-link" size="sm" />
+            </span>
           </a>
-        </article>
-
-        <article class="flex flex-1 flex-col rounded-xl border border-border bg-background-secondary p-5">
-          <h3 class="font-display text-base font-semibold text-foreground">{t('techEdge.bridge.title')}</h3>
-          <p class="mt-2 text-sm leading-relaxed text-foreground-muted">
-            {t('techEdge.bridge.body')}
-          </p>
-
-          <div class="mt-4 flex flex-wrap items-center gap-2" aria-label="Integration logos">
-            <span class="logo-chip">
-              <img src={notionLogo.src} alt="Notion" class="logo-mark logo-mark--dark-friendly" loading="lazy" />
-            </span>
-            <span class="logo-chip">
-              <img src={supabaseLogo.src} alt="Supabase" class="logo-mark" loading="lazy" />
-            </span>
-            <span class="logo-chip">
-              <img src={resendLogo.src} alt="Resend" class="logo-mark logo-mark--dark-friendly" loading="lazy" />
-            </span>
-          </div>
-
-          <a
-            href={`${portfolioBase}/lead-funnel`}
-            class="tech-link mt-3 inline-flex min-h-11 items-center gap-1.5 text-sm lg:mt-auto"
-          >
-            {t('techEdge.bridge.cta')}
-            <Icon name="arrow-right" size="sm" />
-          </a>
-        </article>
-      </div>
+        ))
+      }
     </div>
   </div>
 </section>
 
-<style>
-  .tech-link {
-    color: var(--foreground-muted);
-    font-weight: 500;
-    transition: color 160ms ease;
+<script>
+  function initTechEdgeReveal() {
+    const section = document.querySelector<HTMLElement>('[data-tech-edge-section]');
+    if (!section) return;
+
+    const cards = section.querySelectorAll<HTMLElement>('.tech-edge-card');
+    cards.forEach((el) => el.classList.remove('is-card-visible'));
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) {
+      cards.forEach((el) => el.classList.add('is-card-visible'));
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-card-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -6% 0px' },
+    );
+
+    cards.forEach((el) => observer.observe(el));
   }
 
-  .tech-link:hover {
-    color: var(--brand-500);
+  initTechEdgeReveal();
+  document.addEventListener('astro:page-load', initTechEdgeReveal);
+</script>
+
+<style>
+  .tech-edge-card {
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      transform 220ms ease,
+      box-shadow 220ms ease,
+      border-color 220ms ease;
+  }
+
+  .tech-edge-card.is-card-visible {
+    animation: tech-card-in 520ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: calc(var(--card-index, 0) * 100ms);
+  }
+
+  @keyframes tech-card-in {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tech-edge-card {
+      opacity: 1;
+      transform: none;
+      animation: none;
+    }
   }
 </style>

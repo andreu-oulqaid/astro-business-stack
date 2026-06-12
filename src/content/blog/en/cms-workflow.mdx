@@ -1,16 +1,45 @@
 ---
-title: "Self-hosted Decap CMS with GitHub OAuth"
-description: "Edit markdown content in the browser; commits flow to the develop branch via a Docker auth gateway."
+title: "Decap CMS collections and editor workflow"
+description: "How markdown content is structured, validated, and edited in the browser — without a separate CMS database."
 publishedAt: 2026-06-03
 author: "Stack Team"
-tags: ["cms", "decap", "oauth", "docker"]
+tags: ["cms", "decap"]
+category: capabilities
 featured: false
 locale: en
 draft: false
 ---
 
-# CMS without Netlify Identity
+# CMS without a content database
 
-Decap loads at `/admin`. A separate `auth-gateway` container handles GitHub OAuth and returns tokens to the CMS popup — no third-party auth SaaS required.
+Decap loads at `/admin` and edits files that live in git. This article covers the **editor and content model** — OAuth and gateway setup are in the [content pipeline deploy guide](/docs/content-pipeline#oauth).
 
-See `docs/cms-oauth.md` for OAuth App setup and callback URLs.
+## Collections
+
+`public/admin/config.yml` defines what editors can change:
+
+| Collection | Path | Format |
+|------------|------|--------|
+| Blog / capabilities | `src/content/blog/{locale}/` | MDX |
+| FAQs | `src/content/faqs/` | JSON |
+| Pages | `src/content/pages/` | MDX |
+
+Schemas in `src/content.config.ts` must match what Decap writes. Tags, `locale`, and `category` fields are validated at build.
+
+## Branch workflow
+
+Default CMS branch is `develop` (test). Editors publish from the admin UI; merges to `main` promote content to production when you're ready.
+
+## Local development
+
+Without the OAuth gateway running locally, edit files directly under `src/content/`. For full CMS testing, use the test VPS or a tunnel to `auth-gateway:3000`.
+
+## Why Decap on a self-hosted stack?
+
+- Content stays in **your** git repo
+- No Netlify Identity or proprietary CMS backend
+- Same review flow as code: PRs, diffs, rollback via git
+
+---
+
+Related: [OAuth login guide](/docs/content-pipeline#oauth)

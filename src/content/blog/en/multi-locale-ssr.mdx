@@ -1,9 +1,10 @@
 ---
 title: "Multi-locale SSR with Typed Content Collections"
-description: "i18n routing for en, es, ca, and pl with Astro content layer and translated URL slugs."
+description: "i18n routing for en, es, ca, and pl with Astro content layer, translated URL slugs, and SSR adapter."
 publishedAt: 2026-06-02
 author: "Stack Team"
 tags: ["ssr", "astro", "i18n"]
+category: capabilities
 featured: false
 locale: en
 draft: false
@@ -11,4 +12,35 @@ draft: false
 
 # Four locales, one deploy
 
-Routes live under `/`, `/es/`, `/ca/`, and `/pl/` with slug translation in `src/i18n/routes.ts`. Blog and FAQ content use folder-per-locale collections validated by Zod schemas.
+Routes live under `/`, `/es/`, `/ca/`, and `/pl/` with slug translation in `src/i18n/routes.ts`. The same Astro build serves every locale — no separate apps per language.
+
+## SSR adapter
+
+The app runs in **server mode** with `@astrojs/node` (standalone). Pages and API routes render on the VPS container, not as a static export. That enables:
+
+- Dynamic lead capture and live demo APIs
+- Locale detection from URL path
+- OG image routes and admin metrics
+
+## i18n routing
+
+`src/i18n/helpers.ts` maps internal route IDs (`about`, `portfolio`, `docs`, …) to translated slugs per locale. `LocalizedLink` and `getLocalizedPath` keep navigation consistent when switching languages.
+
+## Content collections
+
+Blog posts, docs, FAQs, and pages use Astro's content layer with Zod schemas in `src/content.config.ts`. Invalid frontmatter fails at build time.
+
+Folder-per-locale layout:
+
+```
+src/content/blog/en/*.mdx
+src/content/blog/es/*.mdx
+```
+
+## Component library
+
+UI primitives (Button, Badge, Icon, TerminalFeed) live under `src/components/ui/`. Landing sections compose these for a consistent design system across marketing pages.
+
+---
+
+Related: [Content pipeline deploy guide](/docs/content-pipeline)

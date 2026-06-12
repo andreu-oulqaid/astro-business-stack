@@ -1,0 +1,70 @@
+---
+title: "Content pipeline: OAuth, Decap, and Git"
+description: "How editors log in with self-hosted GitHub OAuth, edit in Decap CMS, and commit to the repo."
+publishedAt: 2026-06-10
+author: "Stack Team"
+tags: ["deploy", "oauth", "decap", "cms"]
+category: deploy
+order: 1
+locale: en
+draft: false
+---
+
+This guide covers **steps 1–3** of the [homepage deploy pipeline](/#process): authentication, editing, and committing content.
+
+<h2 id="oauth">OAuth login</h2>
+
+Decap CMS needs a GitHub access token to commit markdown. Netlify Identity is the default hosted option — this stack uses a **self-hosted Express gateway** (`gateway/`) on your VPS instead.
+
+**Flow:**
+
+1. Editor opens `/admin`
+2. Decap redirects to `AUTH_GATEWAY_URL/api/auth`
+3. Gateway redirects to GitHub OAuth (`repo`, `user` scope)
+4. GitHub callbacks to `/api/auth/callback`
+5. Gateway exchanges the code for a token and `postMessage`s it to the Decap popup
+
+**Required env vars on the VPS:**
+
+```bash
+GITHUB_CLIENT_ID=...
+GITHUB_CLIENT_SECRET=...
+AUTH_GATEWAY_URL=https://your-domain
+```
+
+Create a GitHub OAuth App with callback URL exactly: `https://your-domain/api/auth/callback`.
+
+The `auth-gateway` container listens on port 3000 inside Docker. Expose it only through your reverse proxy (Nginx Proxy Manager), not publicly on the host port.
+
+<h2 id="decap">Edit in Decap CMS</h2>
+
+After login, editors use the visual UI at `/admin`. Collections map to `src/content/`:
+
+- `blog/` — MDX capability articles per locale
+- `faqs/` — JSON FAQ entries
+- `pages/` — optional static pages
+
+`public/admin/config.yml` uses a deploy-time placeholder:
+
+```yaml
+base_url: __AUTH_GATEWAY_URL__
+```
+
+The GitHub Actions deploy workflow substitutes the real gateway URL before `docker compose build`.
+
+Collections are validated by Zod schemas in `src/content.config.ts` — invalid frontmatter fails at build time, not in production.
+
+<h2 id="git-commit">Commit to GitHub</h2>
+
+When an editor saves, Decap commits directly to the configured branch:
+
+- **`develop`** — test/staging environment
+- **`main`** — production content (merge when ready)
+
+No separate CMS database: content **is** the git repo. Review changes with normal PRs, branch protection, and code review.
+
+**Local dev without OAuth:** edit files under `src/content/` directly, or deploy to a test VPS and use the CMS there. OAuth requires a public HTTPS callback URL.
+
+---
+
+[Next: Production deploy guide](/docs/production-deploy) · [Back to pipeline](/#process)

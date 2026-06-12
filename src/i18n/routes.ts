@@ -54,11 +54,11 @@ export const routes = {
   // Static pages
   about: {
     en: 'about', es: 'sobre-nosotros', ca: 'sobre-nosaltres', pl: 'o-nas',
-    nav: { show: true, order: 3, label: 'nav.about' },
+    nav: { show: false, order: 3, label: 'nav.about' },
   },
   contact: {
     en: 'contact', es: 'contacto', ca: 'contacte', pl: 'kontakt',
-    nav: { show: true, order: 4, label: 'nav.contact' },
+    nav: { show: false, order: 4, label: 'nav.contact' },
   },
   privacy: {
     en: 'privacy', es: 'privacidad', ca: 'privacitat', pl: 'prywatnosc',
@@ -78,6 +78,15 @@ export const routes = {
     ca: 'portfoli',
     pl: 'realizacje',
     nav: { show: false, order: 0, label: 'nav.portfolio' },
+  },
+
+  /** Deploy pipeline guides (MDX docs collection) */
+  docs: {
+    en: 'docs',
+    es: 'documentacion',
+    ca: 'documentacio',
+    pl: 'dokumentacja',
+    nav: { show: false, order: 0, label: 'docs.breadcrumb' },
   },
 
   /** Sales pillar: web */

@@ -1,6 +1,8 @@
 ---
 import type { Locale } from '@/i18n/config';
+import type { LogoKey } from '@/config/logoMarks';
 import { useTranslations } from '@/i18n';
+import LogoChip from '@/components/ui/data-display/LogoChip/LogoChip.astro';
 import astroLogo from '@/assets/external_logos/astro.svg';
 import dockerLogo from '@/assets/external_logos/Docker-Logos-1/docker-logos/SVG/docker-mark-black.svg';
 import githubActionsLogo from '@/assets/external_logos/githubactions-svgrepo-com.svg';
@@ -11,6 +13,8 @@ import supabaseLogo from '@/assets/external_logos/supabase-logo-icon.svg';
 import notionLogo from '@/assets/external_logos/Notion-logo.svg';
 import resendLogo from '@/assets/external_logos/resend-icon-black.svg';
 import calLogo from '@/assets/external_logos/cal-com-light.svg';
+import velocityLogomark from '@/assets/external_logos/velocity/logomark.svg';
+import velocityLogomarkDark from '@/assets/external_logos/velocity/logomark-dark.svg';
 
 interface Props {
   locale: Locale;
@@ -19,18 +23,20 @@ interface Props {
 const { locale } = Astro.props;
 const t = useTranslations(locale);
 
-const logos = [
-  { src: astroLogo.src, alt: 'Astro', darkFriendly: false },
-  { src: dockerLogo.src, alt: 'Docker', darkFriendly: true },
-  { src: githubActionsLogo.src, alt: 'GitHub Actions', darkFriendly: false },
-  { src: decapLogo.src, alt: 'Decap CMS', darkFriendly: false },
-  { src: hetznerLogo.src, alt: 'Hetzner', darkFriendly: false },
-  { src: tailwindLogo.src, alt: 'Tailwind CSS', darkFriendly: false },
-  { src: supabaseLogo.src, alt: 'Supabase', darkFriendly: false },
-  { src: notionLogo.src, alt: 'Notion', darkFriendly: true },
-  { src: resendLogo.src, alt: 'Resend', darkFriendly: true },
-  { src: calLogo.src, alt: 'Cal.com', darkFriendly: false },
-] as const;
+const velocityUrl = 'https://github.com/southwellmedia/velocity';
+
+const logos: { src: string; alt: string; key: LogoKey }[] = [
+  { src: astroLogo.src, alt: 'Astro', key: 'astro' },
+  { src: dockerLogo.src, alt: 'Docker', key: 'docker' },
+  { src: githubActionsLogo.src, alt: 'GitHub Actions', key: 'githubActions' },
+  { src: decapLogo.src, alt: 'Decap CMS', key: 'decap' },
+  { src: hetznerLogo.src, alt: 'Hetzner', key: 'hetzner' },
+  { src: tailwindLogo.src, alt: 'Tailwind CSS', key: 'tailwind' },
+  { src: supabaseLogo.src, alt: 'Supabase', key: 'supabase' },
+  { src: notionLogo.src, alt: 'Notion', key: 'notion' },
+  { src: resendLogo.src, alt: 'Resend', key: 'resend' },
+  { src: calLogo.src, alt: 'Cal.com', key: 'cal' },
+];
 ---
 
 <section class="trust-bar border-y border-border bg-background-secondary py-4" aria-label={t('trustBar.label')}>
@@ -38,37 +44,65 @@ const logos = [
     <div class="marquee-container">
       <div class="marquee-track">
         <div class="marquee-set">
+          <a
+            href={velocityUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="logo-chip marquee-item marquee-item--velocity"
+            title={t('trustBar.velocityTitle')}
+          >
+            <img
+              src={velocityLogomark.src}
+              alt="Velocity"
+              class="logo-mark logo-mark--velocity dark:hidden"
+              loading="lazy"
+              width="20"
+              height="22"
+            />
+            <img
+              src={velocityLogomarkDark.src}
+              alt="Velocity"
+              class="logo-mark logo-mark--velocity hidden dark:block"
+              loading="lazy"
+              width="20"
+              height="22"
+            />
+          </a>
           {
             logos.map((logo) => (
               <span class="marquee-item">
-                <span class="logo-chip">
-                  <img
-                    src={logo.src}
-                    alt={logo.alt}
-                    class:list={['logo-mark', logo.darkFriendly && 'logo-mark--dark-friendly']}
-                    loading="lazy"
-                    width="68"
-                    height="18"
-                  />
-                </span>
+                <LogoChip src={logo.src} alt={logo.alt} logoKey={logo.key} />
               </span>
             ))
           }
         </div>
         <div class="marquee-set" aria-hidden="true">
+          <a
+            href={velocityUrl}
+            tabindex="-1"
+            class="logo-chip marquee-item marquee-item--velocity"
+          >
+            <img
+              src={velocityLogomark.src}
+              alt=""
+              class="logo-mark logo-mark--velocity dark:hidden"
+              loading="lazy"
+              width="20"
+              height="22"
+            />
+            <img
+              src={velocityLogomarkDark.src}
+              alt=""
+              class="logo-mark logo-mark--velocity hidden dark:block"
+              loading="lazy"
+              width="20"
+              height="22"
+            />
+          </a>
           {
             logos.map((logo) => (
               <span class="marquee-item">
-                <span class="logo-chip">
-                  <img
-                    src={logo.src}
-                    alt=""
-                    class:list={['logo-mark', logo.darkFriendly && 'logo-mark--dark-friendly']}
-                    loading="lazy"
-                    width="68"
-                    height="18"
-                  />
-                </span>
+                <LogoChip src={logo.src} alt="" logoKey={logo.key} />
               </span>
             ))
           }
@@ -76,6 +110,14 @@ const logos = [
       </div>
     </div>
   </div>
+
+  <p class="trust-bar-attribution">
+    {t('trustBar.attributionPrefix')}
+    <a href={velocityUrl} target="_blank" rel="noopener noreferrer" class="trust-bar-attribution-link">
+      {t('trustBar.attributionLink')}
+    </a>
+    {t('trustBar.attributionSuffix')}
+  </p>
 </section>
 
 <style>
@@ -130,7 +172,6 @@ const logos = [
     align-items: center;
     flex-shrink: 0;
     gap: var(--marquee-gap);
-    /* Same spacing after the last logo as between logos — hides the loop seam */
     margin-right: var(--marquee-gap);
   }
 
@@ -138,6 +179,35 @@ const logos = [
     display: inline-flex;
     align-items: center;
     flex-shrink: 0;
+  }
+
+  .marquee-item--velocity {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .trust-bar-attribution {
+    margin: 0.625rem auto 0;
+    max-width: 72rem;
+    padding-inline: 1rem;
+    text-align: center;
+    font-size: 0.6875rem;
+    line-height: 1.4;
+    color: var(--foreground-muted);
+  }
+
+  .trust-bar-attribution-link {
+    font-weight: 600;
+    color: var(--foreground-muted);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in oklab, var(--foreground-muted) 45%, transparent);
+    text-underline-offset: 2px;
+    transition: color 160ms ease;
+  }
+
+  .trust-bar-attribution-link:hover {
+    color: var(--brand-500);
+    text-decoration-color: color-mix(in oklab, var(--brand-500) 55%, transparent);
   }
 
   @keyframes marquee {

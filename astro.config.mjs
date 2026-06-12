@@ -69,6 +69,35 @@ export default defineConfig({
         optional: true,
         default: '',
       }),
+      PUBLIC_LIVE_DEMO_ENABLED: envField.boolean({
+        context: 'client',
+        access: 'public',
+        default: false,
+      }),
+      DEMO_SUPABASE_URL: envField.string({
+        context: 'server',
+        access: 'secret',
+        optional: true,
+        default: '',
+      }),
+      DEMO_SUPABASE_SERVICE_ROLE_KEY: envField.string({
+        context: 'server',
+        access: 'secret',
+        optional: true,
+        default: '',
+      }),
+      DEMO_NOTION_API_KEY: envField.string({
+        context: 'server',
+        access: 'secret',
+        optional: true,
+        default: '',
+      }),
+      DEMO_NOTION_DATABASE_ID: envField.string({
+        context: 'server',
+        access: 'secret',
+        optional: true,
+        default: '',
+      }),
     },
   },
 

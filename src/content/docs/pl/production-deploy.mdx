@@ -1,0 +1,29 @@
+---
+title: "Deploy produkcyjny: Actions, Docker i strona na żywo"
+description: "Deploy SSH przez GitHub Actions, rebuild Docker na VPS i TLS z Astro SSR."
+publishedAt: 2026-06-10
+author: "Stack Team"
+tags: ["deploy", "docker", "github-actions"]
+category: deploy
+order: 2
+locale: pl
+draft: false
+---
+
+Przewodnik po **krokach 4–6** [pipeline na stronie głównej](/pl#process).
+
+<h2 id="github-actions">GitHub Actions</h2>
+
+Push na `main`/`develop` → SSH, pull, build, `compose up`. Sekrety SSH i `DEPLOY_PATH_*`.
+
+<h2 id="docker">Docker na VPS</h2>
+
+`app` (Astro :4325) i `auth-gateway` (:3000) w sieci `web-public`.
+
+<h2 id="live-site">Strona na żywo</h2>
+
+Nginx Proxy Manager obsługuje TLS i kieruje ruch do kontenera Astro.
+
+---
+
+[Poprzedni: Pipeline treści](/pl/dokumentacja/content-pipeline)

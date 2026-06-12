@@ -3,6 +3,7 @@
  * LandingFooter Component (i18n-aware)
  * Footer for landing pages with translations
  */
+import BrandMark from '@/components/ui/brand/BrandMark.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import siteConfig from '@/config/site.config';
 import { type Locale, getLocaleFromPath } from '@/i18n/config';
@@ -20,36 +21,57 @@ const t = useTranslations(locale);
 
 const links = [
   { label: t('footer.links.documentation'), href: `${siteConfig.github.url}#readme` },
-  { label: t('footer.links.github'), href: siteConfig.github.profile },
   { label: t('footer.links.license'), href: `${siteConfig.github.url}/blob/main/LICENSE` },
   { label: t('footer.links.privacy'), href: getLocalizedPath('privacy', locale) },
+];
+
+const socialLinks = [
+  { platform: 'github' as const, href: siteConfig.github.profile, label: t('footer.links.github') },
+  { platform: 'linkedin' as const, href: siteConfig.linkedin.url, label: t('footer.links.linkedin') },
 ];
 ---
 
 <footer class="border-t border-border bg-background-secondary py-12">
-  <div class="mx-auto max-w-6xl px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-    <!-- Logo & Attribution -->
+  <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 px-6 md:flex-row">
+    <!-- Logo -->
     <div class="flex flex-col gap-2">
       <a href={getLocalizedPath('home', locale)} class="flex items-center gap-2">
-        <span class="flex h-7 w-7 items-center justify-center rounded-md border border-border bg-background text-brand-500">
-          <Icon name="code" size="sm" />
-        </span>
+        <BrandMark />
         <span class="font-display text-lg font-semibold tracking-tight text-foreground">{t('site.name')}</span>
       </a>
     </div>
 
     <!-- Links -->
-    <nav class="flex gap-8 text-sm text-foreground-muted font-medium">
-      {links.map((link) => (
-        <a
-          href={link.href}
-          class="hover:text-foreground transition-colors"
-          target={link.href.startsWith('http') ? '_blank' : undefined}
-          rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-        >
-          {link.label}
-        </a>
-      ))}
+    <nav class="flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm font-medium text-foreground-muted">
+      {
+        links.map((link) => (
+          <a
+            href={link.href}
+            class="transition-colors hover:text-foreground"
+            target={link.href.startsWith('http') ? '_blank' : undefined}
+            rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+          >
+            {link.label}
+          </a>
+        ))
+      }
     </nav>
+
+    <!-- Social -->
+    <div class="flex items-center gap-3">
+      {
+        socialLinks.map((social) => (
+          <a
+            href={social.href}
+            class="flex h-9 w-9 items-center justify-center rounded-md text-foreground-muted transition-colors hover:bg-background hover:text-foreground"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={social.label}
+          >
+            <Icon name={social.platform} size="md" />
+          </a>
+        ))
+      }
+    </div>
   </div>
 </footer>
