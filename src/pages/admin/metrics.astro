@@ -1,5 +1,7 @@
 ---
 import { ADMIN_METRICS_ENABLED } from 'astro:env/server';
+import MetricsFilterBar from '@/components/admin/metrics/MetricsFilterBar.astro';
+import MetricsHubHeader from '@/components/admin/metrics/MetricsHubHeader.astro';
 import MetricsModuleEnvBreakdown from '@/components/admin/metrics/MetricsModuleEnvBreakdown.astro';
 import MetricsModuleDevice from '@/components/admin/metrics/MetricsModuleDevice.astro';
 import MetricsModuleFunnel from '@/components/admin/metrics/MetricsModuleFunnel.astro';
@@ -9,11 +11,11 @@ import MetricsModuleLatest from '@/components/admin/metrics/MetricsModuleLatest.
 import MetricsModuleLocale from '@/components/admin/metrics/MetricsModuleLocale.astro';
 import MetricsModuleSummaryCards from '@/components/admin/metrics/MetricsModuleSummaryCards.astro';
 import MetricsModuleUtm from '@/components/admin/metrics/MetricsModuleUtm.astro';
-import MetricsToolbar from '@/components/admin/metrics/MetricsToolbar.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { getAnalyticsSiteId } from '@/lib/analyticsSite';
 import { loadMetricsContext } from '@/lib/metricsContext';
-import { metricsEnvHref, parseMetricsEnvParam } from '@/lib/metricsEnvParams';
+import { parseMetricsEnvParam } from '@/lib/metricsEnvParams';
+import { parseMetricsRangeParam } from '@/lib/metricsRangeParams';
 import { totalEventCount } from '@/lib/metricsTypes';
 import { getSupabaseAdmin } from '@/lib/supabase';
 
@@ -23,13 +25,8 @@ if (!import.meta.env.DEV && !ADMIN_METRICS_ENABLED) {
   return new Response(null, { status: 404, statusText: 'Not Found' });
 }
 
-type RangeParam = '7d' | '30d';
-
-const rawRange = Astro.url.searchParams.get('range');
-const range: RangeParam = rawRange === '7d' ? '7d' : '30d';
+const parsedRange = parseMetricsRangeParam(Astro.url.searchParams);
 const parsedEnv = parseMetricsEnvParam(Astro.url.searchParams);
-const days = range === '7d' ? 7 : 30;
-const sinceDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
 const supabase = getSupabaseAdmin();
 
@@ -40,14 +37,16 @@ if (!supabase) {
   queryError = 'Supabase admin client is not configured. Check SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.';
 } else {
   try {
-    ctx = await loadMetricsContext(supabase, sinceDate, { env: parsedEnv.env });
+    ctx = await loadMetricsContext(supabase, parsedRange.sinceIso, {
+      env: parsedEnv.env,
+      envFilterLabel: parsedEnv.envFilterLabel,
+      rpcEnv: parsedEnv.rpcEnv,
+    });
   } catch (e) {
     queryError = e instanceof Error ? e.message : String(e);
   }
 }
 
-const queryLabel = range === '7d' ? 'Last 7 days' : 'Last 30 days';
-const envScopeLabel = ctx?.envFilter ?? 'unknown';
 const siteScopeLabel = ctx?.siteFilter ?? getAnalyticsSiteId();
 const displayName = ctx?.profile.display_name ?? siteScopeLabel;
 const visibleModules = ctx?.visibleModules ?? [];
@@ -57,40 +56,44 @@ const showUtmRow =
   visibleModules.includes('utm_sources') || visibleModules.includes('utm_campaigns');
 const showFunnelRow =
   visibleModules.includes('funnel') || visibleModules.includes('funnel_friction');
+
+function filterHref(overrides: { range?: string; env?: string }): string {
+  const p = new URLSearchParams(Astro.url.searchParams.toString());
+  if (overrides.range) p.set('range', overrides.range);
+  if (overrides.env) {
+    if (overrides.env === 'production') p.delete('env');
+    else p.set('env', overrides.env);
+  }
+  return `/admin/metrics?${p.toString()}`;
+}
 ---
 
 <BaseLayout
-  title="Admin Metrics"
+  title="Analytics"
   description="Internal analytics dashboard."
   lang="en"
   noindex
 >
-  <main class="mx-auto w-full max-w-7xl px-6 py-10">
-    <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-      <div>
-        <h1 class="font-display text-3xl font-bold text-foreground">Admin Metrics</h1>
-        <p class="mt-2 text-sm text-foreground-muted">
-          {displayName} · Window:{' '}
-          <span class="font-semibold text-foreground">{queryLabel}</span>
-          <span class="text-foreground-subtle"> · </span>
-          <span class="font-semibold text-foreground">env: {envScopeLabel}</span>
-          <span class="text-foreground-subtle"> · </span>
-          <span class="font-semibold text-foreground">site: {siteScopeLabel}</span>
-          {
-            ctx?.usedRpc ? (
-              <span class="text-foreground-subtle"> (RPC)</span>
-            ) : (
-              <span class="text-foreground-subtle"> (fallback)</span>
-            )
-          }
-        </p>
-      </div>
-      <MetricsToolbar range={range} env={parsedEnv.env} />
-    </div>
+  <main class="mx-auto w-full max-w-7xl space-y-6 px-6 py-10">
+    <MetricsHubHeader
+      projectName={displayName}
+      projectId={siteScopeLabel}
+      envLabel={parsedEnv.envFilterLabel}
+      rangeLabel={parsedRange.queryLabel}
+      usedRpc={ctx?.usedRpc ?? false}
+      fallbackWarning={ctx?.fallbackWarning ?? null}
+    />
+
+    <MetricsFilterBar
+      range={parsedRange.range}
+      env={parsedEnv.env}
+      projectName={displayName}
+      baseSearchParams={Astro.url.searchParams}
+    />
 
     {
       queryError ? (
-        <div class="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
+        <div class="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
           <p class="font-semibold">Analytics unavailable</p>
           <p class="mt-1">{queryError}</p>
         </div>
@@ -99,13 +102,13 @@ const showFunnelRow =
 
     {
       ctx?.fallbackWarning ? (
-        <div class="mb-6 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
+        <div class="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
           <p class="font-semibold">Aggregate quality</p>
           <p class="mt-1">{ctx.fallbackWarning}</p>
           <p class="mt-2 text-xs text-foreground-muted">
             Run{' '}
             <code class="rounded bg-secondary px-1 py-0.5">
-              scripts/supabase-analytics-v6-project-env.sql
+              scripts/supabase-analytics-v7-hub-projects.sql
             </code>{' '}
             in the Supabase SQL editor.
           </p>
@@ -115,20 +118,13 @@ const showFunnelRow =
 
     {
       !queryError && !hasData ? (
-        <div class="mb-6 rounded-xl border border-border bg-card p-6">
+        <div class="rounded-xl border border-border bg-card p-6">
           <h2 class="text-lg font-semibold text-foreground">No events in this range</h2>
           <p class="mt-2 text-sm text-foreground-muted">
             Try{' '}
-            <a href={metricsEnvHref('/admin/metrics', { range: '30d', env: parsedEnv.env })} class="underline">
-              Last 30 days
-            </a>
-            ,{' '}
-            <a href={metricsEnvHref('/admin/metrics', { range, env: 'all' })} class="underline">
-              All envs
-            </a>
-            , or confirm{' '}
-            <code class="rounded bg-secondary px-1 py-0.5">ANALYTICS_ENV</code> matches the{' '}
-            <code class="rounded bg-secondary px-1 py-0.5">env</code> column on stored rows.
+            <a href={filterHref({ range: '90d' })} class="underline">Last 90 days</a>,{' '}
+            <a href={filterHref({ env: 'all' })} class="underline">All environments</a>, or confirm
+            tracking is enabled on this deployment.
           </p>
         </div>
       ) : null
@@ -136,7 +132,7 @@ const showFunnelRow =
 
     {
       hasData && ctx ? (
-        <>
+        <div class="space-y-6">
           {
             parsedEnv.env === 'all' ? (
               <MetricsModuleEnvBreakdown profile={ctx.profile} aggregates={ctx.aggregates} />
@@ -154,7 +150,7 @@ const showFunnelRow =
           }
           {
             showFunnelRow ? (
-              <div class="mt-6 grid gap-6 lg:grid-cols-2">
+              <div class="grid gap-6 lg:grid-cols-2">
                 {
                   visibleModules.includes('funnel') ? (
                     <MetricsModuleFunnel aggregates={ctx.aggregates} />
@@ -180,7 +176,7 @@ const showFunnelRow =
           }
           {
             showUtmRow ? (
-              <div class="mt-6 grid gap-6 lg:grid-cols-2">
+              <div class="grid gap-6 lg:grid-cols-2">
                 {
                   visibleModules.includes('utm_sources') ? (
                     <MetricsModuleUtm aggregates={ctx.aggregates} variant="sources" />
@@ -199,7 +195,7 @@ const showFunnelRow =
               <MetricsModuleLatest aggregates={ctx.aggregates} />
             ) : null
           }
-        </>
+        </div>
       ) : null
     }
   </main>

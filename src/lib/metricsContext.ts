@@ -6,9 +6,12 @@ import {
   syncSiteProfile,
 } from '@/lib/analyticsProfile';
 import type { AnalyticsEventKey, MetricsModuleId } from '@/lib/analyticsProfileSchema';
-import { getAnalyticsEnv } from '@/lib/analyticsEnv';
 import { getAnalyticsSiteId } from '@/lib/analyticsSite';
-import { parseMetricsEnvParam, type MetricsEnvParam } from '@/lib/metricsEnvParams';
+import {
+  envFilterLabel,
+  parseMetricsEnvParam,
+  type MetricsEnvParam,
+} from '@/lib/metricsEnvParams';
 import { getVisibleModules } from '@/lib/metricsModules';
 import {
   emptyAggregates,
@@ -277,8 +280,6 @@ async function loadFallbackAggregatesWithEnv(
 }
 
 export type LoadMetricsOptions = {
-  /** @deprecated Use env */
-  allEnvironments?: boolean;
   env?: MetricsEnvParam;
   envFilterLabel?: string;
   rpcEnv?: string;
@@ -319,7 +320,7 @@ async function loadAggregatesForSite(
       usedRpc: false,
       fallbackWarning:
         (rpcError ? `${rpcError.message}. ` : '') +
-        'Using fallback aggregates. Run scripts/supabase-analytics-v6-project-env.sql in Supabase.',
+        'Using fallback aggregates. Run scripts/supabase-analytics-v7-hub-projects.sql in Supabase.',
     };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
@@ -338,35 +339,15 @@ export async function loadMetricsContext(
       ? {
           envFilterLabel: options.envFilterLabel,
           rpcEnv: options.rpcEnv,
-          env: options.env ?? ('deploy' as MetricsEnvParam),
+          env: options.env ?? parseMetricsEnvParam(new URLSearchParams()).env,
         }
-      : (() => {
-          if (options?.allEnvironments === true) {
-            return {
-              env: 'all' as MetricsEnvParam,
-              envFilterLabel: 'all envs',
-              rpcEnv: '',
-            };
+      : options?.env
+        ? {
+            env: options.env,
+            envFilterLabel: options.envFilterLabel ?? envFilterLabel(options.env),
+            rpcEnv: options.rpcEnv ?? (options.env === 'all' ? '' : options.env),
           }
-          if (options?.env) {
-            const deploymentEnv = getAnalyticsEnv();
-            const envFilterLabel =
-              options.env === 'deploy'
-                ? deploymentEnv
-                : options.env === 'all'
-                  ? 'all envs'
-                  : options.env;
-            const rpcEnv =
-              options.env === 'deploy'
-                ? deploymentEnv
-                : options.env === 'all'
-                  ? ''
-                  : options.env;
-            return { env: options.env, envFilterLabel, rpcEnv };
-          }
-          const p = parseMetricsEnvParam(new URLSearchParams());
-          return { env: p.env, envFilterLabel: p.envFilterLabel, rpcEnv: p.rpcEnv };
-        })();
+        : parseMetricsEnvParam(new URLSearchParams());
 
   await syncSiteProfile(supabase);
   const profile = await resolveSiteProfile(supabase);

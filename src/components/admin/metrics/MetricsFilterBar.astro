@@ -1,0 +1,76 @@
+---
+import {
+  envShortLabel,
+  METRICS_ENV_OPTIONS,
+  type MetricsEnvParam,
+} from '@/lib/metricsEnvParams';
+import { METRICS_RANGE_OPTIONS, rangeShortLabel, type MetricsRangeParam } from '@/lib/metricsRangeParams';
+
+interface Props {
+  range: MetricsRangeParam;
+  env: MetricsEnvParam;
+  projectName: string;
+  basePath?: string;
+  baseSearchParams?: URLSearchParams;
+}
+
+const { range, env, projectName, basePath = '/admin/metrics', baseSearchParams } = Astro.props;
+const baseParams = baseSearchParams ?? new URLSearchParams();
+
+function href(next: Partial<{ range: MetricsRangeParam; env: MetricsEnvParam }>): string {
+  const p = new URLSearchParams(baseParams.toString());
+  p.set('range', next.range ?? range);
+  const nextEnv = next.env ?? env;
+  if (nextEnv !== 'production') {
+    p.set('env', nextEnv);
+  } else {
+    p.delete('env');
+  }
+  return `${basePath}?${p.toString()}`;
+}
+
+const segmentClass = 'rounded-md px-3 py-2 text-sm font-medium transition';
+const activeClass = 'bg-foreground text-background shadow-sm';
+const inactiveClass = 'text-foreground-muted hover:text-foreground hover:bg-secondary/80';
+---
+
+<div class="rounded-xl border border-border bg-card p-4">
+  <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+    <div class="flex items-center gap-2">
+      <span class="text-xs font-medium uppercase tracking-wide text-foreground-subtle">Project</span>
+      <span class="rounded-full border border-border bg-secondary px-3 py-1 text-sm font-medium text-foreground">
+        {projectName}
+      </span>
+    </div>
+
+    <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+      <div class="flex flex-col gap-1.5">
+        <span class="text-xs font-medium uppercase tracking-wide text-foreground-subtle">Environment</span>
+        <div class="inline-flex flex-wrap gap-1 rounded-lg border border-border bg-secondary p-1">
+          {METRICS_ENV_OPTIONS.map((opt) => (
+            <a
+              href={href({ env: opt })}
+              class:list={[segmentClass, env === opt ? activeClass : inactiveClass]}
+            >
+              {envShortLabel(opt)}
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <span class="text-xs font-medium uppercase tracking-wide text-foreground-subtle">Period</span>
+        <div class="inline-flex flex-wrap gap-1 rounded-lg border border-border bg-secondary p-1">
+          {METRICS_RANGE_OPTIONS.map((opt) => (
+            <a
+              href={href({ range: opt })}
+              class:list={[segmentClass, range === opt ? activeClass : inactiveClass]}
+            >
+              {rangeShortLabel(opt)}
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -57,6 +57,8 @@ Canonical **`site_id`** is the repo key from [`src/config/analytics.profile.ts`]
 
 Run `scripts/supabase-analytics-v6-project-env.sql` in Supabase after v5 to backfill legacy hostname rows and enable per-env breakdown in aggregates.
 
+Run `scripts/supabase-analytics-v7-hub-projects.sql` after v6 to dedupe the hub project picker (one row per `repo_key`).
+
 ### Hybrid site profiles (collect + dashboard modules)
 
 Each repo declares defaults in [`src/config/analytics.profile.ts`](../src/config/analytics.profile.ts). On ingest and dashboard load, the app syncs the profile to Supabase (`analytics_sites`, `analytics_site_profiles`).
@@ -78,9 +80,9 @@ Optional DB override (no redeploy): update `analytics_site_profiles.config` JSON
 | Test VPS (`stack.ilurodigital.com`) | `development` | Yes | Yes when `ADMIN_METRICS_ENABLED=true` |
 | Prod VPS (`stack.andreuog.com`) | `production` | Yes (`SUPABASE_TRACKING_ENABLED=true`) | No (404) |
 
-Env pills on `/admin/metrics`: **This deploy** | **All envs** | **Development** | **Production**. With **All envs**, combined totals plus a dev/prod split panel appear when v6 SQL is applied.
+Env filters on `/admin/metrics`: **All environments** | **Development** | **Production** (default). Period: **24h** | **7d** | **30d** | **90d**. With **All environments**, combined totals plus an env breakdown panel appear when v6+ SQL is applied.
 
-**Hub drill-down** (iluro develop): `/admin/metrics?site=astro-business-stack&env=all` or `?env=production`.
+**Hub drill-down** (iluro develop): `/admin/metrics?site=astro-business-stack&env=all&range=90d`.
 
 Dashboard at `/admin/metrics` when enabled locally (`pnpm dev`) or when `ADMIN_METRICS_ENABLED=true`.
 

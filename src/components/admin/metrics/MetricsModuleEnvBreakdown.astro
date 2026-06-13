@@ -38,26 +38,28 @@ const showFunnel =
 ---
 
 <section class="mb-6 rounded-xl border border-border bg-card p-5">
-  <h2 class="text-lg font-semibold text-foreground">By environment</h2>
-  <p class="mt-1 text-sm text-foreground-muted">
-    Split view while all environments are selected. Main modules below show combined totals.
-  </p>
-  <div class="mt-4 grid gap-4 lg:grid-cols-2">
+  <div class="mb-4 border-b border-border pb-4">
+    <h2 class="text-lg font-semibold text-foreground">Environment breakdown</h2>
+    <p class="mt-1 text-sm text-foreground-muted">
+      Per-environment totals while all environments are selected.
+    </p>
+  </div>
+  <div class="grid gap-4 lg:grid-cols-2">
     {
       envKeys.map((envKey) => {
         const slice = byEnv[envKey];
         const interactions = interactionSummary(slice);
         const funnel = slice.funnel;
         return (
-          <div class="rounded-lg border border-border/60 bg-secondary/30 p-4">
-            <h3 class="text-sm font-semibold text-foreground">{envLabel(envKey)}</h3>
-            <div class="mt-3 grid gap-3 sm:grid-cols-2">
+          <div class="rounded-xl border border-border/60 bg-secondary/20 p-5">
+            <h3 class="text-sm font-semibold uppercase tracking-wide text-foreground">{envLabel(envKey)}</h3>
+            <div class="mt-4 grid gap-4 sm:grid-cols-2">
               {
                 showInteraction ? (
                   <>
-                    <div>
-                      <p class="text-xs uppercase tracking-wide text-foreground-subtle">Interactions</p>
-                      <p class="mt-1 text-xl font-bold text-foreground">{interactions.total}</p>
+                    <div class="rounded-lg border border-border/50 bg-card p-4">
+                      <p class="text-xs font-medium uppercase tracking-wide text-foreground-subtle">Interactions</p>
+                      <p class="mt-1 text-2xl font-bold tabular-nums text-foreground">{interactions.total}</p>
                       <p class="text-xs text-foreground-muted">
                         Unique: {interactions.unique_visitors}
                       </p>
@@ -67,25 +69,25 @@ const showFunnel =
               }
               {
                 showFunnel && isDashboardEventEnabled(profile, 'lead_captured') ? (
-                  <div>
-                    <p class="text-xs uppercase tracking-wide text-foreground-subtle">Leads</p>
-                    <p class="mt-1 text-xl font-bold text-foreground">{funnel.lead_captured}</p>
+                  <div class="rounded-lg border border-border/50 bg-card p-4">
+                    <p class="text-xs font-medium uppercase tracking-wide text-foreground-subtle">Leads</p>
+                    <p class="mt-1 text-2xl font-bold tabular-nums text-foreground">{funnel.lead_captured}</p>
                   </div>
                 ) : null
               }
               {
                 showFunnel && isDashboardEventEnabled(profile, 'calendar_viewed') ? (
-                  <div>
-                    <p class="text-xs uppercase tracking-wide text-foreground-subtle">Calendar</p>
-                    <p class="mt-1 text-xl font-bold text-foreground">{funnel.calendar_viewed}</p>
+                  <div class="rounded-lg border border-border/50 bg-card p-4">
+                    <p class="text-xs font-medium uppercase tracking-wide text-foreground-subtle">Calendar</p>
+                    <p class="mt-1 text-2xl font-bold tabular-nums text-foreground">{funnel.calendar_viewed}</p>
                   </div>
                 ) : null
               }
               {
                 showFunnel && isDashboardEventEnabled(profile, 'audit_booked') ? (
-                  <div>
-                    <p class="text-xs uppercase tracking-wide text-foreground-subtle">Bookings</p>
-                    <p class="mt-1 text-xl font-bold text-foreground">{funnel.audit_booked}</p>
+                  <div class="rounded-lg border border-border/50 bg-card p-4">
+                    <p class="text-xs font-medium uppercase tracking-wide text-foreground-subtle">Bookings</p>
+                    <p class="mt-1 text-2xl font-bold tabular-nums text-foreground">{funnel.audit_booked}</p>
                   </div>
                 ) : null
               }
