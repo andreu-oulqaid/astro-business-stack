@@ -43,19 +43,20 @@ export const en = {
   // Hero Section
   hero: {
     badge: 'Production engineering showcase',
-    title: 'Self-hosted Astro business stack on',
-    titleHighlight: 'your VPS.',
+    title: 'Steal my self-hosted WebApp template',
+    titleHighlight: 'for FREE',
     description:
       'Dockerized SSR sites with GitHub OAuth CMS, CI/CD via GitHub Actions, and optional Notion, Supabase, Resend, and Cal.com integrations.',
     cta: 'View on GitHub',
     secondaryCta: 'Live deployments',
+    scrollHint: 'Scroll down',
     github: 'View on GitHub',
     socialProof: 'Multi-tenant platform running on Hetzner VPS',
   },
 
   trustBar: {
     label: 'Built with',
-    velocityTitle: 'Velocity — UI baseline by Southwell Media',
+    velocityTitle: 'Velocity, UI baseline by Southwell Media',
     attributionPrefix: 'UI baseline from ',
     attributionLink: 'Velocity',
     attributionSuffix: ' by Southwell Media',
@@ -71,7 +72,7 @@ export const en = {
     title: 'See the stack in action',
     description: 'Short walkthrough of deploy, CMS auth, and integrations.',
     placeholder: 'Demo video coming soon',
-    posterAlt: 'Self-hosted web stack walkthrough — production-ready and automated',
+    posterAlt: 'Self-hosted web stack walkthrough, production-ready and automated',
     playLabel: 'Play walkthrough video',
   },
 
@@ -79,7 +80,7 @@ export const en = {
     badge: 'Try it yourself',
     title: 'Live integration sandbox',
     description:
-      'Simulate a lead form pipeline through demo Supabase and Notion — same integration pattern as production.',
+      'Simulate a lead form pipeline through demo Supabase and Notion, same integration pattern as production.',
     runButton: 'Add a lead',
     running: 'Adding lead…',
     attemptsLeft: '{remaining} of {max} runs / hour',
@@ -107,7 +108,7 @@ export const en = {
       notionOk: 'Notion: row created',
       notionFailed: 'Notion: failed',
       sendingNotify: '◐ Sending notification…',
-      resendOk: 'Resend: simulated — no email sent',
+      resendOk: 'Resend: simulated, no email sent',
       resendSkipped: 'Resend: skipped',
       runMetadata: 'Run metadata & persistence ({ms}ms)',
       complete: 'Pipeline total ({ms}ms)',
@@ -116,7 +117,7 @@ export const en = {
   },
 
   realityCheck: {
-    title: 'Why this stack <strong>exists</strong>.',
+    title: 'Why this stack <strong>exists</strong>',
     left: {
       webTitle: '<strong>Template sites are not enough.</strong>',
       webBody:
@@ -127,7 +128,7 @@ export const en = {
     },
     right: {
       authorityTitle: '<strong>Self-hosted by default.</strong>',
-      authorityBody: 'You own the containers, the secrets, and the deploy pipeline — <strong>no vendor lock-in.</strong>',
+      authorityBody: 'You own the containers, the secrets, and the deploy pipeline, <strong>no vendor lock-in.</strong>',
       opportunityTitle: '<strong>Engineering evidence.</strong>',
       opportunityBody:
         'Recruiters and collaborators see <strong>architecture decisions</strong>, not just screenshots.',
@@ -136,30 +137,30 @@ export const en = {
   },
 
   leakToFlow: {
-    title: 'The <span class="text-brand-500"><strong>deploy pipeline</strong></span> — from CMS to VPS.',
+    title: 'The <span class="text-brand-500"><strong>deploy pipeline</strong></span> from CMS to VPS',
     steps: {
       step1: {
-        title: '<strong>Login</strong> via OAuth.',
+        title: '<strong>Login</strong> via OAuth',
         body: 'Editor opens /admin. Self-hosted auth gateway redirects to GitHub and returns a CMS token.',
       },
       step2: {
-        title: 'Edit in <strong>Decap CMS</strong>.',
+        title: 'Edit in <strong>Decap CMS</strong>',
         body: 'Content changes in the visual editor. No third-party auth SaaS.',
       },
       step3: {
-        title: '<strong>Commit</strong> to GitHub.',
-        body: 'Decap saves to the repo branch — develop for test, main for production.',
+        title: '<strong>Commit</strong> to GitHub',
+        body: 'Decap saves to the repo branch: develop for test, main for production.',
       },
       step4: {
-        title: '<strong>GitHub Actions</strong> deploy.',
+        title: '<strong>GitHub Actions</strong> deploy',
         body: 'Workflow SSHs into the VPS, pulls latest code, and triggers a rebuild.',
       },
       step5: {
-        title: '<strong>Docker</strong> rebuild on VPS.',
+        title: '<strong>Docker</strong> rebuild on VPS',
         body: 'Multi-stage build, compose up on the shared web-public network.',
       },
       step6: {
-        title: '<strong>Live site</strong> updated.',
+        title: '<strong>Live site</strong> updated',
         body: 'Nginx Proxy Manager routes TLS. Astro SSR serves the new build.',
       },
     },
@@ -173,10 +174,16 @@ export const en = {
   },
 
   docs: {
-    title: 'Deploy guides',
-    description: 'How content authoring and production deploy work on this stack — step by step.',
+    title: 'Stack docs',
+    description: 'Deploy guides and technical write-ups on integrations, CMS workflow, and multi-locale SSR.',
     breadcrumb: 'Docs',
     backToIndex: 'Back to docs',
+    filterLabel: 'Filter by',
+    filterAll: 'All',
+    filter: {
+      deploy: 'Deploy',
+      capabilities: 'Capabilities',
+    },
   },
 
   techEdge: {
@@ -207,14 +214,14 @@ export const en = {
     },
     bridge: {
       title: 'Business Integrations',
-      body: 'Optional Notion CRM, Resend email, Supabase analytics, and Cal.com — wired through typed API routes.',
+      body: 'Optional Notion CRM, Resend email, Supabase analytics, and Cal.com, wired through typed API routes.',
       cta: 'Lead funnel article',
     },
     readGuide: 'Read guide',
   },
 
   servicesSection: {
-    title: 'Services built for growth, not vanity metrics.',
+    title: 'Services built for growth, not vanity metrics',
     description:
       'Each service is engineered to increase qualified demand and reduce friction from first click to signed client.',
     cards: {
@@ -234,7 +241,7 @@ export const en = {
   },
 
   comparisonSection: {
-    title: 'Why teams switch from traditional agencies to Iluro Digital.',
+    title: 'Why teams switch from traditional agencies to Iluro Digital',
     traditional: 'Traditional agencies',
     iluro: 'Iluro Digital',
     rows: {
@@ -257,7 +264,7 @@ export const en = {
   },
 
   selectedWorkSection: {
-    title: 'Selected work and measurable outcomes.',
+    title: 'Selected work and measurable outcomes',
     items: {
       one: {
         title: 'B2B services landing overhaul',
@@ -275,7 +282,7 @@ export const en = {
   },
 
   homeFaq: {
-    title: 'Frequently asked questions before we start.',
+    title: 'Frequently asked questions before we start',
   },
 
   // Tech Stack Section
@@ -373,7 +380,7 @@ export const en = {
     },
     testimonial: {
       quote: "\"The cleanest boilerplate I've seen in 2024. It cuts the fluff.\"",
-      author: '— Alex C., Senior Frontend Dev',
+      author: '- Alex C., Senior Frontend Dev',
     },
   },
 
@@ -416,6 +423,8 @@ export const en = {
   // Footer
   footer: {
     copyright: '© {year} Astro Business Stack. MIT License.',
+    tagline:
+      'Steal my self-hosted WebApp template for FREE. Docker, GitHub OAuth CMS, CI/CD to your VPS, and optional production integrations.',
     madeWith: 'Made with',
     maintainedBy: 'Maintained by',
     links: {
@@ -451,7 +460,7 @@ export const en = {
     mission: {
       title: 'What it proves',
       description:
-        'Full-stack delivery with SSR, CMS auth, CI/CD, and optional CRM, analytics, email, and booking integrations — the same pattern used for live agency and client deployments.',
+        'Full-stack delivery with SSR, CMS auth, CI/CD, and optional CRM, analytics, email, and booking integrations, the same pattern used for live agency and client deployments.',
     },
     values: {
       title: 'Design principles',

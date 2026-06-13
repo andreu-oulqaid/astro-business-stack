@@ -24,8 +24,8 @@ export const ca: TranslationKeys = {
   hero: {
     ...en.hero,
     badge: 'Mostra d’enginyeria en producció',
-    title: 'Stack de negoci Astro autoallotjat al',
-    titleHighlight: 'teu VPS.',
+    title: 'Roba la meva plantilla WebApp autoallotjada',
+    titleHighlight: 'GRATIS',
     description:
       'Llocs SSR en Docker, <strong>CMS amb OAuth de GitHub</strong>, CI/CD amb GitHub Actions i integracions opcionals.',
     cta: 'Veure a GitHub',
@@ -34,7 +34,7 @@ export const ca: TranslationKeys = {
   },
   trustBar: {
     label: 'Construït amb',
-    velocityTitle: 'Velocity — base UI de Southwell Media',
+    velocityTitle: 'Velocity, base UI de Southwell Media',
     attributionPrefix: 'Base UI de ',
     attributionLink: 'Velocity',
     attributionSuffix: ' per Southwell Media',
@@ -114,7 +114,7 @@ export const ca: TranslationKeys = {
     cta: 'Vull <strong>diagnosticar</strong> la meva empresa <strong>gratis</strong>.',
   },
   leakToFlow: {
-    title: 'El <span class="text-brand-500"><strong>pipeline de deploy</strong></span> — del CMS al VPS.',
+    title: 'El <span class="text-brand-500"><strong>pipeline de deploy</strong></span> del CMS al VPS',
     steps: {
       step1: {
         title: '<strong>Login</strong> amb OAuth.',
@@ -151,8 +151,9 @@ export const ca: TranslationKeys = {
   },
 
   docs: {
-    title: 'Guies de deploy',
-    description: 'Com funcionen el pipeline de contingut i el deploy en producció — pas a pas.',
+    ...en.docs,
+    title: 'Documentació del stack',
+    description: 'Guies de deploy i articles tècnics sobre integracions, CMS i SSR multi-idioma.',
     breadcrumb: 'Docs',
     backToIndex: 'Tornar a docs',
   },
@@ -218,6 +219,8 @@ export const ca: TranslationKeys = {
   footer: {
     ...en.footer,
     copyright: '© {year} Astro Business Stack. Llicència MIT.',
+    tagline:
+      'Roba la meva plantilla WebApp autoallotjada GRATIS. Docker, CMS OAuth de GitHub, CI/CD al VPS i integracions opcionals.',
     links: {
       ...en.footer.links,
       documentation: 'Docs',

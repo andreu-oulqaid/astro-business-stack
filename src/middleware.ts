@@ -10,6 +10,10 @@ import {
 } from '@/lib/localeDetect';
 
 export const onRequest = defineMiddleware(async (context, next) => {
+  if (context.isPrerendered) {
+    return next();
+  }
+
   const { pathname } = context.url;
 
   if (shouldSkipLocaleRedirect(pathname)) {

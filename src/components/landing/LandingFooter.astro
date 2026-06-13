@@ -19,9 +19,25 @@ const { locale: localeProp } = Astro.props;
 const locale = localeProp || getLocaleFromPath(Astro.url.pathname);
 const t = useTranslations(locale);
 
+const homePath = getLocalizedPath('home', locale);
+const isLandingPage =
+  Astro.url.pathname === homePath || Astro.url.pathname === `${homePath}/`;
+
+const featuresLink = isLandingPage ? '#tech-edge' : `${homePath}#tech-edge`;
+const deploymentsLink = isLandingPage ? '#deployments' : `${homePath}#deployments`;
+const faqLink = isLandingPage ? '#faq' : `${homePath}#faq`;
+
 const links = [
   { label: t('footer.links.documentation'), href: `${siteConfig.github.url}#readme` },
   { label: t('footer.links.license'), href: `${siteConfig.github.url}/blob/main/LICENSE` },
+  { label: t('footer.links.privacy'), href: getLocalizedPath('privacy', locale) },
+];
+
+const mobileNavLinks = [
+  { label: t('nav.features'), href: featuresLink },
+  { label: t('nav.portfolio'), href: deploymentsLink },
+  { label: t('nav.faq'), href: faqLink },
+  { label: t('footer.links.documentation'), href: `${siteConfig.github.url}#readme` },
   { label: t('footer.links.privacy'), href: getLocalizedPath('privacy', locale) },
 ];
 
@@ -29,52 +45,102 @@ const socialLinks = [
   { platform: 'github' as const, href: siteConfig.github.profile, label: t('footer.links.github') },
   { platform: 'linkedin' as const, href: siteConfig.linkedin.url, label: t('footer.links.linkedin') },
 ];
+
+const year = new Date().getFullYear();
+const copyright = t('footer.copyright').replace('{year}', String(year));
 ---
 
-<footer class="border-t border-border bg-background-secondary py-12">
-  <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 px-6 md:flex-row">
-    <!-- Logo -->
-    <div class="flex flex-col gap-2">
-      <a href={getLocalizedPath('home', locale)} class="flex items-center gap-2">
-        <BrandMark />
-        <span class="font-display text-lg font-semibold tracking-tight text-foreground">{t('site.name')}</span>
-      </a>
+<footer class="border-t border-border bg-background-secondary py-10 md:py-12">
+  <div class="mx-auto max-w-6xl px-4 sm:px-6">
+    <!-- Mobile -->
+    <div class="flex flex-col gap-5 md:hidden">
+      <div class="flex items-center justify-between gap-4">
+        <a href={homePath} class="inline-flex min-w-0 items-center gap-2">
+          <BrandMark />
+          <span class="truncate font-display text-base font-bold tracking-tight text-foreground">
+            {t('site.name')}
+          </span>
+        </a>
+        <div class="flex shrink-0 items-center gap-2">
+          {
+            socialLinks.map((social) => (
+              <a
+                href={social.href}
+                class="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-background text-foreground-muted transition-colors hover:bg-secondary hover:text-foreground"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={social.label}
+                data-analytics-target={social.platform}
+                data-analytics-placement="footer"
+                data-analytics-action="click"
+              >
+                <Icon name={social.platform} size="sm" />
+              </a>
+            ))
+          }
+        </div>
+      </div>
+
+      <nav class="flex flex-wrap gap-x-4 gap-y-2 text-sm font-medium text-foreground-secondary">
+        {
+          mobileNavLinks.map((link) => (
+            <a
+              href={link.href}
+              class="transition-colors hover:text-foreground"
+              target={link.href.startsWith('http') ? '_blank' : undefined}
+              rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+            >
+              {link.label}
+            </a>
+          ))
+        }
+      </nav>
+
+      <p class="text-xs text-foreground-subtle">{copyright}</p>
     </div>
 
-    <!-- Links -->
-    <nav class="flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm font-medium text-foreground-muted">
-      {
-        links.map((link) => (
-          <a
-            href={link.href}
-            class="transition-colors hover:text-foreground"
-            target={link.href.startsWith('http') ? '_blank' : undefined}
-            rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-          >
-            {link.label}
-          </a>
-        ))
-      }
-    </nav>
+    <!-- Desktop: compact row -->
+    <div class="hidden items-center justify-between gap-6 md:flex">
+      <div class="flex flex-col gap-2">
+        <a href={homePath} class="flex items-center gap-2">
+          <BrandMark />
+          <span class="font-display text-lg font-semibold tracking-tight text-foreground">{t('site.name')}</span>
+        </a>
+      </div>
 
-    <!-- Social -->
-    <div class="flex items-center gap-3">
-      {
-        socialLinks.map((social) => (
-          <a
-            href={social.href}
-            class="flex h-9 w-9 items-center justify-center rounded-md text-foreground-muted transition-colors hover:bg-background hover:text-foreground"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={social.label}
-            data-analytics-target={social.platform}
-            data-analytics-placement="footer"
-            data-analytics-action="click"
-          >
-            <Icon name={social.platform} size="md" />
-          </a>
-        ))
-      }
+      <nav class="flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm font-medium text-foreground-muted">
+        {
+          links.map((link) => (
+            <a
+              href={link.href}
+              class="transition-colors hover:text-foreground"
+              target={link.href.startsWith('http') ? '_blank' : undefined}
+              rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+            >
+              {link.label}
+            </a>
+          ))
+        }
+      </nav>
+
+      <div class="flex items-center gap-3">
+        {
+          socialLinks.map((social) => (
+            <a
+              href={social.href}
+              class="flex h-9 w-9 items-center justify-center rounded-md text-foreground-muted transition-colors hover:bg-background hover:text-foreground"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={social.label}
+              data-analytics-target={social.platform}
+              data-analytics-placement="footer"
+              data-analytics-action="click"
+            >
+              <Icon name={social.platform} size="md" />
+            </a>
+          ))
+        }
+      </div>
     </div>
   </div>
 </footer>

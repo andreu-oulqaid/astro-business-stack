@@ -160,21 +160,7 @@ export default defineConfig({
     },
   },
 
-  redirects: {
-    '/portfolio/web': '/portfolio/multi-locale-ssr',
-    '/portfolio/automation': '/portfolio/cms-workflow',
-    '/portfolio/fullsystem': '/portfolio/lead-funnel',
-    '/portfolio/envilo': '/portfolio',
-    '/es/casos/web': '/es/casos/multi-locale-ssr',
-    '/es/casos/automatizacion': '/es/casos/cms-workflow',
-    '/es/casos/sistema-completo': '/es/casos/lead-funnel',
-    '/ca/portfoli/web': '/ca/portfoli/multi-locale-ssr',
-    '/ca/portfoli/automatitzacio': '/ca/portfoli/cms-workflow',
-    '/ca/portfoli/sistema-complet': '/ca/portfoli/lead-funnel',
-    '/pl/realizacje/web': '/pl/realizacje/multi-locale-ssr',
-    '/pl/realizacje/automatyzacja': '/pl/realizacje/cms-workflow',
-    '/pl/realizacje/pelny-system': '/pl/realizacje/lead-funnel',
-  },
+  redirects: {},
 
   // i18n configuration
   i18n: {

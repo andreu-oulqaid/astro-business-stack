@@ -52,7 +52,7 @@ const metaDescription = t(`${prefix}.metaDescription` as TranslationKey);
 
 const tagFilter = pillar === 'web' ? 'web' : pillar === 'automation' ? 'automation' : 'full-system';
 
-const allPosts = await getCollection('services', ({ data }) => {
+const allPosts = await getCollection('docs', ({ data }) => {
   return import.meta.env.PROD ? data.draft !== true : true;
 });
 
@@ -66,10 +66,10 @@ const enviloPost =
 const proofGridPosts =
   pillar === 'web' && enviloPost ? proofPosts.filter((p) => p.id !== enviloPost.id) : proofPosts;
 
-const portfolioBase = getLocalizedPath('portfolio', locale);
+const docsBase = getLocalizedPath('docs', locale);
 const postHref = (postId: string) => {
   const slug = postId.replace(`${locale}/`, '');
-  return `${portfolioBase}/${slug}`;
+  return `${docsBase}/${slug}`;
 };
 
 const revenueDescId = 'revenue-loop-desc';
@@ -77,7 +77,7 @@ const revenueDescId = 'revenue-loop-desc';
 const partnerLogoCls =
   'h-7 w-auto max-h-8 max-w-[7rem] object-contain opacity-90 dark:brightness-0 dark:invert';
 
-const heroSecondaryHref = pillar === 'web' && enviloPost ? '#sales-web-envilo' : portfolioBase;
+const heroSecondaryHref = pillar === 'web' && enviloPost ? '#sales-web-envilo' : docsBase;
 const heroSecondaryLabel =
   pillar === 'web' && enviloPost ? t('salesWeb.heroCtaFeaturedCase') : t('salesCommon.heroCtaCases');
 

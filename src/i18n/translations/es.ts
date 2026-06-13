@@ -45,19 +45,20 @@ export const es: TranslationKeys = {
   // Hero Section
   hero: {
     badge: 'Showcase de ingeniería en producción',
-    title: 'Stack de negocio Astro autoalojado en',
-    titleHighlight: 'tu VPS.',
+    title: 'Roba mi plantilla WebApp autoalojada',
+    titleHighlight: 'GRATIS',
     description:
       'Sitios SSR en Docker, <strong>CMS con OAuth de GitHub</strong>, CI/CD con GitHub Actions e integraciones opcionales con Notion, Supabase, Resend y Cal.com.',
     cta: 'Ver en GitHub',
     secondaryCta: 'Despliegues en vivo',
+    scrollHint: 'Desplazar hacia abajo',
     github: 'Ver en GitHub',
     socialProof: 'Plataforma multi-tenant en VPS Hetzner',
   },
 
   trustBar: {
     label: 'Construido con',
-    velocityTitle: 'Velocity — base UI de Southwell Media',
+    velocityTitle: 'Velocity, base UI de Southwell Media',
     attributionPrefix: 'Base UI de ',
     attributionLink: 'Velocity',
     attributionSuffix: ' por Southwell Media',
@@ -73,7 +74,7 @@ export const es: TranslationKeys = {
     title: 'El stack en acción',
     description: 'Recorrido breve de deploy, auth CMS e integraciones.',
     placeholder: 'Vídeo demo próximamente',
-    posterAlt: 'Recorrido del stack web autoalojado — listo para producción y automatizado',
+    posterAlt: 'Recorrido del stack web autoalojado, listo para producción y automatizado',
     playLabel: 'Reproducir vídeo del recorrido',
   },
 
@@ -81,7 +82,7 @@ export const es: TranslationKeys = {
     badge: 'Pruébalo tú',
     title: 'Sandbox de integraciones en vivo',
     description:
-      'Simula un pipeline de formulario lead con Supabase y Notion de demo — mismo patrón que en producción.',
+      'Simula un pipeline de formulario lead con Supabase y Notion de demo, mismo patrón que en producción.',
     runButton: 'Añadir un lead',
     running: 'Añadiendo lead…',
     attemptsLeft: '{remaining} de {max} ejecuciones / hora',
@@ -109,7 +110,7 @@ export const es: TranslationKeys = {
       notionOk: 'Notion: fila creada',
       notionFailed: 'Notion: error',
       sendingNotify: '◐ Enviando notificación…',
-      resendOk: 'Resend: simulado — sin email',
+      resendOk: 'Resend: simulado, sin email',
       resendSkipped: 'Resend: omitido',
       runMetadata: 'Metadatos y persistencia ({ms}ms)',
       complete: 'Total del pipeline ({ms}ms)',
@@ -138,7 +139,7 @@ export const es: TranslationKeys = {
   },
 
   leakToFlow: {
-    title: 'El <span class="text-brand-500"><strong>pipeline de deploy</strong></span> — del CMS al VPS.',
+    title: 'El <span class="text-brand-500"><strong>pipeline de deploy</strong></span> del CMS al VPS',
     steps: {
       step1: {
         title: '<strong>Login</strong> con OAuth.',
@@ -150,7 +151,7 @@ export const es: TranslationKeys = {
       },
       step3: {
         title: '<strong>Commit</strong> a GitHub.',
-        body: 'Decap guarda en la rama del repo — develop para test, main para producción.',
+        body: 'Decap guarda en la rama del repo: develop para test, main para producción.',
       },
       step4: {
         title: 'Deploy con <strong>GitHub Actions</strong>.',
@@ -175,10 +176,16 @@ export const es: TranslationKeys = {
   },
 
   docs: {
-    title: 'Guías de deploy',
-    description: 'Cómo funcionan el pipeline de contenido y el deploy en producción — paso a paso.',
+    title: 'Documentación del stack',
+    description: 'Guías de deploy y artículos técnicos sobre integraciones, CMS y SSR multi-idioma.',
     breadcrumb: 'Docs',
     backToIndex: 'Volver a docs',
+    filterLabel: 'Filtrar por',
+    filterAll: 'Todos',
+    filter: {
+      deploy: 'Deploy',
+      capabilities: 'Capacidades',
+    },
   },
 
   techEdge: {
@@ -204,7 +211,7 @@ export const es: TranslationKeys = {
     },
     bridge: {
       title: 'Integraciones de negocio',
-      body: 'Notion CRM, Resend, Supabase analytics y Cal.com — vía rutas API tipadas.',
+      body: 'Notion CRM, Resend, Supabase analytics y Cal.com, vía rutas API tipadas.',
       cta: 'Artículo lead funnel',
     },
     readGuide: 'Leer guía',
@@ -370,7 +377,7 @@ export const es: TranslationKeys = {
     },
     testimonial: {
       quote: '"El boilerplate más limpio que he visto en 2024. Elimina lo innecesario."',
-      author: '— Alex C., Senior Frontend Dev',
+      author: '- Alex C., Senior Frontend Dev',
     },
   },
 
@@ -413,6 +420,8 @@ export const es: TranslationKeys = {
   // Footer
   footer: {
     copyright: '© {year} Astro Business Stack. Licencia MIT.',
+    tagline:
+      'Roba mi plantilla WebApp autoalojada GRATIS. Docker, CMS OAuth de GitHub, CI/CD a tu VPS e integraciones opcionales.',
     madeWith: 'Hecho con',
     maintainedBy: 'Mantenido por',
     links: {

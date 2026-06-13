@@ -22,7 +22,7 @@ interface Props {
   slug?: string;
   locale?: Locale;
   /** Breadcrumb + “back” hub */
-  hubRouteId?: 'portfolio' | 'services' | 'docs';
+  hubRouteId?: 'services' | 'docs';
 }
 
 const {
@@ -36,7 +36,7 @@ const {
   tags = [],
   slug = '',
   locale = defaultLocale,
-  hubRouteId = 'portfolio',
+  hubRouteId = 'docs',
 } = Astro.props;
 
 const t = useTranslations(locale);
@@ -53,11 +53,9 @@ const ogImage = resolveOgImageString(image);
 const hubUrl = getLocalizedPath(hubRouteId, locale);
 const homeUrl = getLocalizedPath('home', locale);
 const hubCrumbLabel =
-  hubRouteId === 'portfolio'
-    ? t('portfolio.breadcrumb')
-    : hubRouteId === 'docs'
-      ? t('docs.breadcrumb')
-      : t('nav.features');
+  hubRouteId === 'docs'
+    ? t('docs.breadcrumb')
+    : t('nav.features');
 
 const breadcrumbs = [
   { label: t('nav.home'), href: homeUrl },
@@ -124,11 +122,9 @@ const fullUrl = new URL(Astro.url.pathname, Astro.site).toString();
             >
               <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            {hubRouteId === 'portfolio'
-              ? t('portfolio.backToIndex')
-              : hubRouteId === 'docs'
-                ? t('docs.backToIndex')
-                : t('blog.backToBlog')}
+            {hubRouteId === 'docs'
+              ? t('docs.backToIndex')
+              : t('blog.backToBlog')}
           </a>
 
           <!-- Share buttons -->

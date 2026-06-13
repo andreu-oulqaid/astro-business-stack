@@ -18,7 +18,6 @@ interface Props {
 
 const { locale } = Astro.props;
 const t = useTranslations(locale);
-const portfolioBase = getLocalizedPath('portfolio', locale);
 const docsBase = getLocalizedPath('docs', locale);
 
 const cards = [
@@ -26,7 +25,7 @@ const cards = [
     title: t('techEdge.web.title'),
     body: t('techEdge.web.body'),
     cta: t('techEdge.web.cta'),
-    href: `${portfolioBase}/multi-locale-ssr`,
+    href: `${docsBase}/multi-locale-ssr`,
     logos: [
       { src: astroLogo.src, alt: 'Astro', logoKey: 'astro' as LogoKey },
       { src: tailwindLogo.src, alt: 'Tailwind CSS', logoKey: 'tailwind' as LogoKey },
@@ -51,7 +50,7 @@ const cards = [
     title: t('techEdge.bridge.title'),
     body: t('techEdge.bridge.body'),
     cta: t('techEdge.bridge.cta'),
-    href: `${portfolioBase}/lead-funnel`,
+    href: `${docsBase}/lead-funnel`,
     logos: [
       { src: notionLogo.src, alt: 'Notion', logoKey: 'notion' as LogoKey },
       { src: supabaseLogo.src, alt: 'Supabase', logoKey: 'supabase' as LogoKey },

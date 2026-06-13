@@ -24,8 +24,8 @@ export const pl: TranslationKeys = {
   hero: {
     ...en.hero,
     badge: 'Prezentacja inżynierii produkcyjnej',
-    title: 'Self-hosted stack Astro na',
-    titleHighlight: 'Twoim VPS.',
+    title: 'Ukradnij mój szablon WebApp self-hosted',
+    titleHighlight: 'ZA DARMO',
     description:
       'Strony SSR w Dockerze, <strong>CMS z GitHub OAuth</strong>, CI/CD przez GitHub Actions i opcjonalne integracje.',
     cta: 'Zobacz na GitHub',
@@ -34,7 +34,7 @@ export const pl: TranslationKeys = {
   },
   trustBar: {
     label: 'Zbudowane z',
-    velocityTitle: 'Velocity — baza UI od Southwell Media',
+    velocityTitle: 'Velocity, baza UI od Southwell Media',
     attributionPrefix: 'Baza UI z ',
     attributionLink: 'Velocity',
     attributionSuffix: ' od Southwell Media',
@@ -114,7 +114,7 @@ export const pl: TranslationKeys = {
     cta: 'Chcę <strong>bezpłatnie zdiagnozować</strong> moją firmę.',
   },
   leakToFlow: {
-    title: 'Pipeline <span class="text-brand-500"><strong>deployu</strong></span> — od CMS do VPS.',
+    title: 'Pipeline <span class="text-brand-500"><strong>deployu</strong></span> od CMS do VPS',
     steps: {
       step1: {
         title: '<strong>Login</strong> przez OAuth.',
@@ -151,8 +151,9 @@ export const pl: TranslationKeys = {
   },
 
   docs: {
-    title: 'Przewodniki deploy',
-    description: 'Jak działają pipeline treści i deploy produkcyjny — krok po kroku.',
+    ...en.docs,
+    title: 'Dokumentacja stacka',
+    description: 'Przewodniki deploy i artykuły techniczne o integracjach, CMS i SSR wielojęzycznym.',
     breadcrumb: 'Docs',
     backToIndex: 'Powrót do docs',
   },
@@ -218,6 +219,8 @@ export const pl: TranslationKeys = {
   footer: {
     ...en.footer,
     copyright: '© {year} Astro Business Stack. Licencja MIT.',
+    tagline:
+      'Ukradnij mój szablon WebApp self-hosted ZA DARMO. Docker, GitHub OAuth CMS, CI/CD na VPS i opcjonalne integracje.',
     links: {
       ...en.footer.links,
       documentation: 'Docs',

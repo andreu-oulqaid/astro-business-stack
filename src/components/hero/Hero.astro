@@ -3,6 +3,9 @@ import type { HTMLAttributes } from 'astro/types';
 import { cn } from '@/lib/cn';
 import siteConfig from '@/config/site.config';
 import heroRevealBg from '@/assets/marketing/hero-reveal-bg.png';
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
+import { getLocaleFromPath } from '@/i18n/config';
+import { useTranslations } from '@/i18n/index';
 
 interface Props extends HTMLAttributes<'section'> {
   /** Layout mode: centered single column or split two-column */
@@ -21,6 +24,10 @@ interface Props extends HTMLAttributes<'section'> {
   showLogomark?: boolean;
   /** Mouse-follow spotlight reveal on hero background (desktop); touch/reduced-motion use static low-opacity */
   interactiveSpotlight?: boolean;
+  /** Subtle scroll cue for mobile viewports */
+  showScrollHint?: boolean;
+  /** Anchor for the scroll hint (e.g. next section below the fold) */
+  scrollHintHref?: string;
 }
 
 const {
@@ -32,9 +39,15 @@ const {
   blobPosition = 'right',
   showLogomark = false,
   interactiveSpotlight = false,
+  showScrollHint = false,
+  scrollHintHref = '#trust-bar',
   class: className,
   ...attrs
 } = Astro.props;
+
+const scrollHintLabel = showScrollHint
+  ? useTranslations(getLocaleFromPath(Astro.url.pathname))('hero.scrollHint')
+  : '';
 
 // Check which slots are provided
 const hasBadgeSlot = Astro.slots.has('badge');
@@ -95,7 +108,7 @@ const gridClasses = cn(
 
   {interactiveSpotlight && (
     <div
-      class="hero-spotlight-base bg-grid-pattern pointer-events-none absolute inset-0 z-[1] [mask-image:linear-gradient(to_bottom,white,transparent)] opacity-[0.08] dark:opacity-[0.12]"
+      class="hero-spotlight-base bg-grid-pattern pointer-events-none absolute inset-0 z-[1] hidden [mask-image:linear-gradient(to_bottom,white,transparent)] opacity-[0.08] md:block dark:opacity-[0.12]"
       aria-hidden="true"
     />
   )}
@@ -114,7 +127,7 @@ const gridClasses = cn(
 
   {interactiveSpotlight && (
     <div
-      class="hero-spotlight-reveal pointer-events-none absolute inset-0 z-[3] bg-cover bg-center bg-no-repeat opacity-[0.42] dark:opacity-[0.38]"
+      class="hero-spotlight-reveal pointer-events-none absolute inset-0 z-[3] hidden bg-cover bg-center bg-no-repeat opacity-[0.42] md:block dark:opacity-[0.38]"
       style={{ backgroundImage: `url(${heroRevealBg.src})` }}
       aria-hidden="true"
     />
@@ -206,7 +219,46 @@ const gridClasses = cn(
       />
     )}
   </div>
+
+  {showScrollHint && (
+    <a
+      href={scrollHintHref}
+      class="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 text-foreground-muted transition-colors hover:text-foreground md:hidden"
+      aria-label={scrollHintLabel}
+    >
+      <span class="hero-scroll-hint inline-flex" aria-hidden="true">
+        <Icon name="chevron-down" size="md" />
+      </span>
+    </a>
+  )}
 </section>
+
+{showScrollHint && (
+  <style is:global>
+    @keyframes hero-scroll-hint {
+      0%,
+      100% {
+        transform: translateY(0);
+        opacity: 0.4;
+      }
+      50% {
+        transform: translateY(5px);
+        opacity: 0.85;
+      }
+    }
+
+    .hero-scroll-hint {
+      animation: hero-scroll-hint 2.2s ease-in-out infinite;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hero-scroll-hint {
+        animation: none;
+        opacity: 0.55;
+      }
+    }
+  </style>
+)}
 
 {interactiveSpotlight && (
   <>
