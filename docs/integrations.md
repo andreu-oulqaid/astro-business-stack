@@ -49,9 +49,13 @@ API_LEADS_CONFIRM_MAX_PER_HOUR=10
 API_CALENDAR_VIEWED_MAX_PER_HOUR=20
 API_ANALYTICS_INTERACTION_MAX_PER_HOUR=30
 ANALYTICS_ENV=development          # tag rows: development | production | staging
-ANALYTICS_SITE_ID=stack.example.com  # optional; defaults to SITE_URL hostname
+# ANALYTICS_SITE_ID=custom-id      # optional; defaults to analyticsRepoKey (e.g. astro-business-stack)
 ADMIN_METRICS_ENABLED=true         # test/staging only; prod returns 404 for /admin/metrics
 ```
+
+Canonical **`site_id`** is the repo key from [`src/config/analytics.profile.ts`](../src/config/analytics.profile.ts) (`astro-business-stack`, `iluro-prod`, …). Test and prod VPS hosts write the same project id; **`env`** separates lanes. **`metadata.deploy_host`** records the hostname for traceability only.
+
+Run `scripts/supabase-analytics-v6-project-env.sql` in Supabase after v5 to backfill legacy hostname rows and enable per-env breakdown in aggregates.
 
 ### Hybrid site profiles (collect + dashboard modules)
 
@@ -71,10 +75,12 @@ Optional DB override (no redeploy): update `analytics_site_profiles.config` JSON
 
 | Deployment | `ANALYTICS_ENV` | Collects events? | `/admin/metrics` |
 |------------|-----------------|------------------|------------------|
-| Test VPS | `development` | Yes | Yes when `ADMIN_METRICS_ENABLED=true` |
-| Prod VPS | `production` | Yes | No (404) |
+| Test VPS (`stack.ilurodigital.com`) | `development` | Yes | Yes when `ADMIN_METRICS_ENABLED=true` |
+| Prod VPS (`stack.andreuog.com`) | `production` | Yes (`SUPABASE_TRACKING_ENABLED=true`) | No (404) |
 
-Use **All environments** on the test dashboard to compare test + prod traffic for the same `site_id`.
+Env pills on `/admin/metrics`: **This deploy** | **All envs** | **Development** | **Production**. With **All envs**, combined totals plus a dev/prod split panel appear when v6 SQL is applied.
+
+**Hub drill-down** (iluro develop): `/admin/metrics?site=astro-business-stack&env=all` or `?env=production`.
 
 Dashboard at `/admin/metrics` when enabled locally (`pnpm dev`) or when `ADMIN_METRICS_ENABLED=true`.
 
@@ -90,7 +96,7 @@ First-party click/play events via `POST /api/analytics/interaction`:
 - **Visitor identity:** IP HMAC via `RATE_LIMIT_SALT` (stored in `user_hash`; distinct from email HMAC on funnel events)
 - **Rate limit:** `analytics_interaction` route, default **30 events/hour per IP** (`API_ANALYTICS_INTERACTION_MAX_PER_HOUR`)
 - **Client:** `navigator.sendBeacon` with JSON blob; video play deduped once per tab session
-- **Multi-site:** set `ANALYTICS_SITE_ID` per deployment when sharing one Supabase project
+- **Multi-site:** one Supabase project, one `site_id` per repo (`analyticsRepoKey`). Override with `ANALYTICS_SITE_ID` only for edge cases.
 
 Allowed values (server-validated):
 

@@ -42,6 +42,8 @@ export type MetricsAggregates = {
     calendar_views: number;
   }>;
   latest: MetricsLatestRow[];
+  /** Per-env slices when viewing all environments (from RPC by_env). */
+  byEnv?: Record<string, MetricsAggregates>;
 };
 
 export type MetricsContext = {

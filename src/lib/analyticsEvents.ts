@@ -9,7 +9,7 @@ import {
   resolveSiteProfile,
   syncSiteProfile,
 } from './analyticsProfile';
-import { getAnalyticsSiteId } from './analyticsSite';
+import { getAnalyticsSiteId, getDeployHost } from './analyticsSite';
 import { hashIpBucket } from './hashBucket';
 import { getSupabaseAdmin } from './supabase';
 import {
@@ -105,6 +105,7 @@ async function insertAnalyticsEvent(row: AnalyticsEventInsert): Promise<void> {
       ...(row.metadata ?? {}),
       site_id,
       env,
+      deploy_host: getDeployHost(),
     };
 
     const { error } = await supabase.from('analytics_events').insert({

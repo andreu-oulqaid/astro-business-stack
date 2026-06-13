@@ -1,23 +1,26 @@
 ---
+import { metricsEnvHref, type MetricsEnvParam } from '@/lib/metricsEnvParams';
+
 interface Props {
   range: '7d' | '30d';
-  allEnvironments: boolean;
+  env: MetricsEnvParam;
 }
 
-const { range, allEnvironments } = Astro.props;
+const { range, env } = Astro.props;
 
-function metricsHref(r: '7d' | '30d', all: boolean): string {
-  const p = new URLSearchParams();
-  p.set('range', r);
-  if (all) p.set('env', 'all');
-  return `/admin/metrics?${p.toString()}`;
+function rangeHref(nextRange: '7d' | '30d'): string {
+  return metricsEnvHref('/admin/metrics', { range: nextRange, env });
+}
+
+function envHref(nextEnv: MetricsEnvParam): string {
+  return metricsEnvHref('/admin/metrics', { range, env: nextEnv });
 }
 ---
 
 <div class="flex flex-col items-stretch gap-2 sm:items-end">
   <div class="inline-flex rounded-lg border border-border bg-secondary p-1 text-sm">
     <a
-      href={metricsHref('7d', allEnvironments)}
+      href={rangeHref('7d')}
       class:list={[
         'rounded-md px-3 py-1.5 transition',
         range === '7d' ? 'bg-foreground text-background' : 'text-foreground-muted hover:text-foreground',
@@ -26,7 +29,7 @@ function metricsHref(r: '7d' | '30d', all: boolean): string {
       Last 7 days
     </a>
     <a
-      href={metricsHref('30d', allEnvironments)}
+      href={rangeHref('30d')}
       class:list={[
         'rounded-md px-3 py-1.5 transition',
         range === '30d' ? 'bg-foreground text-background' : 'text-foreground-muted hover:text-foreground',
@@ -35,24 +38,42 @@ function metricsHref(r: '7d' | '30d', all: boolean): string {
       Last 30 days
     </a>
   </div>
-  <div class="inline-flex rounded-lg border border-border bg-secondary p-1 text-sm">
+  <div class="inline-flex flex-wrap justify-end gap-1 rounded-lg border border-border bg-secondary p-1 text-sm">
     <a
-      href={metricsHref(range, false)}
+      href={envHref('deploy')}
       class:list={[
         'rounded-md px-3 py-1.5 transition',
-        !allEnvironments ? 'bg-foreground text-background' : 'text-foreground-muted hover:text-foreground',
+        env === 'deploy' ? 'bg-foreground text-background' : 'text-foreground-muted hover:text-foreground',
       ]}
     >
       This deploy
     </a>
     <a
-      href={metricsHref(range, true)}
+      href={envHref('all')}
       class:list={[
         'rounded-md px-3 py-1.5 transition',
-        allEnvironments ? 'bg-foreground text-background' : 'text-foreground-muted hover:text-foreground',
+        env === 'all' ? 'bg-foreground text-background' : 'text-foreground-muted hover:text-foreground',
       ]}
     >
-      All environments
+      All envs
+    </a>
+    <a
+      href={envHref('development')}
+      class:list={[
+        'rounded-md px-3 py-1.5 transition',
+        env === 'development' ? 'bg-foreground text-background' : 'text-foreground-muted hover:text-foreground',
+      ]}
+    >
+      Development
+    </a>
+    <a
+      href={envHref('production')}
+      class:list={[
+        'rounded-md px-3 py-1.5 transition',
+        env === 'production' ? 'bg-foreground text-background' : 'text-foreground-muted hover:text-foreground',
+      ]}
+    >
+      Production
     </a>
   </div>
 </div>

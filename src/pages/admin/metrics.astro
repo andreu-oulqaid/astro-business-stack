@@ -1,5 +1,6 @@
 ---
 import { ADMIN_METRICS_ENABLED } from 'astro:env/server';
+import MetricsModuleEnvBreakdown from '@/components/admin/metrics/MetricsModuleEnvBreakdown.astro';
 import MetricsModuleDevice from '@/components/admin/metrics/MetricsModuleDevice.astro';
 import MetricsModuleFunnel from '@/components/admin/metrics/MetricsModuleFunnel.astro';
 import MetricsModuleFunnelFriction from '@/components/admin/metrics/MetricsModuleFunnelFriction.astro';
@@ -12,6 +13,7 @@ import MetricsToolbar from '@/components/admin/metrics/MetricsToolbar.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { getAnalyticsSiteId } from '@/lib/analyticsSite';
 import { loadMetricsContext } from '@/lib/metricsContext';
+import { metricsEnvHref, parseMetricsEnvParam } from '@/lib/metricsEnvParams';
 import { totalEventCount } from '@/lib/metricsTypes';
 import { getSupabaseAdmin } from '@/lib/supabase';
 
@@ -25,16 +27,9 @@ type RangeParam = '7d' | '30d';
 
 const rawRange = Astro.url.searchParams.get('range');
 const range: RangeParam = rawRange === '7d' ? '7d' : '30d';
-const allEnvironments = Astro.url.searchParams.get('env') === 'all';
+const parsedEnv = parseMetricsEnvParam(Astro.url.searchParams);
 const days = range === '7d' ? 7 : 30;
 const sinceDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
-
-function metricsHref(r: RangeParam, all: boolean): string {
-  const p = new URLSearchParams();
-  p.set('range', r);
-  if (all) p.set('env', 'all');
-  return `/admin/metrics?${p.toString()}`;
-}
 
 const supabase = getSupabaseAdmin();
 
@@ -45,7 +40,7 @@ if (!supabase) {
   queryError = 'Supabase admin client is not configured. Check SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.';
 } else {
   try {
-    ctx = await loadMetricsContext(supabase, sinceDate, { allEnvironments });
+    ctx = await loadMetricsContext(supabase, sinceDate, { env: parsedEnv.env });
   } catch (e) {
     queryError = e instanceof Error ? e.message : String(e);
   }
@@ -90,7 +85,7 @@ const showFunnelRow =
           }
         </p>
       </div>
-      <MetricsToolbar range={range} allEnvironments={allEnvironments} />
+      <MetricsToolbar range={range} env={parsedEnv.env} />
     </div>
 
     {
@@ -110,7 +105,7 @@ const showFunnelRow =
           <p class="mt-2 text-xs text-foreground-muted">
             Run{' '}
             <code class="rounded bg-secondary px-1 py-0.5">
-              scripts/supabase-analytics-v4-profiles.sql
+              scripts/supabase-analytics-v6-project-env.sql
             </code>{' '}
             in the Supabase SQL editor.
           </p>
@@ -123,8 +118,15 @@ const showFunnelRow =
         <div class="mb-6 rounded-xl border border-border bg-card p-6">
           <h2 class="text-lg font-semibold text-foreground">No events in this range</h2>
           <p class="mt-2 text-sm text-foreground-muted">
-            Try <a href={metricsHref('30d', allEnvironments)} class="underline">Last 30 days</a>,{' '}
-            <a href={metricsHref(range, true)} class="underline">All environments</a>, or confirm{' '}
+            Try{' '}
+            <a href={metricsEnvHref('/admin/metrics', { range: '30d', env: parsedEnv.env })} class="underline">
+              Last 30 days
+            </a>
+            ,{' '}
+            <a href={metricsEnvHref('/admin/metrics', { range, env: 'all' })} class="underline">
+              All envs
+            </a>
+            , or confirm{' '}
             <code class="rounded bg-secondary px-1 py-0.5">ANALYTICS_ENV</code> matches the{' '}
             <code class="rounded bg-secondary px-1 py-0.5">env</code> column on stored rows.
           </p>
@@ -135,6 +137,11 @@ const showFunnelRow =
     {
       hasData && ctx ? (
         <>
+          {
+            parsedEnv.env === 'all' ? (
+              <MetricsModuleEnvBreakdown profile={ctx.profile} aggregates={ctx.aggregates} />
+            ) : null
+          }
           {
             visibleModules.includes('summary_cards') ? (
               <MetricsModuleSummaryCards profile={ctx.profile} aggregates={ctx.aggregates} />

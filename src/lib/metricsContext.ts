@@ -8,6 +8,7 @@ import {
 import type { AnalyticsEventKey, MetricsModuleId } from '@/lib/analyticsProfileSchema';
 import { getAnalyticsEnv } from '@/lib/analyticsEnv';
 import { getAnalyticsSiteId } from '@/lib/analyticsSite';
+import { parseMetricsEnvParam, type MetricsEnvParam } from '@/lib/metricsEnvParams';
 import { getVisibleModules } from '@/lib/metricsModules';
 import {
   emptyAggregates,
@@ -43,10 +44,26 @@ type RpcAggregatePayload = {
     calendar_views: number;
   }>;
   latest?: MetricsLatestRow[];
+  by_env?: Record<string, RpcAggregatePayload>;
 };
 
 function normalizeAggregates(raw: RpcAggregatePayload): MetricsAggregates {
   const funnel = raw.funnel ?? {};
+  const byEnvRaw = raw.by_env;
+  let byEnv: Record<string, MetricsAggregates> | undefined;
+
+  if (byEnvRaw && typeof byEnvRaw === 'object') {
+    byEnv = {};
+    for (const [envKey, slice] of Object.entries(byEnvRaw)) {
+      if (slice && typeof slice === 'object') {
+        byEnv[envKey] = normalizeAggregates(slice);
+      }
+    }
+    if (Object.keys(byEnv).length === 0) {
+      byEnv = undefined;
+    }
+  }
+
   return {
     totals: raw.totals ?? {},
     unique_visitors: raw.unique_visitors ?? {},
@@ -72,6 +89,7 @@ function normalizeAggregates(raw: RpcAggregatePayload): MetricsAggregates {
     by_device: raw.by_device ?? {},
     by_locale: raw.by_locale ?? [],
     latest: raw.latest ?? [],
+    byEnv,
   };
 }
 
@@ -215,67 +233,160 @@ async function loadFallbackAggregates(
   };
 }
 
+function buildFallbackByEnv(
+  supabase: SupabaseClient,
+  sinceIso: string,
+  siteId: string,
+  eventTypes: AnalyticsEventKey[],
+  envKeys: string[],
+): Promise<Record<string, MetricsAggregates>> {
+  return Promise.all(
+    envKeys.map(async (envKey) => {
+      const agg = await loadFallbackAggregates(supabase, sinceIso, siteId, envKey, eventTypes);
+      return [envKey, agg] as const;
+    }),
+  ).then((entries) => Object.fromEntries(entries));
+}
+
+async function loadFallbackAggregatesWithEnv(
+  supabase: SupabaseClient,
+  sinceIso: string,
+  siteId: string,
+  env: string,
+  eventTypes: AnalyticsEventKey[],
+): Promise<MetricsAggregates> {
+  const base = await loadFallbackAggregates(supabase, sinceIso, siteId, env, eventTypes);
+
+  if (!env) {
+    const { data: envRows } = await supabase
+      .from('analytics_events')
+      .select('env')
+      .gte('created_at', sinceIso)
+      .eq('site_id', siteId);
+
+    const envKeys = [
+      ...new Set((envRows ?? []).map((r) => r.env).filter((v): v is string => Boolean(v))),
+    ].sort();
+
+    if (envKeys.length > 1) {
+      base.byEnv = await buildFallbackByEnv(supabase, sinceIso, siteId, eventTypes, envKeys);
+    }
+  }
+
+  return base;
+}
+
 export type LoadMetricsOptions = {
+  /** @deprecated Use env */
   allEnvironments?: boolean;
+  env?: MetricsEnvParam;
+  envFilterLabel?: string;
+  rpcEnv?: string;
 };
+
+async function loadAggregatesForSite(
+  supabase: SupabaseClient,
+  sinceIso: string,
+  siteId: string,
+  rpcEnv: string,
+  eventTypes: AnalyticsEventKey[],
+): Promise<{ aggregates: MetricsAggregates; usedRpc: boolean; fallbackWarning: string | null }> {
+  const { data: rpcData, error: rpcError } = await supabase.rpc('analytics_aggregate_metrics', {
+    p_since: sinceIso,
+    p_site_id: siteId,
+    p_env: rpcEnv,
+    p_event_types: eventTypes,
+  });
+
+  if (!rpcError && rpcData && typeof rpcData === 'object' && !('error' in (rpcData as object))) {
+    return {
+      aggregates: normalizeAggregates(rpcData as RpcAggregatePayload),
+      usedRpc: true,
+      fallbackWarning: null,
+    };
+  }
+
+  try {
+    const aggregates = await loadFallbackAggregatesWithEnv(
+      supabase,
+      sinceIso,
+      siteId,
+      rpcEnv,
+      eventTypes,
+    );
+    return {
+      aggregates,
+      usedRpc: false,
+      fallbackWarning:
+        (rpcError ? `${rpcError.message}. ` : '') +
+        'Using fallback aggregates. Run scripts/supabase-analytics-v6-project-env.sql in Supabase.',
+    };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    throw new Error(rpcError ? `${rpcError.message}; fallback: ${msg}` : msg);
+  }
+}
 
 export async function loadMetricsContext(
   supabase: SupabaseClient,
   sinceIso: string,
   options?: LoadMetricsOptions,
 ): Promise<MetricsContext> {
-  const deploymentEnv = getAnalyticsEnv();
   const deploymentSiteId = getAnalyticsSiteId();
-  const allEnvironments = options?.allEnvironments === true;
-  const envFilter = allEnvironments ? 'all' : deploymentEnv;
-  const rpcEnv = allEnvironments ? '' : deploymentEnv;
+  const parsed =
+    options?.envFilterLabel != null && options?.rpcEnv != null
+      ? {
+          envFilterLabel: options.envFilterLabel,
+          rpcEnv: options.rpcEnv,
+          env: options.env ?? ('deploy' as MetricsEnvParam),
+        }
+      : (() => {
+          if (options?.allEnvironments === true) {
+            return {
+              env: 'all' as MetricsEnvParam,
+              envFilterLabel: 'all envs',
+              rpcEnv: '',
+            };
+          }
+          if (options?.env) {
+            const deploymentEnv = getAnalyticsEnv();
+            const envFilterLabel =
+              options.env === 'deploy'
+                ? deploymentEnv
+                : options.env === 'all'
+                  ? 'all envs'
+                  : options.env;
+            const rpcEnv =
+              options.env === 'deploy'
+                ? deploymentEnv
+                : options.env === 'all'
+                  ? ''
+                  : options.env;
+            return { env: options.env, envFilterLabel, rpcEnv };
+          }
+          const p = parseMetricsEnvParam(new URLSearchParams());
+          return { env: p.env, envFilterLabel: p.envFilterLabel, rpcEnv: p.rpcEnv };
+        })();
 
   await syncSiteProfile(supabase);
   const profile = await resolveSiteProfile(supabase);
   const eventTypes = dashboardEventTypes(profile);
-
-  const { data: rpcData, error: rpcError } = await supabase.rpc('analytics_aggregate_metrics', {
-    p_since: sinceIso,
-    p_site_id: deploymentSiteId,
-    p_env: rpcEnv,
-    p_event_types: eventTypes,
-  });
-
-  let aggregates: MetricsAggregates;
-  let usedRpc = false;
-  let fallbackWarning: string | null = null;
-
-  if (!rpcError && rpcData && typeof rpcData === 'object' && !('error' in (rpcData as object))) {
-    aggregates = normalizeAggregates(rpcData as RpcAggregatePayload);
-    usedRpc = true;
-  } else {
-    try {
-      aggregates = await loadFallbackAggregates(
-        supabase,
-        sinceIso,
-        deploymentSiteId,
-        rpcEnv,
-        eventTypes,
-      );
-      fallbackWarning =
-        (rpcError ? `${rpcError.message}. ` : '') +
-        'Using fallback aggregates. Run scripts/supabase-analytics-v4-profiles.sql in Supabase.';
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      throw new Error(rpcError ? `${rpcError.message}; fallback: ${msg}` : msg);
-    }
-  }
-
-  const visibleModules = getVisibleModules(profile);
+  const { aggregates, usedRpc, fallbackWarning } = await loadAggregatesForSite(
+    supabase,
+    sinceIso,
+    deploymentSiteId,
+    parsed.rpcEnv,
+    eventTypes,
+  );
 
   return {
     profile,
     aggregates,
-    envFilter,
+    envFilter: parsed.envFilterLabel,
     siteFilter: deploymentSiteId,
     usedRpc,
     fallbackWarning,
-    visibleModules,
+    visibleModules: getVisibleModules(profile),
   };
 }
 
