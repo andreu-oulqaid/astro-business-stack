@@ -1,4 +1,5 @@
 import {
+  API_ANALYTICS_INTERACTION_MAX_PER_HOUR,
   API_CALENDAR_VIEWED_MAX_PER_HOUR,
   API_LEADS_CONFIRM_MAX_PER_HOUR,
   API_LEADS_MAX_PER_HOUR,
@@ -9,7 +10,7 @@ import { getSupabaseAdmin } from '@/lib/supabase';
 
 const WINDOW_MINUTES = 60;
 
-export type ApiRateLimitRoute = 'leads' | 'leads_confirm' | 'calendar_viewed';
+export type ApiRateLimitRoute = 'leads' | 'leads_confirm' | 'calendar_viewed' | 'analytics_interaction';
 
 export type ApiQuotaCheckResult =
   | { allowed: true }
@@ -22,9 +23,11 @@ function maxForRoute(route: ApiRateLimitRoute): number {
       ? API_LEADS_MAX_PER_HOUR
       : route === 'leads_confirm'
         ? API_LEADS_CONFIRM_MAX_PER_HOUR
-        : API_CALENDAR_VIEWED_MAX_PER_HOUR;
+        : route === 'calendar_viewed'
+          ? API_CALENDAR_VIEWED_MAX_PER_HOUR
+          : API_ANALYTICS_INTERACTION_MAX_PER_HOUR;
   const n = Number(raw);
-  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 10;
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : route === 'analytics_interaction' ? 30 : 10;
 }
 
 /**

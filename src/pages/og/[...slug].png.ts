@@ -3,28 +3,25 @@ import { getCollection } from 'astro:content';
 import { generateOGImage } from '@/lib/og';
 import siteConfig from '@/config/site.config';
 
-// Define static pages that need OG images
 const STATIC_PAGES = [
   { slug: 'index', title: siteConfig.name, description: siteConfig.description },
   { slug: 'about', title: 'About', description: `Learn more about ${siteConfig.name}` },
   { slug: 'contact', title: 'Contact', description: `Get in touch with ${siteConfig.name}` },
   { slug: 'services', title: 'Services', description: `Latest service insights from ${siteConfig.name}` },
-  { slug: 'portfolio', title: 'Portfolio', description: `Case studies from ${siteConfig.name}` },
-  { slug: 'services/web', title: 'Websites & performance', description: `Web pillar — ${siteConfig.name}` },
-  { slug: 'services/automation', title: 'Automation & AI', description: `Automation pillar — ${siteConfig.name}` },
-  { slug: 'services/full-system', title: 'Full system', description: `Full system pillar — ${siteConfig.name}` },
+  { slug: 'docs', title: 'Docs', description: `Stack documentation from ${siteConfig.name}` },
+  { slug: 'services/web', title: 'Websites & performance', description: `Web pillar - ${siteConfig.name}` },
+  { slug: 'services/automation', title: 'Automation & AI', description: `Automation pillar - ${siteConfig.name}` },
+  { slug: 'services/full-system', title: 'Full system', description: `Full system pillar - ${siteConfig.name}` },
   { slug: 'components', title: 'Component Library', description: 'UI component showcase' },
 ];
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  // Get all service posts
-  const blogPosts = await getCollection('services', ({ data }) => {
+  const docPosts = await getCollection('docs', ({ data }) => {
     return import.meta.env.PROD ? data.draft !== true : true;
   });
 
-  // Generate paths for service posts
-  const blogPaths = blogPosts.map((post) => ({
-    params: { slug: `portfolio/${post.id}` },
+  const docPaths = docPosts.map((post) => ({
+    params: { slug: `docs/${post.id}` },
     props: {
       title: post.data.title,
       description: post.data.description,
@@ -32,7 +29,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
     },
   }));
 
-  // Generate paths for static pages
   const staticPaths = STATIC_PAGES.map((page) => ({
     params: { slug: page.slug },
     props: {
@@ -42,7 +38,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
     },
   }));
 
-  return [...staticPaths, ...blogPaths];
+  return [...staticPaths, ...docPaths];
 };
 
 export const GET: APIRoute = async ({ props }) => {
@@ -58,7 +54,6 @@ export const GET: APIRoute = async ({ props }) => {
     type,
   });
 
-  // Convert Buffer to Uint8Array for Response compatibility
   return new Response(new Uint8Array(png), {
     headers: {
       'Content-Type': 'image/png',

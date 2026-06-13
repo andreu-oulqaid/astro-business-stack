@@ -1,0 +1,10 @@
+---
+/** Delegated click tracking for elements with data-analytics-* attributes. */
+---
+
+<script>
+  import { initInteractionTracking } from '@/lib/trackInteraction';
+
+  initInteractionTracking();
+  document.addEventListener('astro:page-load', initInteractionTracking);
+</script>

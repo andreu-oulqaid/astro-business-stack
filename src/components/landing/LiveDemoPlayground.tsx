@@ -374,7 +374,7 @@ async function runTerminalSequence(
 }
 
 function formatAvgMs(ms: number | null): string {
-  if (ms == null) return '—';
+  if (ms == null) return 'N/A';
   if (ms >= 1000) return `${(ms / 1000).toFixed(1)}s`;
   return `${ms}ms`;
 }
@@ -771,7 +771,7 @@ export default function LiveDemoPlayground({
               type="button"
               onClick={() => void handleRun()}
               disabled={running || challenging || statsLoading}
-              className="order-2 inline-flex shrink-0 items-center justify-center rounded-md bg-brand-500 px-4 py-2.5 text-sm font-semibold text-on-brand transition hover:bg-brand-600 disabled:opacity-60 md:order-1"
+              className="order-2 inline-flex shrink-0 items-center justify-center rounded-md bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-600 disabled:opacity-60 dark:bg-brand-500 dark:text-white dark:shadow-[0_0_0_1px_rgba(255,255,255,0.15),0_4px_16px_-4px_rgba(0,0,0,0.55)] dark:hover:bg-brand-400 md:order-1"
             >
               {challenging ? labels.challengeRunning : running ? labels.running : labels.runButton}
             </button>

@@ -1,0 +1,103 @@
+---
+import type { AnalyticsSiteProfile } from '@/lib/analyticsProfileSchema';
+import {
+  formatLeadToBookingSpeed,
+  interactionSummary,
+  isDashboardEventEnabled,
+  type MetricsAggregates,
+} from '@/lib/metricsTypes';
+
+interface Props {
+  profile: AnalyticsSiteProfile;
+  aggregates: MetricsAggregates;
+}
+
+const { profile, aggregates } = Astro.props;
+const interactions = interactionSummary(aggregates);
+const funnel = aggregates.funnel;
+
+const showFunnel =
+  isDashboardEventEnabled(profile, 'lead_captured') ||
+  isDashboardEventEnabled(profile, 'calendar_viewed') ||
+  isDashboardEventEnabled(profile, 'audit_booked');
+
+const showInteraction = isDashboardEventEnabled(profile, 'interaction');
+
+const conversionRate =
+  funnel.lead_captured > 0 ? (funnel.audit_booked / funnel.lead_captured) * 100 : 0;
+const uniqueConversionRate =
+  funnel.unique_lead_users > 0
+    ? (funnel.unique_booking_users / funnel.unique_lead_users) * 100
+    : 0;
+---
+
+<section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+  {
+    showFunnel ? (
+      <>
+        {isDashboardEventEnabled(profile, 'lead_captured') ? (
+          <div class="rounded-xl border border-border bg-card p-4">
+            <p class="text-xs uppercase tracking-wide text-foreground-subtle">Leads captured</p>
+            <p class="mt-2 text-3xl font-bold text-foreground">{funnel.lead_captured}</p>
+            <p class="mt-2 text-xs text-foreground-muted">
+              Unique users: {funnel.unique_lead_users}
+            </p>
+          </div>
+        ) : null}
+        {isDashboardEventEnabled(profile, 'calendar_viewed') ? (
+          <div class="rounded-xl border border-border bg-card p-4">
+            <p class="text-xs uppercase tracking-wide text-foreground-subtle">Calendar viewed</p>
+            <p class="mt-2 text-3xl font-bold text-foreground">{funnel.calendar_viewed}</p>
+            <p class="mt-2 text-xs text-foreground-muted">Step 3 embed shown</p>
+          </div>
+        ) : null}
+        {isDashboardEventEnabled(profile, 'audit_booked') ? (
+          <div class="rounded-xl border border-border bg-card p-4">
+            <p class="text-xs uppercase tracking-wide text-foreground-subtle">Audits booked</p>
+            <p class="mt-2 text-3xl font-bold text-foreground">{funnel.audit_booked}</p>
+            <p class="mt-2 text-xs text-foreground-muted">
+              Unique users: {funnel.unique_booking_users}
+            </p>
+          </div>
+        ) : null}
+        {isDashboardEventEnabled(profile, 'lead_captured') &&
+        isDashboardEventEnabled(profile, 'audit_booked') ? (
+          <div class="rounded-xl border border-border bg-card p-4">
+            <p class="text-xs uppercase tracking-wide text-foreground-subtle">Lead → booking</p>
+            <p class="mt-2 text-3xl font-bold text-foreground">{conversionRate.toFixed(1)}%</p>
+            <p class="mt-2 text-xs text-foreground-muted">
+              Unique: {uniqueConversionRate.toFixed(1)}%
+            </p>
+          </div>
+        ) : null}
+        {isDashboardEventEnabled(profile, 'audit_booked') ? (
+          <div class="rounded-xl border border-border bg-card p-4">
+            <p class="text-xs uppercase tracking-wide text-foreground-subtle">
+              Lead-to-Booking Speed
+            </p>
+            <p class="mt-2 text-3xl font-bold text-foreground">
+              {formatLeadToBookingSpeed(funnel.avg_lead_to_booking_seconds)}
+            </p>
+            <p class="mt-2 text-xs text-foreground-muted">Avg of conversion_delta_seconds</p>
+          </div>
+        ) : null}
+      </>
+    ) : null
+  }
+  {
+    showInteraction ? (
+      <>
+        <div class="rounded-xl border border-border bg-card p-4">
+          <p class="text-xs uppercase tracking-wide text-foreground-subtle">Interactions</p>
+          <p class="mt-2 text-3xl font-bold text-foreground">{interactions.total}</p>
+          <p class="mt-2 text-xs text-foreground-muted">Clicks and video plays</p>
+        </div>
+        <div class="rounded-xl border border-border bg-card p-4">
+          <p class="text-xs uppercase tracking-wide text-foreground-subtle">Unique visitors</p>
+          <p class="mt-2 text-3xl font-bold text-foreground">{interactions.unique_visitors}</p>
+          <p class="mt-2 text-xs text-foreground-muted">IP-derived HMAC buckets</p>
+        </div>
+      </>
+    ) : null
+  }
+</section>

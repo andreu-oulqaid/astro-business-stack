@@ -1,0 +1,59 @@
+---
+import type { MetricsAggregates } from '@/lib/metricsTypes';
+
+interface Props {
+  aggregates: MetricsAggregates;
+}
+
+const { aggregates } = Astro.props;
+const funnel = aggregates.funnel;
+const totalLeads = funnel.lead_captured;
+const totalCalendar = funnel.calendar_viewed;
+const totalBookings = funnel.audit_booked;
+const dropoffLeadToBooking =
+  totalLeads > 0 ? ((totalLeads - totalBookings) / totalLeads) * 100 : 0;
+---
+
+<section class="rounded-xl border border-border bg-card p-5">
+  <h2 class="text-lg font-semibold text-foreground">Funnel</h2>
+  <div class="mt-4 space-y-4">
+    <div>
+      <div class="mb-1 flex items-center justify-between text-sm">
+        <span class="text-foreground-muted">Lead captured</span>
+        <span class="font-medium text-foreground">{totalLeads}</span>
+      </div>
+      <div class="h-3 rounded-full bg-secondary">
+        <div class="h-3 rounded-full bg-blue-500" style="width: 100%;"></div>
+      </div>
+    </div>
+    <div>
+      <div class="mb-1 flex items-center justify-between text-sm">
+        <span class="text-foreground-muted">Calendar viewed</span>
+        <span class="font-medium text-foreground">{totalCalendar}</span>
+      </div>
+      <div class="h-3 rounded-full bg-secondary">
+        <div
+          class="h-3 rounded-full bg-amber-500"
+          style={`width: ${totalLeads > 0 ? Math.min(100, (totalCalendar / totalLeads) * 100).toFixed(1) : 0}%;`}
+        >
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="mb-1 flex items-center justify-between text-sm">
+        <span class="text-foreground-muted">Audit booked</span>
+        <span class="font-medium text-foreground">{totalBookings}</span>
+      </div>
+      <div class="h-3 rounded-full bg-secondary">
+        <div
+          class="h-3 rounded-full bg-emerald-500"
+          style={`width: ${totalLeads > 0 ? Math.min(100, (totalBookings / totalLeads) * 100).toFixed(1) : 0}%;`}
+        >
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="mt-4 text-sm text-foreground-muted">
+    Drop-off lead → booking: {dropoffLeadToBooking.toFixed(1)}%
+  </p>
+</section>

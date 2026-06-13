@@ -1,5 +1,6 @@
 -- Production API rate limits (run on analytics Supabase after supabase-analytics-base.sql).
 -- Advisory lock namespace: app_id=2 (production APIs), lock_id=hashtext(route).
+-- Routes: leads, leads_confirm, calendar_viewed, analytics_interaction (max from app env per route).
 
 CREATE TABLE IF NOT EXISTS public.api_rate_limit_events (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

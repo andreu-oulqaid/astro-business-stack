@@ -1,0 +1,35 @@
+---
+import type { MetricsAggregates } from '@/lib/metricsTypes';
+
+interface Props {
+  aggregates: MetricsAggregates;
+}
+
+const { aggregates } = Astro.props;
+const funnel = aggregates.funnel;
+const totalLeads = funnel.lead_captured;
+const totalCalendar = funnel.calendar_viewed;
+const totalBookings = funnel.audit_booked;
+---
+
+<section class="rounded-xl border border-border bg-card p-5">
+  <h2 class="text-lg font-semibold text-foreground">Funnel friction</h2>
+  <p class="mt-2 text-sm text-foreground-muted">
+    Uses calendar_viewed events. High lead → calendar drop may indicate UX issues before the
+    embed; high calendar → book may point to Cal.com or copy.
+  </p>
+  <ul class="mt-4 space-y-2 text-sm text-foreground">
+    <li>
+      Lead → calendar drop:{' '}
+      <span class="font-semibold">
+        {(totalLeads > 0 ? (1 - totalCalendar / totalLeads) * 100 : 0).toFixed(1)}%
+      </span>
+    </li>
+    <li>
+      Calendar → book drop:{' '}
+      <span class="font-semibold">
+        {(totalCalendar > 0 ? (1 - totalBookings / totalCalendar) * 100 : 0).toFixed(1)}%
+      </span>
+    </li>
+  </ul>
+</section>

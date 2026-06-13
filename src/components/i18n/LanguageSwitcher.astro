@@ -39,7 +39,10 @@ const localeCodes: Record<Locale, string> = {
 };
 ---
 
-<div class:list={['relative inline-block text-center', className]}>
+<div
+  class:list={['relative inline-block text-center', className]}
+  data-preferred-locale-cookie="preferred_locale"
+>
   <button
     type="button"
     data-language-switcher-trigger={pickerId}
@@ -101,6 +104,12 @@ const localeCodes: Record<Locale, string> = {
 </div>
 
 <script>
+  const PREFERRED_LOCALE_MAX_AGE = 60 * 60 * 24 * 365;
+
+  function setPreferredLocaleCookie(name: string, locale: string) {
+    document.cookie = `${name}=${encodeURIComponent(locale)};path=/;max-age=${PREFERRED_LOCALE_MAX_AGE};SameSite=Lax`;
+  }
+
   function initLanguageSwitchers() {
     document.querySelectorAll('[data-language-switcher-trigger]').forEach((btn) => {
       if (!(btn instanceof HTMLButtonElement)) return;
@@ -112,12 +121,31 @@ const localeCodes: Record<Locale, string> = {
       const menu = document.querySelector(`[data-language-switcher-menu="${key}"]`);
       if (!(menu instanceof HTMLElement)) return;
 
+      const root = btn.closest('[data-preferred-locale-cookie]');
+      const cookieName =
+        root instanceof HTMLElement ? root.dataset.preferredLocaleCookie ?? 'preferred_locale' : 'preferred_locale';
+
       btn.dataset.languageSwitcherBound = '1';
 
       const closeMenu = () => {
         menu.classList.add('hidden');
         btn.setAttribute('aria-expanded', 'false');
       };
+
+      menu.querySelectorAll('a[role="menuitem"]').forEach((link) => {
+        if (!(link instanceof HTMLAnchorElement)) return;
+        if (link.dataset.localeCookieBound === '1') return;
+        link.dataset.localeCookieBound = '1';
+
+        link.addEventListener('click', () => {
+          const href = link.getAttribute('href') ?? '';
+          const segments = href.split('/').filter(Boolean);
+          const first = segments[0];
+          const locale =
+            first === 'es' || first === 'ca' || first === 'pl' ? first : 'en';
+          setPreferredLocaleCookie(cookieName, locale);
+        });
+      });
 
       btn.addEventListener('click', (e) => {
         e.stopPropagation();

@@ -1,10 +1,13 @@
 ---
 import '@/styles/global.css';
+import manropeLatin from '@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2?url';
+import outfitLatin from '@fontsource-variable/outfit/files/outfit-latin-wght-normal.woff2?url';
 import SEO from '@/components/seo/SEO.astro';
 import JsonLd from '@/components/seo/JsonLd.astro';
 import Hreflang from '@/components/i18n/Hreflang.astro';
 import Analytics from '@/components/layout/Analytics.astro';
 import ConsentBanner from '@/components/ui/overlay/ConsentBanner';
+import TrackInteraction from '@/components/TrackInteraction.astro';
 import { createWebsiteSchema, createOrganizationSchema } from '@/lib/schema';
 import type { Thing, WithContext } from 'schema-dts';
 import siteConfig from '@/config/site.config';
@@ -83,7 +86,10 @@ if (extraSchema) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
 
-    <!-- Favicon — source: public/favicon.svg; generate siblings via RealFaviconGenerator -->
+    <link rel="preload" href={manropeLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={outfitLatin} as="font" type="font/woff2" crossorigin />
+
+    <!-- Favicon - source: public/favicon.svg; generate siblings via RealFaviconGenerator -->
     <link rel="icon" type="image/svg+xml" href={siteConfig.branding.favicon.svg} />
     <link rel="icon" type="image/png" href={siteConfig.branding.favicon.png96} sizes="96x96" />
     <link rel="shortcut icon" href={siteConfig.branding.favicon.ico} />
@@ -157,5 +163,6 @@ if (extraSchema) {
     <slot name="footer" />
 
     <ConsentBanner ui={consentUi} alwaysOnLabel={consentAlwaysOnLabel} />
+    <TrackInteraction />
   </body>
 </html>

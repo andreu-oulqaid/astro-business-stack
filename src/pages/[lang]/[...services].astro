@@ -40,7 +40,7 @@ export async function getStaticPaths() {
       paths.push({ params: { lang, services: `${enServicesBase}/${tail}` } });
     }
 
-    const posts = await getCollection('services', ({ data }) => {
+    const posts = await getCollection('docs', ({ data }) => {
       return data.locale === lang && (import.meta.env.PROD ? data.draft !== true : true);
     });
 
@@ -62,7 +62,7 @@ const { lang, services } = Astro.params;
 const locale = lang as Locale;
 const extra = stripServicesBase(services ?? '', locale);
 
-const portfolioOut = routes.portfolio[defaultLocale];
+const docsOut = routes.docs[defaultLocale];
 
 let target: string;
 if (!extra) {
@@ -71,7 +71,7 @@ if (!extra) {
   target = `/${lang}/services/${extra}`;
 } else {
   const pillarSeg = pillarFilesystemSegmentFromServicesSlugTail(extra, locale);
-  target = pillarSeg ? `/${lang}/services/${pillarSeg}` : `/${lang}/${portfolioOut}/${extra}`;
+  target = pillarSeg ? `/${lang}/services/${pillarSeg}` : `/${lang}/${docsOut}/${extra}`;
 }
 
 return Astro.redirect(target, 301);

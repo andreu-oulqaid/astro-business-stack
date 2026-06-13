@@ -1,0 +1,255 @@
+-- Run after supabase-analytics-v2.sql.
+-- Adds interaction events (outbound clicks, video play) + dashboard aggregates + rate-limit route note.
+
+-- 1) Allow event type interaction
+ALTER TABLE public.analytics_events
+  DROP CONSTRAINT IF EXISTS analytics_events_event_type_check;
+
+ALTER TABLE public.analytics_events
+  ADD CONSTRAINT analytics_events_event_type_check
+  CHECK (
+    event_type = ANY (
+      ARRAY[
+        'lead_captured'::text,
+        'audit_booked'::text,
+        'calendar_viewed'::text,
+        'interaction'::text
+      ]
+    )
+  );
+
+-- 2) Faster filtering by site_id inside metadata (multi-site deployments)
+CREATE INDEX IF NOT EXISTS idx_analytics_events_site_id_created
+  ON public.analytics_events ((metadata ->> 'site_id'), created_at DESC)
+  WHERE event_type = 'interaction';
+
+-- 3) Dashboard RPC — adds interactions block; optional p_site_id scopes interaction aggregates only
+CREATE OR REPLACE FUNCTION public.analytics_dashboard_summary(
+  p_since timestamptz,
+  p_env text DEFAULT NULL,
+  p_site_id text DEFAULT NULL
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  result jsonb;
+BEGIN
+  WITH filtered AS (
+    SELECT *
+    FROM public.analytics_events e
+    WHERE e.created_at >= p_since
+      AND (
+        p_env IS NULL
+        OR trim(p_env) = ''
+        OR e.metadata ->> 'env' = p_env
+      )
+  ),
+  counts AS (
+    SELECT
+      count(*) FILTER (WHERE event_type = 'lead_captured')::int AS lead_captured,
+      count(*) FILTER (WHERE event_type = 'calendar_viewed')::int AS calendar_viewed,
+      count(*) FILTER (WHERE event_type = 'audit_booked')::int AS audit_booked
+    FROM filtered
+  ),
+  uniq AS (
+    SELECT
+      count(DISTINCT user_hash) FILTER (WHERE event_type = 'lead_captured')::int AS lead_users,
+      count(DISTINCT user_hash) FILTER (WHERE event_type = 'audit_booked')::int AS booking_users
+    FROM filtered
+  ),
+  avg_delta AS (
+    SELECT round(avg(conversion_delta_seconds)::numeric, 2) AS avg_seconds
+    FROM filtered
+    WHERE event_type = 'audit_booked'
+      AND conversion_delta_seconds IS NOT NULL
+  ),
+  by_source AS (
+    SELECT
+      coalesce(utm_source, 'direct') AS utm_source,
+      count(*) FILTER (WHERE event_type = 'lead_captured')::int AS leads,
+      count(*) FILTER (WHERE event_type = 'audit_booked')::int AS bookings
+    FROM filtered
+    GROUP BY 1
+  ),
+  by_source_top AS (
+    SELECT *
+    FROM by_source
+    ORDER BY leads + bookings DESC
+    LIMIT 8
+  ),
+  by_campaign AS (
+    SELECT
+      coalesce(utm_campaign, 'unknown') AS utm_campaign,
+      count(*) FILTER (WHERE event_type = 'lead_captured')::int AS leads,
+      count(*) FILTER (WHERE event_type = 'audit_booked')::int AS bookings
+    FROM filtered
+    GROUP BY 1
+  ),
+  by_campaign_top AS (
+    SELECT *
+    FROM by_campaign
+    ORDER BY leads + bookings DESC
+    LIMIT 8
+  ),
+  by_device AS (
+    SELECT
+      coalesce(device_type, 'unknown') AS device_type,
+      count(*)::int AS c
+    FROM filtered
+    GROUP BY 1
+  ),
+  by_locale AS (
+    SELECT
+      coalesce(locale, 'unknown') AS locale,
+      count(*) FILTER (WHERE event_type = 'lead_captured')::int AS leads,
+      count(*) FILTER (WHERE event_type = 'audit_booked')::int AS bookings,
+      count(*) FILTER (WHERE event_type = 'calendar_viewed')::int AS calendar_views
+    FROM filtered
+    GROUP BY 1
+  ),
+  latest_rows AS (
+    SELECT
+      created_at,
+      event_type,
+      locale,
+      device_type,
+      utm_source,
+      utm_campaign,
+      conversion_delta_seconds,
+      page_path
+    FROM filtered
+    ORDER BY created_at DESC
+    LIMIT 50
+  ),
+  latest AS (
+    SELECT
+      coalesce(
+        jsonb_agg(
+          jsonb_build_object(
+            'created_at', created_at,
+            'event_type', event_type,
+            'locale', locale,
+            'device_type', device_type,
+            'utm_source', utm_source,
+            'utm_campaign', utm_campaign,
+            'conversion_delta_seconds', conversion_delta_seconds,
+            'page_path', page_path
+          )
+          ORDER BY created_at DESC
+        ),
+        '[]'::jsonb
+      ) AS events
+    FROM latest_rows
+  ),
+  interaction_filtered AS (
+    SELECT *
+    FROM public.analytics_events e
+    WHERE e.created_at >= p_since
+      AND e.event_type = 'interaction'
+      AND (
+        p_env IS NULL
+        OR trim(p_env) = ''
+        OR e.metadata ->> 'env' = p_env
+      )
+      AND (
+        p_site_id IS NULL
+        OR trim(p_site_id) = ''
+        OR e.metadata ->> 'site_id' = p_site_id
+      )
+  ),
+  interaction_totals AS (
+    SELECT
+      count(*)::int AS total,
+      count(DISTINCT user_hash)::int AS unique_visitors
+    FROM interaction_filtered
+  ),
+  interaction_by_target AS (
+    SELECT
+      coalesce(metadata ->> 'target', 'unknown') AS target,
+      count(*)::int AS c
+    FROM interaction_filtered
+    GROUP BY 1
+  ),
+  interaction_by_placement AS (
+    SELECT
+      coalesce(metadata ->> 'placement', 'unknown') AS placement,
+      count(*)::int AS c
+    FROM interaction_filtered
+    GROUP BY 1
+  )
+  SELECT jsonb_build_object(
+    'counts',
+    (SELECT jsonb_build_object(
+      'lead_captured', lead_captured,
+      'calendar_viewed', calendar_viewed,
+      'audit_booked', audit_booked
+    ) FROM counts),
+    'unique_users',
+    (SELECT jsonb_build_object('lead_users', lead_users, 'booking_users', booking_users) FROM uniq),
+    'avg_lead_to_booking_seconds',
+    (SELECT avg_seconds FROM avg_delta),
+    'by_source',
+    coalesce(
+      (SELECT jsonb_agg(
+        jsonb_build_object('utm_source', utm_source, 'leads', leads, 'bookings', bookings)
+        ORDER BY leads + bookings DESC
+      ) FROM by_source_top),
+      '[]'::jsonb
+    ),
+    'by_campaign',
+    coalesce(
+      (SELECT jsonb_agg(
+        jsonb_build_object('utm_campaign', utm_campaign, 'leads', leads, 'bookings', bookings)
+        ORDER BY leads + bookings DESC
+      ) FROM by_campaign_top),
+      '[]'::jsonb
+    ),
+    'by_device',
+    coalesce((SELECT jsonb_object_agg(device_type, c) FROM by_device), '{}'::jsonb),
+    'by_locale',
+    coalesce(
+      (SELECT jsonb_agg(
+        jsonb_build_object(
+          'locale', locale,
+          'leads', leads,
+          'bookings', bookings,
+          'calendar_views', calendar_views
+        )
+        ORDER BY locale
+      ) FROM by_locale),
+      '[]'::jsonb
+    ),
+    'latest',
+    (SELECT events FROM latest),
+    'interactions',
+    jsonb_build_object(
+      'total', coalesce((SELECT total FROM interaction_totals), 0),
+      'unique_visitors', coalesce((SELECT unique_visitors FROM interaction_totals), 0),
+      'by_target', coalesce(
+        (SELECT jsonb_object_agg(target, c) FROM interaction_by_target),
+        '{}'::jsonb
+      ),
+      'by_placement', coalesce(
+        (SELECT jsonb_object_agg(placement, c) FROM interaction_by_placement),
+        '{}'::jsonb
+      )
+    )
+  )
+  INTO result;
+
+  RETURN result;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.analytics_dashboard_summary(timestamptz, text, text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.analytics_dashboard_summary(timestamptz, text, text) TO service_role;
+
+-- Drop legacy 2-arg overload if present (signature changed)
+DROP FUNCTION IF EXISTS public.analytics_dashboard_summary(timestamptz, text);
+
+-- Rate-limit route used by POST /api/analytics/interaction (max passed from app env, default 30/hour per IP).
+-- No config table — route key is stored in api_rate_limit_events.route = 'analytics_interaction'.

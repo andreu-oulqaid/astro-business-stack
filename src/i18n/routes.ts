@@ -71,16 +71,7 @@ export const routes = {
     nav: { show: true, order: 2, label: 'nav.blog' },
   },
 
-  /** Case studies (MDX collection) — “Proof engine” */
-  portfolio: {
-    en: 'portfolio',
-    es: 'casos',
-    ca: 'portfoli',
-    pl: 'realizacje',
-    nav: { show: false, order: 0, label: 'nav.portfolio' },
-  },
-
-  /** Deploy pipeline guides (MDX docs collection) */
+  /** Deploy guides and stack articles (MDX docs collection) */
   docs: {
     en: 'docs',
     es: 'documentacion',

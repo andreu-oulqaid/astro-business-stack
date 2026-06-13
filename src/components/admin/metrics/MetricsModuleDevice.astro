@@ -1,0 +1,41 @@
+---
+import type { MetricsAggregates } from '@/lib/metricsTypes';
+
+interface Props {
+  aggregates: MetricsAggregates;
+}
+
+const { aggregates } = Astro.props;
+
+const deviceCounts = {
+  desktop: aggregates.by_device.desktop ?? 0,
+  mobile: aggregates.by_device.mobile ?? 0,
+  tablet: aggregates.by_device.tablet ?? 0,
+  unknown: aggregates.by_device.unknown ?? 0,
+};
+const totalDeviceEvents = Object.values(deviceCounts).reduce((sum, v) => sum + v, 0);
+---
+
+<section class="mt-6 rounded-xl border border-border bg-card p-5">
+  <h2 class="text-lg font-semibold text-foreground">Device Breakdown</h2>
+  <div class="mt-4 space-y-3">
+    {
+      Object.entries(deviceCounts).map(([device, count]) => {
+        const pct = totalDeviceEvents > 0 ? (count / totalDeviceEvents) * 100 : 0;
+        return (
+          <div>
+            <div class="mb-1 flex items-center justify-between text-sm">
+              <span class="capitalize text-foreground-muted">{device}</span>
+              <span class="font-medium text-foreground">
+                {count} ({pct.toFixed(1)}%)
+              </span>
+            </div>
+            <div class="h-2 rounded-full bg-secondary">
+              <div class="h-2 rounded-full bg-violet-500" style={`width: ${pct.toFixed(1)}%;`} />
+            </div>
+          </div>
+        );
+      })
+    }
+  </div>
+</section>
